@@ -1,4 +1,10 @@
 {
 	"$schema": "https://inlang.com/schema/inlang-message-format",
-	"hello_world": "Hello, {name} from es!"
+	"hello_world": "Hello, {name} from es!",
+	"web_description": "Cálculo de cuota de partido",
+	"share_btn": "Exportar y Compartir",
+	"app_title": "Badminton Splitter",
+	"players_heading": "Jugadores",
+	"add_player_btn": "+ Añadir jugador",
+	"bill_preview_heading": "Vista previa de la factura"
 }

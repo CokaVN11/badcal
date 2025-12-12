@@ -1,3 +1,528 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Space+Mono:wght@400;700&display=swap');
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
+
+/* Badminton Splitter - Sporty Receipt Design System */
+
+:root {
+	/* Primary - Court Green (like shuttlecock feathers) */
+	--court-50: #f0fdf4;
+	--court-100: #dcfce7;
+	--court-200: #bbf7d0;
+	--court-300: #86efac;
+	--court-400: #4ade80;
+	--court-500: #22c55e;
+	--court-600: #16a34a;
+	--court-700: #15803d;
+
+	/* Accent - Shuttlecock Yellow/Gold */
+	--shuttle-50: #fefce8;
+	--shuttle-100: #fef9c3;
+	--shuttle-200: #fef08a;
+	--shuttle-300: #fde047;
+	--shuttle-400: #facc15;
+	--shuttle-500: #eab308;
+	--shuttle-600: #ca8a04;
+
+	/* Secondary - Net Blue */
+	--net-50: #eff6ff;
+	--net-100: #dbeafe;
+	--net-200: #bfdbfe;
+	--net-300: #93c5fd;
+	--net-400: #60a5fa;
+	--net-500: #3b82f6;
+	--net-600: #2563eb;
+
+	/* Status Colors */
+	--paid: #22c55e;
+	--pending: #f59e0b;
+	--error: #ef4444;
+
+	/* Neutrals - Cool slate for contrast */
+	--slate-50: #f8fafc;
+	--slate-100: #f1f5f9;
+	--slate-200: #e2e8f0;
+	--slate-300: #cbd5e1;
+	--slate-400: #94a3b8;
+	--slate-500: #64748b;
+	--slate-600: #475569;
+	--slate-700: #334155;
+	--slate-800: #1e293b;
+	--slate-900: #0f172a;
+
+	/* Paper textures for receipt feel */
+	--paper: #fafaf9;
+	--paper-warm: #fef7ed;
+	--ink: #1e293b;
+
+	/* Shadows */
+	--shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+	--shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+	--shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	--shadow-receipt: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+	/* Radius */
+	--radius-sm: 6px;
+	--radius-md: 10px;
+	--radius-lg: 14px;
+	--radius-xl: 20px;
+	--radius-full: 9999px;
+}
+
+* {
+	font-family:
+		'DM Sans',
+		-apple-system,
+		BlinkMacSystemFont,
+		sans-serif;
+}
+
+body {
+	background: var(--slate-100);
+	color: var(--ink);
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+/* Monospace for numbers/amounts */
+.font-mono {
+	font-family: 'Space Mono', monospace;
+}
+
+/* App container */
+.app-shell {
+	min-height: 100dvh;
+	display: flex;
+	flex-direction: column;
+	background: linear-gradient(180deg, var(--court-50) 0%, var(--slate-100) 30%);
+}
+
+/* Section card */
+.section-card {
+	background: white;
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-sm);
+	border: 1px solid var(--slate-200);
+}
+
+/* Form input */
+.form-input {
+	width: 100%;
+	padding: 12px 14px;
+	background: var(--slate-50);
+	border: 1.5px solid var(--slate-200);
+	border-radius: var(--radius-md);
+	font-size: 15px;
+	transition: all 0.15s ease;
+	outline: none;
+}
+
+.form-input:focus {
+	background: white;
+	border-color: var(--court-500);
+	box-shadow: 0 0 0 3px var(--court-100);
+}
+
+.form-input::placeholder {
+	color: var(--slate-400);
+}
+
+/* Number input with monospace */
+.form-input-number {
+	font-family: 'Space Mono', monospace;
+	text-align: right;
+}
+
+/* Form label */
+.form-label {
+	display: block;
+	font-size: 13px;
+	font-weight: 600;
+	color: var(--slate-600);
+	margin-bottom: 6px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+
+/* Primary button - Court green */
+.btn-primary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	padding: 14px 24px;
+	background: var(--court-600);
+	color: white;
+	font-weight: 600;
+	font-size: 15px;
+	border-radius: var(--radius-md);
+	border: none;
+	cursor: pointer;
+	transition: all 0.15s ease;
+	box-shadow: 0 2px 8px -2px rgba(22, 163, 74, 0.4);
+}
+
+.btn-primary:hover {
+	background: var(--court-700);
+	transform: translateY(-1px);
+	box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.5);
+}
+
+.btn-primary:active {
+	transform: translateY(0);
+}
+
+/* Secondary button */
+.btn-secondary {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	padding: 10px 16px;
+	background: white;
+	color: var(--slate-700);
+	font-weight: 500;
+	font-size: 14px;
+	border-radius: var(--radius-md);
+	border: 1.5px solid var(--slate-200);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.btn-secondary:hover {
+	border-color: var(--court-400);
+	background: var(--court-50);
+	color: var(--court-700);
+}
+
+/* Icon button */
+.btn-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	background: transparent;
+	color: var(--slate-500);
+	border: none;
+	border-radius: var(--radius-sm);
+	cursor: pointer;
+	transition: all 0.15s ease;
+}
+
+.btn-icon:hover {
+	background: var(--slate-100);
+	color: var(--slate-700);
+}
+
+.btn-icon-danger:hover {
+	background: #fef2f2;
+	color: var(--error);
+}
+
+/* Badge/Tag */
+.badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 4px 10px;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	border-radius: var(--radius-full);
+}
+
+.badge-paid {
+	background: var(--court-100);
+	color: var(--court-700);
+}
+
+.badge-pending {
+	background: var(--shuttle-100);
+	color: var(--shuttle-600);
+}
+
+/* Player avatar */
+.player-avatar {
+	width: 40px;
+	height: 40px;
+	border-radius: var(--radius-full);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 14px;
+	font-weight: 700;
+	color: white;
+	flex-shrink: 0;
+}
+
+/* Avatar color variants */
+.avatar-green {
+	background: var(--court-500);
+}
+.avatar-yellow {
+	background: var(--shuttle-500);
+}
+.avatar-blue {
+	background: var(--net-500);
+}
+.avatar-red {
+	background: #ef4444;
+}
+.avatar-purple {
+	background: #8b5cf6;
+}
+.avatar-pink {
+	background: #ec4899;
+}
+
+/* Divider */
+.divider {
+	height: 1px;
+	background: var(--slate-200);
+	margin: 16px 0;
+}
+
+/* Receipt-style dotted separator */
+.receipt-divider {
+	border: none;
+	border-top: 2px dashed var(--slate-300);
+	margin: 20px 0;
+}
+
+/* Amount display */
+.amount {
+	font-family: 'Space Mono', monospace;
+	font-weight: 700;
+}
+
+.amount-large {
+	font-size: 28px;
+	color: var(--court-600);
+}
+
+.amount-medium {
+	font-size: 18px;
+	color: var(--slate-800);
+}
+
+/* Stats grid item */
+.stat-box {
+	text-align: center;
+	padding: 16px 12px;
+	background: var(--slate-50);
+	border-radius: var(--radius-md);
+}
+
+.stat-value {
+	font-family: 'Space Mono', monospace;
+	font-size: 22px;
+	font-weight: 700;
+	color: var(--slate-800);
+}
+
+.stat-label {
+	font-size: 11px;
+	font-weight: 600;
+	color: var(--slate-500);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	margin-top: 4px;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+	from {
+		opacity: 0;
+		transform: translateY(16px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+@keyframes slideIn {
+	from {
+		opacity: 0;
+		transform: translateX(-10px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+@keyframes popIn {
+	0% {
+		opacity: 0;
+		transform: scale(0.9);
+	}
+	70% {
+		transform: scale(1.02);
+	}
+	100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+}
+
+.animate-fade-in-up {
+	animation: fadeInUp 0.4s ease-out forwards;
+}
+
+.animate-fade-in {
+	animation: fadeIn 0.3s ease-out forwards;
+}
+
+.animate-slide-in {
+	animation: slideIn 0.3s ease-out forwards;
+}
+
+.animate-pop-in {
+	animation: popIn 0.3s ease-out forwards;
+}
+
+/* Stagger delays */
+.delay-1 {
+	animation-delay: 0.05s;
+}
+.delay-2 {
+	animation-delay: 0.1s;
+}
+.delay-3 {
+	animation-delay: 0.15s;
+}
+.delay-4 {
+	animation-delay: 0.2s;
+}
+.delay-5 {
+	animation-delay: 0.25s;
+}
+
+/* Receipt/Bill card - special shareable style */
+.receipt-card {
+	background: var(--paper);
+	border-radius: var(--radius-lg);
+	box-shadow: var(--shadow-receipt);
+	position: relative;
+	overflow: hidden;
+}
+
+/* Perforated edge effect */
+.receipt-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	height: 6px;
+	background: repeating-linear-gradient(
+		90deg,
+		transparent,
+		transparent 8px,
+		var(--slate-200) 8px,
+		var(--slate-200) 16px
+	);
+}
+
+/* Receipt header with logo area */
+.receipt-header {
+	text-align: center;
+	padding: 24px 20px 16px;
+	background: linear-gradient(180deg, var(--court-50) 0%, transparent 100%);
+}
+
+.receipt-logo {
+	width: 56px;
+	height: 56px;
+	margin: 0 auto 12px;
+	background: linear-gradient(135deg, var(--court-500) 0%, var(--court-600) 100%);
+	border-radius: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 28px;
+	box-shadow: 0 4px 12px -2px rgba(22, 163, 74, 0.3);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+	width: 4px;
+	height: 4px;
+}
+
+::-webkit-scrollbar-track {
+	background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+	background: var(--slate-300);
+	border-radius: 2px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+	background: var(--slate-400);
+}
+
+/* Focus visible for accessibility */
+:focus-visible {
+	outline: 2px solid var(--court-500);
+	outline-offset: 2px;
+}
+
+/* Import modal overlay */
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(15, 23, 42, 0.5);
+	backdrop-filter: blur(4px);
+	z-index: 50;
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+}
+
+@media (min-width: 640px) {
+	.modal-backdrop {
+		align-items: center;
+	}
+}
+
+.modal-content {
+	background: white;
+	border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+	width: 100%;
+	max-width: 480px;
+	max-height: 90vh;
+	overflow-y: auto;
+	animation: slideUp 0.3s ease-out;
+}
+
+@media (min-width: 640px) {
+	.modal-content {
+		border-radius: var(--radius-xl);
+	}
+}
+
+@keyframes slideUp {
+	from {
+		opacity: 0;
+		transform: translateY(100%);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
