@@ -31,6 +31,22 @@
 
 	let receiptEl: HTMLDivElement | null = $state(null);
 	let isSharingImage = $state(false);
+	let isCopyingText = $state(false);
+
+	let totalHours = $derived.by(() => {
+		return playerShares.reduce((sum, p) => sum + (p.hours || 0), 0);
+	});
+
+	const paidExtras = $derived.by(() => additionalCosts.filter((c) => c.amount > 0));
+	const visibleExtraCount = 6;
+	const visibleExtras = $derived.by(() => paidExtras.slice(0, visibleExtraCount));
+	const remainingExtras = $derived.by(() => paidExtras.slice(visibleExtraCount));
+	const remainingExtrasTotal = $derived.by(() =>
+		remainingExtras.reduce((sum, c) => sum + (c.amount || 0), 0)
+	);
+
+	const isDensePlayers = $derived.by(() => playerShares.length > 10);
+	const isUltraDensePlayers = $derived.by(() => playerShares.length > 16);
 
 	function downloadBlob(blob: Blob, filename: string) {
 		const url = URL.createObjectURL(blob);
@@ -52,6 +68,18 @@
 		return `badcal-${safeDate}${safeTitle ? `-${safeTitle}` : ''}.png`;
 	}
 
+	async function copyShareText() {
+		isCopyingText = true;
+		try {
+			await navigator.clipboard.writeText(generateShareText());
+			alert(m.copied_to_clipboard());
+		} catch {
+			alert(m.copy_failed());
+		} finally {
+			isCopyingText = false;
+		}
+	}
+
 	async function shareBillImage() {
 		if (!receiptEl) return;
 
@@ -68,35 +96,48 @@
 			}
 
 			const { toBlob } = await import('html-to-image');
-			const blob = await toBlob(receiptEl, {
-				cacheBust: true,
-				pixelRatio: 2,
-				backgroundColor: '#ffffff'
-			});
-			if (!blob) throw new Error('Failed to generate image blob');
+			const exportEl = receiptEl.cloneNode(true) as HTMLElement;
+			exportEl.classList.remove('animate-pop-in');
+			exportEl.style.width = '540px';
+			exportEl.style.position = 'fixed';
+			exportEl.style.left = '-10000px';
+			exportEl.style.top = '0';
+			exportEl.style.transform = 'none';
+			exportEl.style.pointerEvents = 'none';
+			document.body.append(exportEl);
+			try {
+				const blob = await toBlob(exportEl, {
+					cacheBust: true,
+					pixelRatio: 2,
+					backgroundColor: '#ffffff'
+				});
+				if (!blob) throw new Error('Failed to generate image blob');
 
-			const filename = buildImageFilename();
-			const file = new File([blob], filename, { type: blob.type || 'image/png' });
+				const filename = buildImageFilename();
+				const file = new File([blob], filename, { type: blob.type || 'image/png' });
 
-			if (navigator.share) {
-				try {
-					const shareData: ShareData = {
-						title: sessionTitle || m.app_title(),
-						text: generateShareText(),
-						files: [file]
-					};
+				if (navigator.share) {
+					try {
+						const shareData: ShareData = {
+							title: sessionTitle || m.app_title(),
+							text: generateShareText(),
+							files: [file]
+						};
 
-					if (!navigator.canShare || navigator.canShare(shareData)) {
-						await navigator.share(shareData);
-						return;
+						if (!navigator.canShare || navigator.canShare(shareData)) {
+							await navigator.share(shareData);
+							return;
+						}
+					} catch {
+						// User cancelled or share failed, fall through to download
 					}
-				} catch {
-					// User cancelled or share failed, fall through to download
 				}
-			}
 
-			downloadBlob(blob, filename);
-			alert(m.image_downloaded());
+				downloadBlob(blob, filename);
+				alert(m.image_downloaded());
+			} finally {
+				exportEl.remove();
+			}
 		} catch (e) {
 			console.error('Failed to share image:', e);
 			alert(m.share_image_failed());
@@ -134,7 +175,7 @@
 
 <div class="min-h-dvh bg-(--slate-100) flex flex-col">
 	<!-- Header with back button -->
-	<header class="bg-white border-b border-(--slate-200) px-4 py-3 sticky top-0 z-30">
+	<header class="bg-white border-b border-(--slate-200) px-4 py-2 sticky top-0 z-30">
 		<div class="max-w-lg mx-auto flex items-center gap-3">
 			<button class="btn-icon" onclick={onBack} aria-label={m.edit()}>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,39 +190,65 @@
 			<h1 class="text-lg font-semibold text-(--slate-800) flex-1">
 				{m.bill_preview_heading()}
 			</h1>
+			<button
+				class="btn-icon"
+				onclick={copyShareText}
+				disabled={isCopyingText}
+				aria-label={m.copy_text_btn()}
+			>
+				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="2"
+						d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M16 3H10a2 2 0 00-2 2v12a2 2 0 002 2h6a2 2 0 002-2V5a2 2 0 00-2-2z"
+					/>
+				</svg>
+			</button>
 		</div>
 	</header>
 
 	<!-- Receipt Card -->
-	<main class="flex-1 p-4 pb-28">
+	<main class="flex-1 p-3 pb-24">
 		<div class="max-w-lg mx-auto">
 			<div
 				class="receipt-card animate-pop-in"
 				style="animation-fill-mode: backwards;"
 				bind:this={receiptEl}
 			>
+				<div class="receipt-topbar">
+					<div class="receipt-topbar-inner">
+						<div class="receipt-brand">
+							<div class="receipt-brand-badge">🏸</div>
+							<div>{m.app_title()}</div>
+						</div>
+						<div class="flex items-center gap-2">
+							<div class="receipt-chip">📅 {formatDate(sessionDate)}</div>
+							<div class="receipt-chip">
+								👥 {playerShares.length} • ⏱ {totalHours}{m.hours_unit()}
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<!-- Receipt Header -->
 				<div class="receipt-header">
-					<div class="receipt-logo">🏸</div>
-					<h2 class="text-xl font-bold text-(--slate-800)">
+					<h2 class="text-lg font-bold text-(--slate-800)">
 						{sessionTitle || m.app_title()}
 					</h2>
-					<p class="text-sm text-(--slate-500) mt-1">
-						{formatDate(sessionDate)}
-					</p>
 				</div>
 
 				<!-- Cost Breakdown -->
-				<div class="px-5 py-4">
-					<h3 class="text-xs font-semibold text-(--slate-400) uppercase tracking-wide mb-3">
+				<div class="px-4 py-3">
+					<h3 class="text-xs font-semibold text-(--slate-400) uppercase tracking-wide mb-2">
 						{m.breakdown()}
 					</h3>
 
-					<div class="space-y-2">
+					<div class="space-y-1.5">
 						{#if courtPrice > 0}
 							<div class="flex justify-between items-center">
-								<span class="text-sm text-(--slate-600)">{m.court_fee()}</span>
-								<span class="font-mono text-sm text-(--slate-800)"
+								<span class="text-[13px] text-(--slate-600)">{m.court_fee()}</span>
+								<span class="font-mono text-[13px] text-(--slate-800)"
 									>{formatCurrency(courtPrice)}</span
 								>
 							</div>
@@ -189,70 +256,107 @@
 
 						{#if shuttlecockPrice > 0 && shuttlecockCount > 0}
 							<div class="flex justify-between items-center">
-								<span class="text-sm text-(--slate-600)">
+								<span class="text-[13px] text-(--slate-600)">
 									{m.shuttlecocks()} (×{shuttlecockCount})
 								</span>
-								<span class="font-mono text-sm text-(--slate-800)"
+								<span class="font-mono text-[13px] text-(--slate-800)"
 									>{formatCurrency(shuttlecockPrice * shuttlecockCount)}</span
 								>
 							</div>
 						{/if}
 
-						{#each additionalCosts as cost (cost.id)}
-							{#if cost.amount > 0}
-								<div class="flex justify-between items-center">
-									<span class="text-sm text-(--slate-600)">{cost.label}</span>
-									<span class="font-mono text-sm text-(--slate-800)"
-										>{formatCurrency(cost.amount)}</span
-									>
-								</div>
-							{/if}
+						{#each visibleExtras as cost (cost.id)}
+							<div class="flex justify-between items-center">
+								<span class="text-[13px] text-(--slate-600)">{cost.label}</span>
+								<span class="font-mono text-[13px] text-(--slate-800)"
+									>{formatCurrency(cost.amount)}</span
+								>
+							</div>
 						{/each}
+
+						{#if remainingExtras.length > 0}
+							<div class="flex justify-between items-center">
+								<span class="text-[13px] text-(--slate-500)">
+									{m.more_items({ count: remainingExtras.length })}
+								</span>
+								<span class="font-mono text-[13px] text-(--slate-700)"
+									>{formatCurrency(remainingExtrasTotal)}</span
+								>
+							</div>
+						{/if}
 					</div>
 
 					<!-- Total -->
-					<div class="flex justify-between items-center mt-4 pt-4 border-t border-(--slate-200)">
+					<div class="flex justify-between items-center mt-3 pt-3 border-t border-(--slate-200)">
 						<span class="font-semibold text-(--slate-800)">{m.total_cost()}</span>
-						<span class="font-mono text-xl font-bold text-(--court-600)"
+						<span class="font-mono text-lg font-bold text-(--court-600)"
 							>{formatCurrency(totalCost)}</span
 						>
 					</div>
 				</div>
 
 				<!-- Dotted Separator -->
-				<hr class="receipt-divider mx-5" />
+				<hr class="receipt-divider mx-4" />
 
 				<!-- Player Shares -->
-				<div class="px-5 pb-5">
-					<h3 class="text-xs font-semibold text-(--slate-400) uppercase tracking-wide mb-3">
+				<div class="px-4 pb-4">
+					<h3 class="text-xs font-semibold text-(--slate-400) uppercase tracking-wide mb-2">
 						{m.player_shares()}
 					</h3>
 
-					<div class="space-y-3">
-						{#each playerShares as player, index (player.id)}
-							<div class="flex items-center gap-3">
-								<div class="player-avatar w-10 h-10 {getAvatarColor(index)}">
-									{getInitial(player.name)}
-								</div>
-								<div class="flex-1 min-w-0">
-									<div class="text-sm font-medium text-(--slate-800) truncate">
+					{#if isUltraDensePlayers}
+						<div class="grid grid-cols-2 gap-x-3 gap-y-1.5">
+							{#each playerShares as player (player.id)}
+								<div class="flex items-center justify-between gap-2">
+									<div class="text-[12px] text-(--slate-700) truncate">
 										{player.name || m.unnamed_player()}
 									</div>
-									<div class="text-xs text-(--slate-400)">
-										{player.hours}
-										{m.hours_unit()} • {Math.round(player.ratio * 100)}%
+									<div class="font-mono text-[12px] font-bold text-(--court-600)">
+										{formatCurrency(player.share)}
 									</div>
 								</div>
-								<div class="font-mono text-base font-bold text-(--court-600)">
-									{formatCurrency(player.share)}
+							{/each}
+						</div>
+					{:else if isDensePlayers}
+						<div class="space-y-1.5">
+							{#each playerShares as player (player.id)}
+								<div class="flex items-center justify-between gap-2">
+									<div class="text-[13px] font-medium text-(--slate-800) truncate">
+										{player.name || m.unnamed_player()}
+									</div>
+									<div class="font-mono text-sm font-bold text-(--court-600)">
+										{formatCurrency(player.share)}
+									</div>
 								</div>
-							</div>
-						{/each}
-					</div>
+							{/each}
+						</div>
+					{:else}
+						<div class="space-y-2">
+							{#each playerShares as player, index (player.id)}
+								<div class="flex items-center gap-2.5">
+									<div class="player-avatar w-9 h-9 text-[12px] {getAvatarColor(index)}">
+										{getInitial(player.name)}
+									</div>
+									<div class="flex-1 min-w-0">
+										<div class="text-[13px] font-medium text-(--slate-800) truncate">
+											{player.name || m.unnamed_player()}
+										</div>
+										<div class="text-xs text-(--slate-400)">
+											{player.hours}
+											{m.hours_unit()} • {Math.round(player.ratio * 100)}%
+										</div>
+									</div>
+									<div class="font-mono text-sm font-bold text-(--court-600)">
+										{formatCurrency(player.share)}
+									</div>
+								</div>
+							{/each}
+						</div>
+					{/if}
 				</div>
 
 				<!-- Footer -->
-				<div class="bg-(--slate-50) px-5 py-3 text-center border-t border-(--slate-200)">
+				<div class="bg-(--slate-50) px-4 py-2 text-center border-t border-(--slate-200)">
 					<p class="text-xs text-(--slate-400)">
 						{m.generated_with()} • {m.app_title()}
 					</p>
@@ -263,10 +367,10 @@
 
 	<!-- Fixed Bottom Actions -->
 	<footer
-		class="fixed inset-x-0 bottom-0 p-4 bg-linear-to-t from-white via-white to-transparent z-20"
+		class="fixed inset-x-0 bottom-0 p-3 bg-linear-to-t from-white via-white to-transparent z-20"
 	>
 		<div class="max-w-lg mx-auto flex gap-3">
-			<button class="btn-secondary flex-1 h-14" onclick={onBack}>
+			<button class="btn-secondary flex-1 h-12" onclick={onBack}>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -278,7 +382,7 @@
 				{m.edit()}
 			</button>
 			<button
-				class="btn-primary flex-1 h-14"
+				class="btn-primary flex-1 h-12"
 				onclick={shareBillImage}
 				disabled={isSharingImage || !receiptEl}
 			>

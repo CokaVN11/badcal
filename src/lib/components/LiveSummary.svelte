@@ -15,6 +15,24 @@
 		totalCost: number;
 		totalHours: number;
 	} = $props();
+
+	let toast = $state<string | null>(null);
+
+	function showToast(text: string) {
+		toast = text;
+		setTimeout(() => {
+			toast = null;
+		}, 1200);
+	}
+
+	async function copyAmount(amount: number) {
+		try {
+			await navigator.clipboard.writeText(String(amount));
+			showToast(m.copied_to_clipboard());
+		} catch {
+			showToast(m.copy_failed());
+		}
+	}
 </script>
 
 <div class="space-y-4">
@@ -22,6 +40,10 @@
 		<h2 class="form-label">{m.summary_heading()}</h2>
 		<span class="badge badge-paid">{m.live_calculation()}</span>
 	</div>
+
+	{#if toast}
+		<div class="text-xs text-(--slate-600)">{toast}</div>
+	{/if}
 
 	<!-- Stats Grid -->
 	<div class="grid grid-cols-3 gap-3">
@@ -72,9 +94,13 @@
 						<div class="col-span-2 text-center text-xs text-(--slate-400)">
 							{Math.round(player.ratio * 100)}%
 						</div>
-						<div class="col-span-3 text-right font-mono text-sm font-bold text-(--court-600)">
+						<button
+							type="button"
+							class="col-span-3 text-right font-mono text-sm font-bold text-(--court-600) hover:underline"
+							onclick={() => copyAmount(player.share)}
+						>
 							{formatCurrency(player.share)}
-						</div>
+						</button>
 					</div>
 				{/each}
 			</div>

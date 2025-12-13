@@ -36,6 +36,35 @@
 		playerShares: PlayerShare[];
 		onShare: () => void;
 	} = $props();
+
+	let hasTitle = $derived.by(() => sessionTitle.trim().length > 0);
+	let hasCosts = $derived.by(() => {
+		if (courtPrice > 0) return true;
+		if (shuttlecockPrice > 0 && shuttlecockCount > 0) return true;
+		return additionalCosts.some((c) => (c.amount || 0) > 0);
+	});
+	let hasPlayers = $derived.by(() => players.length > 0);
+	let progressRatio = $derived.by(() => {
+		const stepsDone = [hasTitle, hasCosts, hasPlayers].filter(Boolean).length;
+		return stepsDone / 3;
+	});
+
+	let canShare = $derived.by(() => players.length > 0 && totalCost > 0 && totalHours > 0);
+
+	let shareHint = $derived.by(() => {
+		if (players.length === 0) return m.add_players_hint();
+		if (totalHours === 0) return m.share_hint_add_hours();
+		if (totalCost === 0) return m.share_hint_add_costs();
+		return m.share_ready();
+	});
+
+	let sessionInfoEl: HTMLElement | null = $state(null);
+	let costsEl: HTMLElement | null = $state(null);
+	let playersEl: HTMLElement | null = $state(null);
+
+	function scrollToSection(el: HTMLElement | null) {
+		el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+	}
 </script>
 
 <div class="flex flex-col min-h-dvh">
@@ -62,8 +91,48 @@
 	<!-- Scrollable Content -->
 	<main class="flex-1 overflow-y-auto pb-28">
 		<div class="max-w-lg mx-auto p-4 space-y-4">
+			<section class="quest-card animate-fade-in-up" style="animation-fill-mode: backwards;">
+				<div class="quest-steps">
+					<button
+						type="button"
+						class="quest-step"
+						class:is-done={hasTitle}
+						onclick={() => scrollToSection(sessionInfoEl)}
+					>
+						<div class="quest-dot">{hasTitle ? '✓' : '1'}</div>
+						<div class="quest-label">{m.session_info()}</div>
+					</button>
+					<button
+						type="button"
+						class="quest-step"
+						class:is-done={hasCosts}
+						onclick={() => scrollToSection(costsEl)}
+					>
+						<div class="quest-dot">{hasCosts ? '✓' : '2'}</div>
+						<div class="quest-label">{m.costs_heading()}</div>
+					</button>
+					<button
+						type="button"
+						class="quest-step"
+						class:is-done={hasPlayers}
+						onclick={() => scrollToSection(playersEl)}
+					>
+						<div class="quest-dot">{hasPlayers ? '✓' : '3'}</div>
+						<div class="quest-label">{m.players_heading()}</div>
+					</button>
+				</div>
+
+				<div class="quest-bar">
+					<div class="quest-bar-fill" style:width={`${Math.round(progressRatio * 100)}%`}></div>
+				</div>
+			</section>
+
 			<!-- Session Info -->
-			<section class="section-card p-4 animate-fade-in-up" style="animation-fill-mode: backwards;">
+			<section
+				class="section-card p-4 animate-fade-in-up scroll-target"
+				style="animation-fill-mode: backwards;"
+				bind:this={sessionInfoEl}
+			>
 				<h2 class="form-label mb-3">{m.session_info()}</h2>
 				<div class="space-y-3">
 					<input
@@ -78,8 +147,9 @@
 
 			<!-- Cost Inputs -->
 			<section
-				class="section-card p-4 animate-fade-in-up delay-1"
+				class="section-card p-4 animate-fade-in-up delay-1 scroll-target"
 				style="animation-fill-mode: backwards;"
+				bind:this={costsEl}
 			>
 				<CostInputs
 					bind:courtHours
@@ -92,8 +162,9 @@
 
 			<!-- Players -->
 			<section
-				class="section-card p-4 animate-fade-in-up delay-2"
+				class="section-card p-4 animate-fade-in-up delay-2 scroll-target"
 				style="animation-fill-mode: backwards;"
+				bind:this={playersEl}
 			>
 				<PlayerList bind:players />
 			</section>
@@ -115,11 +186,8 @@
 		class="fixed inset-x-0 bottom-0 p-4 bg-linear-to-t from-white via-white to-transparent z-20"
 	>
 		<div class="max-w-lg mx-auto">
-			<button
-				class="btn-primary w-full h-14 text-base"
-				onclick={onShare}
-				disabled={players.length === 0}
-			>
+			<p class="text-xs text-(--slate-500) mb-2">{shareHint}</p>
+			<button class="btn-primary w-full h-14 text-base" onclick={onShare} disabled={!canShare}>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"

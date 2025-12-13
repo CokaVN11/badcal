@@ -59,5 +59,15 @@
 	"share_image_btn": "Share image",
 	"preparing_image": "Preparing image…",
 	"image_downloaded": "Image downloaded!",
-	"share_image_failed": "Couldn't share image."
+	"share_image_failed": "Couldn't share image.",
+	"court_total_hint": "Total for the whole session.",
+	"court_per_hour_hint": "≈ {amount}/h",
+	"share_hint_add_hours": "Add hours so we can split fairly.",
+	"share_hint_add_costs": "Add costs so there's something to split.",
+	"share_ready": "Ready to share.",
+	"copy_failed": "Couldn't copy.",
+	"copy_text_btn": "Copy text",
+	"increase_hours": "Increase hours",
+	"decrease_hours": "Decrease hours",
+	"more_items": "+{count} more"
 }

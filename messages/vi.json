@@ -59,5 +59,15 @@
 	"share_image_btn": "Chia sẻ ảnh",
 	"preparing_image": "Đang tạo ảnh…",
 	"image_downloaded": "Đã tải ảnh xuống!",
-	"share_image_failed": "Không thể chia sẻ ảnh."
+	"share_image_failed": "Không thể chia sẻ ảnh.",
+	"court_total_hint": "Tổng tiền cho cả buổi.",
+	"court_per_hour_hint": "≈ {amount}/giờ",
+	"share_hint_add_hours": "Thêm số giờ để chia cho công bằng.",
+	"share_hint_add_costs": "Thêm chi phí để còn chia.",
+	"share_ready": "Sẵn sàng chia sẻ.",
+	"copy_failed": "Không thể sao chép.",
+	"copy_text_btn": "Sao chép chữ",
+	"increase_hours": "Tăng giờ",
+	"decrease_hours": "Giảm giờ",
+	"more_items": "+{count} mục nữa"
 }

@@ -10,5 +10,15 @@
 	"share_image_btn": "Compartir imagen",
 	"preparing_image": "Generando imagen…",
 	"image_downloaded": "¡Imagen descargada!",
-	"share_image_failed": "No se pudo compartir la imagen."
+	"share_image_failed": "No se pudo compartir la imagen.",
+	"copy_text_btn": "Copiar texto",
+	"copy_failed": "No se pudo copiar.",
+	"court_total_hint": "Total de toda la sesión.",
+	"court_per_hour_hint": "≈ {amount}/h",
+	"share_hint_add_hours": "Agrega horas para dividir de forma justa.",
+	"share_hint_add_costs": "Agrega costos para poder dividir.",
+	"share_ready": "Listo para compartir.",
+	"increase_hours": "Aumentar horas",
+	"decrease_hours": "Disminuir horas",
+	"more_items": "+{count} más"
 }

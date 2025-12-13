@@ -33,6 +33,14 @@
 		players = players.map((p) => (p.id === id ? { ...p, [field]: value } : p));
 	}
 
+	function addHours(id: number, delta: number) {
+		players = players.map((p) => {
+			if (p.id !== id) return p;
+			const next = Math.max(0, (p.hours || 0) + delta);
+			return { ...p, hours: Math.round(next * 2) / 2 };
+		});
+	}
+
 	function parseAndImport() {
 		const lines = importText.split('\n').filter((l) => l.trim());
 		const newPlayers: Player[] = lines.map((line, i) => {
@@ -180,6 +188,14 @@
 						/>
 					</div>
 					<div class="flex items-center gap-2">
+						<button
+							type="button"
+							class="btn-secondary w-9 h-9 p-0"
+							onclick={() => addHours(player.id, -0.5)}
+							aria-label={m.decrease_hours()}
+						>
+							<span class="text-lg leading-none">−</span>
+						</button>
 						<input
 							type="number"
 							value={player.hours}
@@ -193,6 +209,14 @@
 							step="0.5"
 							class="w-16 form-input form-input-number text-sm py-1.5"
 						/>
+						<button
+							type="button"
+							class="btn-secondary w-9 h-9 p-0"
+							onclick={() => addHours(player.id, 0.5)}
+							aria-label={m.increase_hours()}
+						>
+							<span class="text-lg leading-none">+</span>
+						</button>
 						<span class="text-xs text-(--slate-400)">{m.hours_unit()}</span>
 						<button
 							class="btn-icon btn-icon-danger"

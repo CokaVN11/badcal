@@ -6,6 +6,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { costInputSchema, additionalCostSchema } from '$lib/schemas';
 	import { zodFieldValidator } from '$lib/form-helpers';
+	import { formatCurrency } from '$lib/utils';
 	import type { AdditionalCost } from '$lib/types';
 
 	let {
@@ -48,6 +49,12 @@
 		courtPrice = values.courtPrice;
 		shuttlecockPrice = values.shuttlecockPrice;
 		shuttlecockCount = values.shuttlecockCount;
+	});
+
+	let courtPerHour = $derived.by(() => {
+		if (!courtHours || courtHours <= 0) return 0;
+		if (!courtPrice || courtPrice <= 0) return 0;
+		return courtPrice / courtHours;
 	});
 
 	// Additional costs management (not in main form - stays simple)
@@ -188,6 +195,12 @@
 							{m.currency()}
 						</span>
 					</div>
+					<p class="text-[11px] text-(--slate-500) mt-1">{m.court_total_hint()}</p>
+					{#if courtPerHour > 0}
+						<p class="text-[11px] text-(--slate-500)">
+							{m.court_per_hour_hint({ amount: formatCurrency(courtPerHour) })}
+						</p>
+					{/if}
 					{#if state.meta.errors.length > 0}
 						<p class="text-xs text-red-500 mt-1">{state.meta.errors[0]}</p>
 					{/if}
