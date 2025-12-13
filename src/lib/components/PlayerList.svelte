@@ -1,7 +1,8 @@
 <script lang="ts">
-	// ABOUTME: Player list component - add/remove players with names and hours
+	// ABOUTME: Player list component - add/remove players with names and hours using bits-ui Dialog
 	// ABOUTME: Supports both individual add and bulk import via textarea
 
+	import { Dialog } from 'bits-ui';
 	import { m } from '$lib/paraglide/messages.js';
 	import { getAvatarColor, getInitial } from '$lib/utils';
 	import type { Player } from '$lib/types';
@@ -32,16 +33,6 @@
 		players = players.map((p) => (p.id === id ? { ...p, [field]: value } : p));
 	}
 
-	function openImportModal() {
-		showImportModal = true;
-		importText = '';
-	}
-
-	function closeImportModal() {
-		showImportModal = false;
-		importText = '';
-	}
-
 	function parseAndImport() {
 		const lines = importText.split('\n').filter((l) => l.trim());
 		const newPlayers: Player[] = lines.map((line, i) => {
@@ -62,7 +53,8 @@
 		});
 
 		players = [...players, ...newPlayers];
-		closeImportModal();
+		showImportModal = false;
+		importText = '';
 	}
 </script>
 
@@ -70,17 +62,70 @@
 	<div class="flex items-center justify-between">
 		<h2 class="form-label">{m.players_heading()}</h2>
 		<div class="flex gap-2">
-			<button class="btn-secondary text-xs py-1.5 px-3" onclick={openImportModal}>
-				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-					/>
-				</svg>
-				{m.import_btn()}
-			</button>
+			<Dialog.Root bind:open={showImportModal}>
+				<Dialog.Trigger class="btn-secondary text-xs py-1.5 px-3">
+					<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+						<path
+							stroke-linecap="round"
+							stroke-linejoin="round"
+							stroke-width="2"
+							d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+						/>
+					</svg>
+					{m.import_btn()}
+				</Dialog.Trigger>
+
+				<Dialog.Portal>
+					<Dialog.Overlay class="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-fade-in" />
+					<Dialog.Content
+						class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl outline-none data-[state=open]:animate-fade-in"
+					>
+						<div class="p-4 border-b border-(--slate-200)">
+							<div class="flex items-center justify-between">
+								<Dialog.Title class="text-lg font-semibold text-(--slate-800)">
+									{m.import_players_title()}
+								</Dialog.Title>
+								<Dialog.Close class="btn-icon">
+									<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path
+											stroke-linecap="round"
+											stroke-linejoin="round"
+											stroke-width="2"
+											d="M6 18L18 6M6 6l12 12"
+										/>
+									</svg>
+								</Dialog.Close>
+							</div>
+							<Dialog.Description class="text-sm text-(--slate-500) mt-1">
+								{m.import_players_hint()}
+							</Dialog.Description>
+						</div>
+
+						<div class="p-4">
+							<textarea
+								bind:value={importText}
+								placeholder={m.import_placeholder()}
+								rows="8"
+								class="form-input resize-none font-mono text-sm"
+							></textarea>
+						</div>
+
+						<div class="p-4 border-t border-(--slate-200) flex gap-3">
+							<Dialog.Close class="btn-secondary flex-1">
+								{m.cancel()}
+							</Dialog.Close>
+							<button
+								class="btn-primary flex-1"
+								onclick={parseAndImport}
+								disabled={!importText.trim()}
+							>
+								{m.import_btn()}
+							</button>
+						</div>
+					</Dialog.Content>
+				</Dialog.Portal>
+			</Dialog.Root>
+
 			<button class="btn-secondary text-xs py-1.5 px-3" onclick={addPlayer}>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -167,47 +212,3 @@
 		</div>
 	{/if}
 </div>
-
-<!-- Import Modal -->
-{#if showImportModal}
-	<div class="modal-backdrop">
-		<dialog open class="modal-content" aria-labelledby="import-title">
-			<div class="p-4 border-b border-(--slate-200)">
-				<div class="flex items-center justify-between">
-					<h3 id="import-title" class="text-lg font-semibold text-(--slate-800)">
-						{m.import_players_title()}
-					</h3>
-					<button class="btn-icon" onclick={closeImportModal} aria-label={m.cancel()}>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								stroke-width="2"
-								d="M6 18L18 6M6 6l12 12"
-							/>
-						</svg>
-					</button>
-				</div>
-				<p class="text-sm text-(--slate-500) mt-1">{m.import_players_hint()}</p>
-			</div>
-
-			<div class="p-4">
-				<textarea
-					bind:value={importText}
-					placeholder={m.import_placeholder()}
-					rows="8"
-					class="form-input resize-none font-mono text-sm"
-				></textarea>
-			</div>
-
-			<div class="p-4 border-t border-(--slate-200) flex gap-3">
-				<button class="btn-secondary flex-1" onclick={closeImportModal}>
-					{m.cancel()}
-				</button>
-				<button class="btn-primary flex-1" onclick={parseAndImport} disabled={!importText.trim()}>
-					{m.import_btn()}
-				</button>
-			</div>
-		</dialog>
-	</div>
-{/if}

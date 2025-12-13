@@ -26,7 +26,7 @@
 	"add_players_hint": "Thêm người chơi để tính tiền",
 	"import_players_title": "Nhập người chơi",
 	"import_players_hint": "Mỗi người một dòng. Có thể thêm số giờ sau tên.",
-	"import_placeholder": "Minh 2\nLan 1.5\nHùng",
+	"import_placeholder": "Khanh 2\nLan 1.5\nHùng",
 	"cancel": "Hủy",
 	"unnamed_player": "Chưa đặt tên",
 	"summary_heading": "Tổng kết trực tiếp",
@@ -42,5 +42,18 @@
 	"player_shares": "Tiền mỗi người",
 	"generated_with": "Tạo bởi",
 	"edit": "Sửa",
-	"copied_to_clipboard": "Đã sao chép!"
+	"copied_to_clipboard": "Đã sao chép!",
+	"validation_required": "Trường này bắt buộc",
+	"validation_name_required": "Tên là bắt buộc",
+	"validation_name_too_long": "Tên quá dài (tối đa {max} ký tự)",
+	"validation_hours_negative": "Giờ không thể âm",
+	"validation_hours_max": "Giờ không thể vượt quá {max}",
+	"validation_price_negative": "Giá không thể âm",
+	"validation_label_required": "Nhãn là bắt buộc",
+	"validation_amount_negative": "Số tiền không thể âm",
+	"validation_title_required": "Tiêu đề phiên bắt buộc",
+	"validation_title_too_long": "Tiêu đề quá dài (tối đa {max} ký tự)",
+	"validation_date_invalid": "Định dạng ngày không hợp lệ",
+	"validation_integer": "Phải là số nguyên",
+	"currency": "đ"
 }

@@ -42,5 +42,18 @@
 	"player_shares": "Player Shares",
 	"generated_with": "Generated with",
 	"edit": "Edit",
-	"copied_to_clipboard": "Copied to clipboard!"
+	"copied_to_clipboard": "Copied to clipboard!",
+	"validation_required": "This field is required",
+	"validation_name_required": "Name is required",
+	"validation_name_too_long": "Name is too long (max {max} characters)",
+	"validation_hours_negative": "Hours cannot be negative",
+	"validation_hours_max": "Hours cannot exceed {max}",
+	"validation_price_negative": "Price cannot be negative",
+	"validation_label_required": "Label is required",
+	"validation_amount_negative": "Amount cannot be negative",
+	"validation_title_required": "Session title is required",
+	"validation_title_too_long": "Title too long (max {max} characters)",
+	"validation_date_invalid": "Invalid date format",
+	"validation_integer": "Must be a whole number",
+	"currency": "đ"
 }
