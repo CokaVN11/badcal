@@ -11,9 +11,9 @@
 		totalCost,
 		totalHours
 	}: {
-		playerShares: () => PlayerShare[];
-		totalCost: () => number;
-		totalHours: () => number;
+		playerShares: PlayerShare[];
+		totalCost: number;
+		totalHours: number;
 	} = $props();
 </script>
 
@@ -26,21 +26,21 @@
 	<!-- Stats Grid -->
 	<div class="grid grid-cols-3 gap-3">
 		<div class="stat-box">
-			<div class="stat-value">{formatCurrency(totalCost())}</div>
+			<div class="stat-value">{formatCurrency(totalCost)}</div>
 			<div class="stat-label">{m.total_cost()}</div>
 		</div>
 		<div class="stat-box">
-			<div class="stat-value">{playerShares().length}</div>
+			<div class="stat-value">{playerShares.length}</div>
 			<div class="stat-label">{m.players_count()}</div>
 		</div>
 		<div class="stat-box">
-			<div class="stat-value">{totalHours()}</div>
+			<div class="stat-value">{totalHours}</div>
 			<div class="stat-label">{m.total_hours()}</div>
 		</div>
 	</div>
 
 	<!-- Player Shares Table -->
-	{#if playerShares().length > 0}
+	{#if playerShares.length > 0}
 		<div class="rounded-xl border border-(--slate-200) overflow-hidden">
 			<div class="bg-(--slate-50) px-4 py-2 border-b border-(--slate-200)">
 				<div
@@ -54,7 +54,7 @@
 			</div>
 
 			<div class="divide-y divide-(--slate-100)">
-				{#each playerShares() as player, index (player.id)}
+				{#each playerShares as player, index (player.id)}
 					<div
 						class="grid grid-cols-12 items-center px-4 py-3 hover:bg-(--slate-50) transition-colors"
 					>

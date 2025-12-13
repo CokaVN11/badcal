@@ -6,14 +6,14 @@ import type { z } from 'zod';
 /**
  * Converts a Zod schema to a TanStack Form validator function
  * Works with Standard Schema (Zod v3.23+)
- * 
+ *
  * @param schema - Zod schema to validate against
  * @returns Validator function that returns error message or undefined
- * 
+ *
  * @example
  * ```ts
  * const schema = z.number().min(0, "Must be positive");
- * 
+ *
  * <form.Field
  *   name="age"
  *   validators={{ onChange: zodFieldValidator(schema) }}

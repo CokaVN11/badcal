@@ -31,9 +31,9 @@
 		shuttlecockCount: number;
 		additionalCosts: AdditionalCost[];
 		players: Player[];
-		totalCost: () => number;
-		totalHours: () => number;
-		playerShares: () => PlayerShare[];
+		totalCost: number;
+		totalHours: number;
+		playerShares: PlayerShare[];
 		onShare: () => void;
 	} = $props();
 </script>

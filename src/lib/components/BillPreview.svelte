@@ -23,8 +23,8 @@
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
 		additionalCosts: AdditionalCost[];
-		playerShares: () => PlayerShare[];
-		totalCost: () => number;
+		playerShares: PlayerShare[];
+		totalCost: number;
 		onBack: () => void;
 	} = $props();
 
@@ -54,7 +54,7 @@
 	function generateShareText() {
 		let text = `🏸 ${sessionTitle || m.app_title()}\n`;
 		text += `📅 ${formatDate(sessionDate)}\n\n`;
-		text += `💰 ${m.total_cost()}: ${formatCurrency(totalCost())}\n\n`;
+		text += `💰 ${m.total_cost()}: ${formatCurrency(totalCost)}\n\n`;
 		text += `${m.breakdown()}:\n`;
 
 		if (courtPrice > 0) {
@@ -70,7 +70,7 @@
 		});
 
 		text += `\n${m.player_shares()}:\n`;
-		playerShares().forEach((p) => {
+		playerShares.forEach((p) => {
 			text += `• ${p.name || m.unnamed_player()}: ${formatCurrency(p.share)}\n`;
 		});
 
@@ -156,7 +156,7 @@
 					<div class="flex justify-between items-center mt-4 pt-4 border-t border-(--slate-200)">
 						<span class="font-semibold text-(--slate-800)">{m.total_cost()}</span>
 						<span class="font-mono text-xl font-bold text-(--court-600)"
-							>{formatCurrency(totalCost())}</span
+							>{formatCurrency(totalCost)}</span
 						>
 					</div>
 				</div>
@@ -171,7 +171,7 @@
 					</h3>
 
 					<div class="space-y-3">
-						{#each playerShares() as player, index (player.id)}
+						{#each playerShares as player, index (player.id)}
 							<div class="flex items-center gap-3">
 								<div class="player-avatar w-10 h-10 {getAvatarColor(index)}">
 									{getInitial(player.name)}

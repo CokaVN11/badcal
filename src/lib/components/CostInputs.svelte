@@ -34,13 +34,16 @@
 			courtPrice,
 			shuttlecockPrice,
 			shuttlecockCount
-    }
+		}
 	}));
+
+	// TanStack Form state is reactive via its internal store; `form.state` is not.
+	const valuesStore = form.useStore((state) => state.values);
 
 	// Sync form state back to parent bindables
 	// Keeps live-reactive design working with validation
 	$effect(() => {
-		const values = form.state.values;
+		const values = valuesStore.current;
 		courtHours = values.courtHours;
 		courtPrice = values.courtPrice;
 		shuttlecockPrice = values.shuttlecockPrice;
@@ -71,8 +74,13 @@
 				costSchema.shape.amount.parse(value);
 			}
 			return null; // No error
-		} catch (err: any) {
-			return err.errors?.[0]?.message || 'Invalid value';
+		} catch (err: unknown) {
+			if (err && typeof err === 'object' && 'issues' in err) {
+				const { issues } = err as { issues?: Array<{ message?: string }> };
+				return issues?.[0]?.message || 'Invalid value';
+			}
+			if (err instanceof Error) return err.message;
+			return 'Invalid value';
 		}
 	}
 
@@ -134,7 +142,9 @@
 							class="form-input form-input-number pr-5!"
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
-						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none">
+						<span
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+						>
 							h
 						</span>
 					</div>
@@ -172,7 +182,9 @@
 							class="form-input form-input-number pr-5!"
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
-						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none">
+						<span
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+						>
 							{m.currency()}
 						</span>
 					</div>
@@ -213,7 +225,9 @@
 							class="form-input form-input-number pr-5!"
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
-						<span class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none">
+						<span
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+						>
 							{m.currency()}
 						</span>
 					</div>
@@ -315,7 +329,9 @@
 									class="form-input form-input-number text-sm w-full pr-6"
 									class:border-red-500={additionalCostErrors[cost.id]?.amount}
 								/>
-								<span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-(--slate-400) pointer-events-none">
+								<span
+									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-(--slate-400) pointer-events-none"
+								>
 									{m.currency()}
 								</span>
 							</div>

@@ -26,21 +26,21 @@
 	let players = $state<Player[]>([]);
 
 	// Derived calculations
-	let totalCost = $derived(() => {
+	let totalCost = $derived.by(() => {
 		const court = courtPrice;
 		const shuttles = shuttlecockPrice * shuttlecockCount;
 		const extras = additionalCosts.reduce((sum, c) => sum + (c.amount || 0), 0);
 		return court + shuttles + extras;
 	});
 
-	let totalHours = $derived(() => {
+	let totalHours = $derived.by(() => {
 		return players.reduce((sum, p) => sum + (p.hours || 0), 0);
 	});
 
 	// Calculate each player's share based on hours played
-	let playerShares = $derived(() => {
-		const total = totalCost();
-		const hours = totalHours();
+	let playerShares = $derived.by(() => {
+		const total = totalCost;
+		const hours = totalHours;
 		if (hours === 0 || players.length === 0) return [];
 
 		return players.map((p) => ({
