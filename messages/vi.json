@@ -55,5 +55,9 @@
 	"validation_title_too_long": "Tiêu đề quá dài (tối đa {max} ký tự)",
 	"validation_date_invalid": "Định dạng ngày không hợp lệ",
 	"validation_integer": "Phải là số nguyên",
-	"currency": "đ"
+	"currency": "đ",
+	"share_image_btn": "Chia sẻ ảnh",
+	"preparing_image": "Đang tạo ảnh…",
+	"image_downloaded": "Đã tải ảnh xuống!",
+	"share_image_failed": "Không thể chia sẻ ảnh."
 }

@@ -6,5 +6,9 @@
 	"app_title": "Badminton Splitter",
 	"players_heading": "Jugadores",
 	"add_player_btn": "+ Añadir jugador",
-	"bill_preview_heading": "Vista previa de la factura"
+	"bill_preview_heading": "Vista previa de la factura",
+	"share_image_btn": "Compartir imagen",
+	"preparing_image": "Generando imagen…",
+	"image_downloaded": "¡Imagen descargada!",
+	"share_image_failed": "No se pudo compartir la imagen."
 }

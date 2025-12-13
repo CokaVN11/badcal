@@ -5,6 +5,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { formatCurrency, formatDate, getAvatarColor, getInitial } from '$lib/utils';
 	import type { AdditionalCost, PlayerShare } from '$lib/types';
+	import { tick } from 'svelte';
 
 	let {
 		sessionTitle,
@@ -28,26 +29,79 @@
 		onBack: () => void;
 	} = $props();
 
-	async function shareOrDownload() {
-		// Try native share first
-		if (navigator.share) {
-			try {
-				await navigator.share({
-					title: sessionTitle || m.app_title(),
-					text: generateShareText()
-				});
-				return;
-			} catch {
-				// User cancelled or share failed, fall through
-			}
-		}
+	let receiptEl: HTMLDivElement | null = $state(null);
+	let isSharingImage = $state(false);
 
-		// Fallback: copy to clipboard
+	function downloadBlob(blob: Blob, filename: string) {
+		const url = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = url;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(url);
+	}
+
+	function buildImageFilename() {
+		const safeTitle = (sessionTitle || m.app_title())
+			.trim()
+			.replace(/\s+/g, '-')
+			.replace(/[^\p{L}\p{N}-]/gu, '')
+			.slice(0, 48);
+
+		const safeDate = sessionDate?.trim() || new Date().toISOString().split('T')[0];
+		return `badcal-${safeDate}${safeTitle ? `-${safeTitle}` : ''}.png`;
+	}
+
+	async function shareBillImage() {
+		if (!receiptEl) return;
+
+		isSharingImage = true;
 		try {
-			await navigator.clipboard.writeText(generateShareText());
-			alert(m.copied_to_clipboard());
+			await tick();
+			// Ensure web fonts are ready before rendering to image.
+			if ('fonts' in document) {
+				try {
+					await document.fonts.ready;
+				} catch {
+					// ignore
+				}
+			}
+
+			const { toBlob } = await import('html-to-image');
+			const blob = await toBlob(receiptEl, {
+				cacheBust: true,
+				pixelRatio: 2,
+				backgroundColor: '#ffffff'
+			});
+			if (!blob) throw new Error('Failed to generate image blob');
+
+			const filename = buildImageFilename();
+			const file = new File([blob], filename, { type: blob.type || 'image/png' });
+
+			if (navigator.share) {
+				try {
+					const shareData: ShareData = {
+						title: sessionTitle || m.app_title(),
+						text: generateShareText(),
+						files: [file]
+					};
+
+					if (!navigator.canShare || navigator.canShare(shareData)) {
+						await navigator.share(shareData);
+						return;
+					}
+				} catch {
+					// User cancelled or share failed, fall through to download
+				}
+			}
+
+			downloadBlob(blob, filename);
+			alert(m.image_downloaded());
 		} catch (e) {
-			console.error('Failed to copy:', e);
+			console.error('Failed to share image:', e);
+			alert(m.share_image_failed());
+		} finally {
+			isSharingImage = false;
 		}
 	}
 
@@ -101,7 +155,11 @@
 	<!-- Receipt Card -->
 	<main class="flex-1 p-4 pb-28">
 		<div class="max-w-lg mx-auto">
-			<div class="receipt-card animate-pop-in" style="animation-fill-mode: backwards;">
+			<div
+				class="receipt-card animate-pop-in"
+				style="animation-fill-mode: backwards;"
+				bind:this={receiptEl}
+			>
 				<!-- Receipt Header -->
 				<div class="receipt-header">
 					<div class="receipt-logo">🏸</div>
@@ -219,7 +277,11 @@
 				</svg>
 				{m.edit()}
 			</button>
-			<button class="btn-primary flex-1 h-14" onclick={shareOrDownload}>
+			<button
+				class="btn-primary flex-1 h-14"
+				onclick={shareBillImage}
+				disabled={isSharingImage || !receiptEl}
+			>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -228,7 +290,7 @@
 						d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
 					/>
 				</svg>
-				{m.share_btn()}
+				{isSharingImage ? m.preparing_image() : m.share_image_btn()}
 			</button>
 		</div>
 	</footer>

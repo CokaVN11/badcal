@@ -44,6 +44,7 @@
 		"@tanstack/svelte-form": "^1.27.2",
 		"@tanstack/zod-form-adapter": "^0.42.1",
 		"bits-ui": "^2.14.4",
+		"html-to-image": "^1.11.13",
 		"openai": "^6.10.0",
 		"zod": "^4.1.13"
 	}

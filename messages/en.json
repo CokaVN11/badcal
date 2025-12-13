@@ -55,5 +55,9 @@
 	"validation_title_too_long": "Title too long (max {max} characters)",
 	"validation_date_invalid": "Invalid date format",
 	"validation_integer": "Must be a whole number",
-	"currency": "đ"
+	"currency": "đ",
+	"share_image_btn": "Share image",
+	"preparing_image": "Preparing image…",
+	"image_downloaded": "Image downloaded!",
+	"share_image_failed": "Couldn't share image."
 }
