@@ -165,8 +165,9 @@
 		});
 
 		text += `\n${m.player_shares()}:\n`;
-		playerShares.forEach((p) => {
-			text += `• ${p.name || m.unnamed_player()}: ${formatCurrency(p.share)}\n`;
+		playerShares.forEach((p, i) => {
+			const name = p.name?.trim() ? p.name : m.player_numbered({ n: i + 1 });
+			text += `• ${name}: ${formatCurrency(p.share)}\n`;
 		});
 
 		return text;
@@ -306,10 +307,10 @@
 
 					{#if isUltraDensePlayers}
 						<div class="grid grid-cols-2 gap-x-3 gap-y-1.5">
-							{#each playerShares as player (player.id)}
+							{#each playerShares as player, index (player.id)}
 								<div class="flex items-center justify-between gap-2">
 									<div class="text-[12px] text-(--slate-700) truncate">
-										{player.name || m.unnamed_player()}
+										{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 									</div>
 									<div class="font-mono text-[12px] font-bold text-(--court-600)">
 										{formatCurrency(player.share)}
@@ -319,10 +320,10 @@
 						</div>
 					{:else if isDensePlayers}
 						<div class="space-y-1.5">
-							{#each playerShares as player (player.id)}
+							{#each playerShares as player, index (player.id)}
 								<div class="flex items-center justify-between gap-2">
 									<div class="text-[13px] font-medium text-(--slate-800) truncate">
-										{player.name || m.unnamed_player()}
+										{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 									</div>
 									<div class="font-mono text-sm font-bold text-(--court-600)">
 										{formatCurrency(player.share)}
@@ -335,11 +336,13 @@
 							{#each playerShares as player, index (player.id)}
 								<div class="flex items-center gap-2.5">
 									<div class="player-avatar w-9 h-9 text-[12px] {getAvatarColor(index)}">
-										{getInitial(player.name)}
+										{getInitial(
+											player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })
+										)}
 									</div>
 									<div class="flex-1 min-w-0">
 										<div class="text-[13px] font-medium text-(--slate-800) truncate">
-											{player.name || m.unnamed_player()}
+											{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 										</div>
 										<div class="text-xs text-(--slate-400)">
 											{player.hours}

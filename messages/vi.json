@@ -69,5 +69,12 @@
 	"copy_text_btn": "Sao chép chữ",
 	"increase_hours": "Tăng giờ",
 	"decrease_hours": "Giảm giờ",
-	"more_items": "+{count} mục nữa"
+	"more_items": "+{count} mục nữa",
+	"player_numbered": "Người {n}",
+	"quick_add": "Thêm nhanh",
+	"players_count_placeholder": "Số người",
+	"add_n_players": "Thêm {count}",
+	"default_hours_badge": "Mặc định {hours}{unit}",
+	"custom_hours": "Khác giờ",
+	"use_default_hours": "Giờ mặc định"
 }

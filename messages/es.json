@@ -20,5 +20,12 @@
 	"share_ready": "Listo para compartir.",
 	"increase_hours": "Aumentar horas",
 	"decrease_hours": "Disminuir horas",
-	"more_items": "+{count} más"
+	"more_items": "+{count} más",
+	"player_numbered": "Jugador {n}",
+	"quick_add": "Añadir rápido",
+	"players_count_placeholder": "Cantidad",
+	"add_n_players": "Añadir {count}",
+	"default_hours_badge": "Por defecto {hours}{unit}",
+	"custom_hours": "Horas distintas",
+	"use_default_hours": "Horas por defecto"
 }

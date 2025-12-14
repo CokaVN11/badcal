@@ -18,6 +18,10 @@
 
 	let toast = $state<string | null>(null);
 
+	function displayName(player: PlayerShare, index: number) {
+		return player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 });
+	}
+
 	function showToast(text: string) {
 		toast = text;
 		setTimeout(() => {
@@ -82,10 +86,10 @@
 					>
 						<div class="col-span-5 flex items-center gap-2">
 							<div class="player-avatar w-8 h-8 text-xs {getAvatarColor(index)}">
-								{getInitial(player.name)}
+								{getInitial(displayName(player, index))}
 							</div>
 							<span class="text-sm font-medium text-(--slate-700) truncate">
-								{player.name || m.unnamed_player()}
+								{displayName(player, index)}
 							</span>
 						</div>
 						<div class="col-span-2 text-right font-mono text-sm text-(--slate-600)">

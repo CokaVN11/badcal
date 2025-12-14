@@ -166,7 +166,7 @@
 				style="animation-fill-mode: backwards;"
 				bind:this={playersEl}
 			>
-				<PlayerList bind:players />
+				<PlayerList bind:players {courtHours} />
 			</section>
 
 			<!-- Live Summary -->

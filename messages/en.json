@@ -69,5 +69,12 @@
 	"copy_text_btn": "Copy text",
 	"increase_hours": "Increase hours",
 	"decrease_hours": "Decrease hours",
-	"more_items": "+{count} more"
+	"more_items": "+{count} more",
+	"player_numbered": "Player {n}",
+	"quick_add": "Quick add",
+	"players_count_placeholder": "Count",
+	"add_n_players": "Add {count}",
+	"default_hours_badge": "Default {hours}{unit}",
+	"custom_hours": "Different hours",
+	"use_default_hours": "Default hours"
 }
