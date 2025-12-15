@@ -43,6 +43,7 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.560.0",
+		"@tabler/icons-svelte-runes": "^3.36.0",
 		"@tanstack/svelte-form": "^1.27.2",
 		"@tanstack/zod-form-adapter": "^0.42.1",
 		"@vercel/analytics": "^1.6.1",
