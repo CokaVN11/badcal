@@ -2,12 +2,12 @@
 // ABOUTME: Color cycling and initial extraction
 
 export const AVATAR_COLORS = [
-	'avatar-green',
-	'avatar-yellow',
 	'avatar-blue',
-	'avatar-red',
-	'avatar-purple',
-	'avatar-pink'
+	'avatar-amber',
+	'avatar-teal',
+	'avatar-rose',
+	'avatar-violet',
+	'avatar-emerald'
 ] as const;
 
 export function getAvatarColor(index: number): string {

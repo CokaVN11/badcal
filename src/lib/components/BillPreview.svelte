@@ -6,6 +6,15 @@
 	import { formatCurrency, formatDate, getAvatarColor, getInitial } from '$lib/utils';
 	import type { AdditionalCost, PlayerShare } from '$lib/types';
 	import { tick } from 'svelte';
+	import {
+		IconPingPong,
+		IconCalendar,
+		IconUsers,
+		IconClock,
+		IconLoader2,
+		IconShare
+	} from '@tabler/icons-svelte-runes';
+	import { toast } from 'svelte-sonner';
 
 	let {
 		sessionTitle,
@@ -72,9 +81,9 @@
 		isCopyingText = true;
 		try {
 			await navigator.clipboard.writeText(generateShareText());
-			alert(m.copied_to_clipboard());
+			toast.success(m.copied_to_clipboard());
 		} catch {
-			alert(m.copy_failed());
+			toast.error(m.copy_failed());
 		} finally {
 			isCopyingText = false;
 		}
@@ -134,13 +143,13 @@
 				}
 
 				downloadBlob(blob, filename);
-				alert(m.image_downloaded());
+				toast.success(m.image_downloaded());
 			} finally {
 				exportEl.remove();
 			}
 		} catch (e) {
 			console.error('Failed to share image:', e);
-			alert(m.share_image_failed());
+			toast.error(m.share_image_failed());
 		} finally {
 			isSharingImage = false;
 		}
@@ -176,7 +185,9 @@
 
 <div class="min-h-dvh bg-(--slate-100) flex flex-col">
 	<!-- Header with back button -->
-	<header class="bg-white border-b border-(--slate-200) px-4 py-2 sticky top-0 z-30">
+	<header
+		class="bg-white/95 backdrop-blur-md border-b border-(--border) px-4 py-2 sticky top-0 z-30"
+	>
 		<div class="max-w-lg mx-auto flex items-center gap-3">
 			<button class="btn-icon" onclick={onBack} aria-label={m.edit()}>
 				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +199,7 @@
 					/>
 				</svg>
 			</button>
-			<h1 class="text-lg font-semibold text-(--slate-800) flex-1">
+			<h1 class="text-lg font-semibold text-(--ink) flex-1">
 				{m.bill_preview_heading()}
 			</h1>
 			<button
@@ -220,13 +231,18 @@
 				<div class="receipt-topbar">
 					<div class="receipt-topbar-inner">
 						<div class="receipt-brand">
-							<div class="receipt-brand-badge">🏸</div>
+							<div class="receipt-brand-badge"><IconPingPong class="w-5 h-5" /></div>
 							<div>{m.app_title()}</div>
 						</div>
 						<div class="flex items-center gap-2">
-							<div class="receipt-chip">📅 {formatDate(sessionDate)}</div>
 							<div class="receipt-chip">
-								👥 {playerShares.length} • ⏱ {totalHours}{m.hours_unit()}
+								<IconCalendar class="w-3.5 h-3.5" />
+								{formatDate(sessionDate)}
+							</div>
+							<div class="receipt-chip">
+								<IconUsers class="w-3.5 h-3.5 inline" />
+								{playerShares.length} • <IconClock class="w-3.5 h-3.5 inline" />
+								{totalHours}{m.hours_unit()}
 							</div>
 						</div>
 					</div>
@@ -289,8 +305,8 @@
 
 					<!-- Total -->
 					<div class="flex justify-between items-center mt-3 pt-3 border-t border-(--slate-200)">
-						<span class="font-semibold text-(--slate-800)">{m.total_cost()}</span>
-						<span class="font-mono text-lg font-bold text-(--court-600)"
+						<span class="font-semibold text-(--ink)">{m.total_cost()}</span>
+						<span class="font-mono text-lg font-bold text-(--zp-blue-600)"
 							>{formatCurrency(totalCost)}</span
 						>
 					</div>
@@ -309,10 +325,10 @@
 						<div class="grid grid-cols-2 gap-x-3 gap-y-1.5">
 							{#each playerShares as player, index (player.id)}
 								<div class="flex items-center justify-between gap-2">
-									<div class="text-[12px] text-(--slate-700) truncate">
+									<div class="text-[12px] text-(--ink-soft) truncate">
 										{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 									</div>
-									<div class="font-mono text-[12px] font-bold text-(--court-600)">
+									<div class="font-mono text-[12px] font-bold text-(--zp-blue-600)">
 										{formatCurrency(player.share)}
 									</div>
 								</div>
@@ -322,10 +338,10 @@
 						<div class="space-y-1.5">
 							{#each playerShares as player, index (player.id)}
 								<div class="flex items-center justify-between gap-2">
-									<div class="text-[13px] font-medium text-(--slate-800) truncate">
+									<div class="text-[13px] font-medium text-(--ink) truncate">
 										{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 									</div>
-									<div class="font-mono text-sm font-bold text-(--court-600)">
+									<div class="font-mono text-sm font-bold text-(--zp-blue-600)">
 										{formatCurrency(player.share)}
 									</div>
 								</div>
@@ -341,15 +357,15 @@
 										)}
 									</div>
 									<div class="flex-1 min-w-0">
-										<div class="text-[13px] font-medium text-(--slate-800) truncate">
+										<div class="text-[13px] font-medium text-(--ink) truncate">
 											{player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 })}
 										</div>
-										<div class="text-xs text-(--slate-400)">
+										<div class="text-xs text-(--ink-muted)">
 											{player.hours}
 											{m.hours_unit()} • {Math.round(player.ratio * 100)}%
 										</div>
 									</div>
-									<div class="font-mono text-sm font-bold text-(--court-600)">
+									<div class="font-mono text-sm font-bold text-(--zp-blue-600)">
 										{formatCurrency(player.share)}
 									</div>
 								</div>
@@ -359,8 +375,8 @@
 				</div>
 
 				<!-- Footer -->
-				<div class="bg-(--slate-50) px-4 py-2 text-center border-t border-(--slate-200)">
-					<p class="text-xs text-(--slate-400)">
+				<div class="bg-(--surface-sunken) px-4 py-3 text-center border-t border-(--border)">
+					<p class="text-xs text-(--ink-muted)">
 						{m.generated_with()} • {m.app_title()}
 					</p>
 				</div>
@@ -389,14 +405,11 @@
 				onclick={shareBillImage}
 				disabled={isSharingImage || !receiptEl}
 			>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-					/>
-				</svg>
+				{#if isSharingImage}
+					<IconLoader2 class="w-5 h-5 animate-spin" />
+				{:else}
+					<IconShare class="w-5 h-5" />
+				{/if}
 				{isSharingImage ? m.preparing_image() : m.share_image_btn()}
 			</button>
 		</div>

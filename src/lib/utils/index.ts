@@ -3,3 +3,5 @@
 
 export { formatCurrency, formatDate } from './format';
 export { AVATAR_COLORS, getAvatarColor, getInitial } from './avatar';
+export { saveSession, loadSession, clearSession, hasPersistedSession } from './persistence';
+export type { PersistedSession } from './persistence';

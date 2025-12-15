@@ -55,7 +55,7 @@
 		{#if isCustom}
 			<button
 				type="button"
-				class="btn-secondary w-9 h-9 p-0"
+				class="btn-secondary w-11 h-11 p-0"
 				onclick={() => addHours(player.id, -hourStep)}
 				aria-label={m.decrease_hours()}
 			>
@@ -67,12 +67,12 @@
 				oninput={(e) =>
 					updatePlayer(player.id, 'hours', parseFloat((e.target as HTMLInputElement).value) || 0)}
 				min="0"
-				step="0.5"
+				step={hourStep}
 				class="w-16 form-input form-input-number text-sm py-1.5"
 			/>
 			<button
 				type="button"
-				class="btn-secondary w-9 h-9 p-0"
+				class="btn-secondary w-11 h-11 p-0"
 				onclick={() => addHours(player.id, hourStep)}
 				aria-label={m.increase_hours()}
 			>

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { MAX_QUICK_ADD, clampInt } from '../Players/playerList.logic';
+	import { MAX_QUICK_ADD, clampToIntegerRange } from '../Players/playerList.logic';
 	type Props = {
 		onAdd: (count: number) => void;
 		max?: number;
@@ -10,13 +10,13 @@
 
 	let rawCount = $state('');
 
-	let n = $derived.by(() => clampInt(rawCount, 0, max));
+	let clampedCount = $derived.by(() => clampToIntegerRange(rawCount, 0, max));
 
-	let canAdd = $derived.by(() => n > 0 && n <= max);
+	let canAdd = $derived.by(() => clampedCount > 0 && clampedCount <= max);
 
-	function submit() {
+	function handleSubmit() {
 		if (!canAdd) return;
-		onAdd(n);
+		onAdd(clampedCount);
 		rawCount = '';
 	}
 </script>
@@ -25,7 +25,7 @@
 	class="flex items-center gap-2"
 	onsubmit={(e) => {
 		e.preventDefault();
-		submit();
+		handleSubmit();
 	}}
 >
 	<input
@@ -44,6 +44,6 @@
 		class="btn-secondary py-1.5 px-3 tracking-tighter whitespace-nowrap disabled:opacity-50"
 		disabled={!canAdd}
 	>
-		{m.add_n_players({ count: n })}
+		{m.add_n_players({ count: clampedCount })}
 	</button>
 </form>

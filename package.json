@@ -50,6 +50,7 @@
 		"bits-ui": "^2.14.4",
 		"html-to-image": "^1.11.13",
 		"openai": "^6.10.0",
+		"svelte-sonner": "^1.0.7",
 		"zod": "^4.1.13"
 	}
 }

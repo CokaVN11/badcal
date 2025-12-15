@@ -1,13 +1,26 @@
 <script lang="ts">
 	// ABOUTME: Editor view - main form for entering session costs and players
-	// ABOUTME: Contains cost inputs, player list, and live calculation summary
+	// ABOUTME: ZaloPay-inspired layout with sticky summary, tabs, and FAB
 
 	import { m } from '$lib/paraglide/messages.js';
 	import PlayerList from './PlayerList.svelte';
 	import CostInputs from './CostInputs.svelte';
 	import LiveSummary from './LiveSummary.svelte';
 	import LanguageToggle from './LanguageToggle.svelte';
+	import GroupEditor from './Groups/GroupEditor.svelte';
 	import type { Player, AdditionalCost, PlayerShare } from '$lib/types';
+	import { formatCurrency } from '$lib/utils';
+	import {
+		IconChevronDown,
+		IconShare,
+		IconPingPong,
+		IconUsers,
+		IconClock,
+		IconCash,
+		IconFileText,
+		IconCheck,
+		IconTrash
+	} from '@tabler/icons-svelte-runes';
 
 	let {
 		sessionTitle = $bindable(),
@@ -21,7 +34,8 @@
 		totalCost,
 		totalHours,
 		playerShares,
-		onShare
+		onShare,
+		onClear
 	}: {
 		sessionTitle: string;
 		sessionDate: string;
@@ -35,169 +49,202 @@
 		totalHours: number;
 		playerShares: PlayerShare[];
 		onShare: () => void;
+		onClear: () => void;
 	} = $props();
 
-	let hasTitle = $derived.by(() => sessionTitle.trim().length > 0);
+	let activeTab = $state<'costs' | 'players'>('costs');
+
 	let hasCosts = $derived.by(() => {
 		if (courtPrice > 0) return true;
 		if (shuttlecockPrice > 0 && shuttlecockCount > 0) return true;
 		return additionalCosts.some((c) => (c.amount || 0) > 0);
 	});
+
 	let hasPlayers = $derived.by(() => players.length > 0);
-	let progressRatio = $derived.by(() => {
-		const stepsDone = [hasTitle, hasCosts, hasPlayers].filter(Boolean).length;
-		return stepsDone / 3;
-	});
 
 	let canShare = $derived.by(() => players.length > 0 && totalCost > 0 && totalHours > 0);
 
-	let shareHint = $derived.by(() => {
-		if (players.length === 0) return m.add_players_hint();
-		if (totalHours === 0) return m.share_hint_add_hours();
-		if (totalCost === 0) return m.share_hint_add_costs();
-		return m.share_ready();
+	let costItemCount = $derived.by(() => {
+		let count = 0;
+		if (courtPrice > 0) count++;
+		if (shuttlecockPrice > 0 && shuttlecockCount > 0) count++;
+		count += additionalCosts.filter((c) => (c.amount || 0) > 0).length;
+		return count;
 	});
 
-	let sessionInfoEl: HTMLElement | null = $state(null);
-	let costsEl: HTMLElement | null = $state(null);
-	let playersEl: HTMLElement | null = $state(null);
-
-	function scrollToSection(el: HTMLElement | null) {
-		el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-	}
+	let namedPlayersCount = $derived.by(() => {
+		return players.filter((p) => p.name?.trim()).length;
+	});
 </script>
 
-<div class="flex flex-col min-h-dvh">
-	<!-- Header -->
-	<header class="bg-white border-b border-(--slate-200) px-4 py-3 sticky top-0 z-30">
-		<div class="max-w-lg mx-auto flex items-center gap-3">
-			<div
-				class="w-10 h-10 rounded-xl bg-linear-to-br from-(--court-500) to-(--court-600) flex items-center justify-center text-xl shadow-md"
-			>
-				🏸
-			</div>
-			<div class="flex-1 min-w-0">
-				<h1 class="text-lg font-bold text-(--slate-800)">
-					{m.app_title()}
-				</h1>
-				<p class="text-xs text-(--slate-500)">
-					{m.web_description()}
-				</p>
-			</div>
-			<LanguageToggle />
+<div class="flex flex-col min-h-dvh bg-(--slate-50)">
+	<!-- Compact Header -->
+	<header class="compact-header sticky top-0 z-30 bg-white/95 backdrop-blur-md">
+		<div class="compact-header-logo text-white"><IconPingPong class="w-5 h-5" /></div>
+		<div class="flex-1 min-w-0">
+			<input
+				type="text"
+				bind:value={sessionTitle}
+				placeholder={m.session_title_placeholder()}
+				class="w-full bg-transparent border-none p-0 text-base font-bold text-(--ink) placeholder:text-(--ink-muted) placeholder:font-normal focus:outline-none focus:ring-0"
+			/>
 		</div>
+		<input
+			type="date"
+			bind:value={sessionDate}
+			class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+		/>
+		<button
+			type="button"
+			class="btn-icon btn-icon-danger"
+			onclick={onClear}
+			aria-label="Clear session"
+		>
+			<IconTrash class="w-5 h-5" />
+		</button>
+		<LanguageToggle />
 	</header>
 
-	<!-- Scrollable Content -->
+	<!-- Sticky Summary Bar -->
+	<div class="summary-bar mx-4 mt-3 animate-fade-in-up" style="animation-fill-mode: backwards;">
+		<div class="summary-bar-content">
+			<div class="summary-total">
+				<div class="summary-total-label">{m.total_cost()}</div>
+				<div class="summary-total-value">{formatCurrency(totalCost)}</div>
+			</div>
+			<div class="summary-stats">
+				<div class="summary-stat">
+					<IconUsers class="summary-stat-icon w-4 h-4" />
+					<span>{players.length}</span>
+				</div>
+				<div class="summary-stat">
+					<IconClock class="summary-stat-icon w-4 h-4" />
+					<span>{totalHours}{m.hours_unit()}</span>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Segment Control -->
+	<div class="px-4 pt-4">
+		<div class="segment-control animate-fade-in-up delay-1" style="animation-fill-mode: backwards;">
+			<button
+				type="button"
+				class="segment-btn"
+				class:is-active={activeTab === 'costs'}
+				onclick={() => (activeTab = 'costs')}
+			>
+				<IconCash class="segment-btn-icon w-5 h-5" />
+				<span>{m.costs_heading()}</span>
+				{#if costItemCount > 0}
+					<span class="segment-btn-badge">{costItemCount}</span>
+				{/if}
+			</button>
+			<button
+				type="button"
+				class="segment-btn"
+				class:is-active={activeTab === 'players'}
+				onclick={() => (activeTab = 'players')}
+			>
+				<IconUsers class="segment-btn-icon w-5 h-5" />
+				<span>{m.players_heading()}</span>
+				{#if players.length > 0}
+					<span class="segment-btn-badge">{players.length}</span>
+				{/if}
+			</button>
+		</div>
+	</div>
+
+	<!-- Tab Content -->
 	<main class="flex-1 overflow-y-auto pb-28">
 		<div class="max-w-lg mx-auto p-4 space-y-4">
-			<section class="quest-card animate-fade-in-up" style="animation-fill-mode: backwards;">
-				<div class="quest-steps">
-					<button
-						type="button"
-						class="quest-step"
-						class:is-done={hasTitle}
-						onclick={() => scrollToSection(sessionInfoEl)}
-					>
-						<div class="quest-dot">{hasTitle ? '✓' : '1'}</div>
-						<div class="quest-label">{m.session_info()}</div>
-					</button>
-					<button
-						type="button"
-						class="quest-step"
-						class:is-done={hasCosts}
-						onclick={() => scrollToSection(costsEl)}
-					>
-						<div class="quest-dot">{hasCosts ? '✓' : '2'}</div>
-						<div class="quest-label">{m.costs_heading()}</div>
-					</button>
-					<button
-						type="button"
-						class="quest-step"
-						class:is-done={hasPlayers}
-						onclick={() => scrollToSection(playersEl)}
-					>
-						<div class="quest-dot">{hasPlayers ? '✓' : '3'}</div>
-						<div class="quest-label">{m.players_heading()}</div>
-					</button>
-				</div>
-
-				<div class="quest-bar">
-					<div class="quest-bar-fill" style:width={`${Math.round(progressRatio * 100)}%`}></div>
-				</div>
-			</section>
-
-			<!-- Session Info -->
-			<section
-				class="section-card p-4 animate-fade-in-up scroll-target"
-				style="animation-fill-mode: backwards;"
-				bind:this={sessionInfoEl}
-			>
-				<h2 class="form-label mb-3">{m.session_info()}</h2>
-				<div class="space-y-3">
-					<input
-						type="text"
-						bind:value={sessionTitle}
-						placeholder={m.session_title_placeholder()}
-						class="form-input"
-					/>
-					<input type="date" bind:value={sessionDate} class="form-input" />
-				</div>
-			</section>
-
-			<!-- Cost Inputs -->
-			<section
-				class="section-card p-4 animate-fade-in-up delay-1 scroll-target"
-				style="animation-fill-mode: backwards;"
-				bind:this={costsEl}
-			>
-				<CostInputs
-					bind:courtHours
-					bind:courtPrice
-					bind:shuttlecockPrice
-					bind:shuttlecockCount
-					bind:additionalCosts
-				/>
-			</section>
-
-			<!-- Players -->
-			<section
-				class="section-card p-4 animate-fade-in-up delay-2 scroll-target"
-				style="animation-fill-mode: backwards;"
-				bind:this={playersEl}
-			>
-				<PlayerList bind:players {courtHours} />
-			</section>
-
-			<!-- Live Summary -->
-			{#if players.length > 0}
+			<!-- Costs Tab -->
+			<div class="tab-panel" class:is-active={activeTab === 'costs'}>
 				<section
-					class="section-card p-4 animate-fade-in-up delay-3"
+					class="section-card p-4 animate-fade-in-up"
 					style="animation-fill-mode: backwards;"
 				>
-					<LiveSummary {playerShares} {totalCost} {totalHours} />
+					<CostInputs
+						bind:courtHours
+						bind:courtPrice
+						bind:shuttlecockPrice
+						bind:shuttlecockCount
+						bind:additionalCosts
+					/>
 				</section>
-			{/if}
+
+				{#if hasCosts}
+					<div class="flex items-center justify-center gap-2 py-3 text-sm text-(--ink-muted)">
+						<IconCheck class="w-4 h-4" />
+						<span>{m.costs_heading()} {m.live_calculation().toLowerCase()}</span>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Players Tab -->
+			<div class="tab-panel" class:is-active={activeTab === 'players'}>
+				<section
+					class="section-card p-4 animate-fade-in-up"
+					style="animation-fill-mode: backwards;"
+				>
+					<GroupEditor bind:players defaultHours={courtHours} />
+				</section>
+
+				<details class="zp-details mt-4">
+					<summary>
+						<div class="zp-details-icon"><IconFileText class="w-5 h-5" /></div>
+						<div class="zp-details-content">
+							<div class="zp-details-title flex items-center gap-2">
+								{m.group_details_optional()}
+								{#if namedPlayersCount > 0}
+									<span class="badge badge-info text-[10px] py-0.5 px-2">
+										{namedPlayersCount}
+										{m.named()}
+									</span>
+								{/if}
+							</div>
+							<div class="zp-details-hint">{m.group_details_hint()}</div>
+						</div>
+						<IconChevronDown class="zp-details-chevron" />
+					</summary>
+					<div class="zp-details-body">
+						<PlayerList bind:players {courtHours} />
+					</div>
+				</details>
+
+				<!-- Live Summary (shows when has players) -->
+				{#if players.length > 0}
+					<section
+						class="section-card p-4 mt-4 animate-fade-in-up"
+						style="animation-fill-mode: backwards;"
+					>
+						<LiveSummary {playerShares} {totalCost} {totalHours} />
+					</section>
+				{/if}
+			</div>
 		</div>
 	</main>
 
-	<!-- Fixed Bottom Action -->
-	<footer
-		class="fixed inset-x-0 bottom-0 p-4 bg-linear-to-t from-white via-white to-transparent z-20"
+	<!-- Floating Action Button -->
+	<button
+		class="fab"
+		class:fab-pulse={canShare}
+		onclick={onShare}
+		disabled={!canShare}
+		aria-label={m.share_btn()}
+	>
+		<IconShare class="fab-icon" />
+	</button>
+
+	<!-- Progress Pills (bottom indicator) -->
+	<div
+		class="fixed bottom-0 inset-x-0 px-4 py-3 bg-linear-to-t from-white via-white/90 to-transparent pointer-events-none z-10"
 	>
 		<div class="max-w-lg mx-auto">
-			<p class="text-xs text-(--slate-500) mb-2">{shareHint}</p>
-			<button class="btn-primary w-full h-14 text-base" onclick={onShare} disabled={!canShare}>
-				<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
-					/>
-				</svg>
-				{m.share_btn()}
-			</button>
+			<div class="progress-pills">
+				<div class="progress-pill" class:is-done={hasCosts}></div>
+				<div class="progress-pill" class:is-done={hasPlayers}></div>
+			</div>
 		</div>
-	</footer>
+	</div>
 </div>

@@ -100,7 +100,7 @@
 						</div>
 						<button
 							type="button"
-							class="col-span-3 text-right font-mono text-sm font-bold text-(--court-600) hover:underline"
+							class="col-span-3 text-right font-mono text-sm font-bold text-(--zp-blue-600) hover:underline"
 							onclick={() => copyAmount(player.share)}
 						>
 							{formatCurrency(player.share)}
