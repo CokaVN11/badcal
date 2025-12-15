@@ -76,5 +76,20 @@
 	"add_n_players": "Add {count}",
 	"default_hours_badge": "Default {hours}{unit}",
 	"custom_hours": "Different hours",
-	"use_default_hours": "Default hours"
+	"use_default_hours": "Default hours",
+	"grouped_players_heading": "Players (grouped)",
+	"grouped_players_hint": "Enter counts by hours played.",
+	"group_details_optional": "Details (optional)",
+	"group_details_hint": "Names and individual hour tweaks",
+	"group_increase_count": "Increase count",
+	"group_decrease_count": "Decrease count",
+	"group_count_label": "Count for {hours}{unit}",
+	"group_add_hours": "Add 1 player at {hours}{unit}",
+	"group_max_players": "Max {max} players.",
+	"group_cannot_remove_named": "Can't remove named players here. Use Details.",
+	"named": "named",
+	"court_price_placeholder": "e.g., 140k",
+	"shuttle_price_placeholder": "e.g., 50k",
+	"amount_placeholder": "e.g., 20k",
+	"shorthand_hint": "Supports: 14k = 14,000 • 1.5tr = 1,500,000"
 }

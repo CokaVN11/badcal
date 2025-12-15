@@ -107,11 +107,12 @@
 					</button>
 
 					<input
+            id={`group-count-${hours}`}
 						type="number"
 						min="0"
 						step="1"
 						inputmode="numeric"
-						class="w-16 form-input form-input-number text-sm py-2"
+						class="w-16! form-input form-input-number text-sm py-2"
 						value={count}
 						oninput={(e) => handleCountInput(hours, (e.target as HTMLInputElement).value)}
 						aria-label={m.group_count_label({ hours, unit: m.hours_unit() })}
@@ -137,7 +138,7 @@
 				{#each remainingHourOptions as hourOption (hourOption)}
 					<button
 						type="button"
-						class="btn-secondary text-xs py-1.5 px-3"
+						class="btn-secondary text-xs! py-1.5 px-3"
 						onclick={() => incrementHoursCount(hourOption, 1)}
 						aria-label={m.group_add_hours({ hours: hourOption, unit: m.hours_unit() })}
 					>

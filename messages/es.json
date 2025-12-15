@@ -27,5 +27,20 @@
 	"add_n_players": "Añadir {count}",
 	"default_hours_badge": "Por defecto {hours}{unit}",
 	"custom_hours": "Horas distintas",
-	"use_default_hours": "Horas por defecto"
+	"use_default_hours": "Horas por defecto",
+	"grouped_players_heading": "Jugadores (por horas)",
+	"grouped_players_hint": "Indica cuántos juegan por cada número de horas.",
+	"group_details_optional": "Detalles (opcional)",
+	"group_details_hint": "Nombres y ajustes individuales",
+	"group_increase_count": "Aumentar cantidad",
+	"group_decrease_count": "Disminuir cantidad",
+	"group_count_label": "Cantidad para {hours}{unit}",
+	"group_add_hours": "Añadir 1 jugador de {hours}{unit}",
+	"group_max_players": "Máximo {max} jugadores.",
+	"group_cannot_remove_named": "No se pueden quitar jugadores con nombre aquí. Usa Detalles.",
+	"named": "nombrados",
+	"court_price_placeholder": "Ej: 140k",
+	"shuttle_price_placeholder": "Ej: 50k",
+	"amount_placeholder": "Ej: 20k",
+	"shorthand_hint": "Soporta: 14k = 14.000 • 1.5m = 1.500.000"
 }

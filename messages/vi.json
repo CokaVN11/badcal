@@ -76,5 +76,20 @@
 	"add_n_players": "Thêm {count}",
 	"default_hours_badge": "Mặc định {hours}{unit}",
 	"custom_hours": "Khác giờ",
-	"use_default_hours": "Giờ mặc định"
+	"use_default_hours": "Giờ mặc định",
+	"grouped_players_heading": "Người chơi (gộp theo giờ)",
+	"grouped_players_hint": "Nhập số người theo số giờ chơi.",
+	"group_details_optional": "Chi tiết (tuỳ chọn)",
+	"group_details_hint": "Tên và chỉnh giờ từng người",
+	"group_increase_count": "Tăng số người",
+	"group_decrease_count": "Giảm số người",
+	"group_count_label": "Số người cho {hours}{unit}",
+	"group_add_hours": "Thêm 1 người {hours}{unit}",
+	"group_max_players": "Tối đa {max} người.",
+	"group_cannot_remove_named": "Không thể xóa người đã đặt tên ở đây. Vào Chi tiết.",
+	"named": "đã đặt tên",
+	"court_price_placeholder": "VD: 140k",
+	"shuttle_price_placeholder": "VD: 50k",
+	"amount_placeholder": "VD: 20k",
+	"shorthand_hint": "Hỗ trợ: 14k = 14.000 • 1,5tr = 1.500.000"
 }
