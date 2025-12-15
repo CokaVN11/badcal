@@ -1,10 +1,18 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages';
-	import { IconUsersGroup } from '@tabler/icons-svelte-runes';
+	import { IconUsersGroup, IconArrowUp } from '@tabler/icons-svelte-runes';
 </script>
 
-<div class="text-center py-8 text-(--slate-400)">
-	<IconUsersGroup class="mx-auto mb-4 w-12 h-12" />
-	<p class="text-sm">{m.no_players_yet()}</p>
-	<p class="text-xs mt-1">{m.add_players_hint()}</p>
+<div class="empty-state">
+	<div class="empty-state-icon">
+		<IconUsersGroup class="w-8 h-8 text-(--zp-blue-500)" />
+	</div>
+	<p class="empty-state-title">{m.no_players_yet()}</p>
+	<p class="empty-state-hint">{m.add_players_hint()}</p>
+	<div
+		class="flex items-center justify-center gap-1 mt-3 text-xs text-(--zp-blue-500) animate-bounce"
+	>
+		<IconArrowUp class="w-4 h-4" />
+		<span>{m.quick_add()}</span>
+	</div>
 </div>

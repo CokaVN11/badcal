@@ -6,7 +6,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { costInputSchema, additionalCostSchema } from '$lib/schemas';
 	import { zodFieldValidator } from '$lib/form-helpers';
-	import { formatCurrency } from '$lib/utils';
+	import { formatCurrency, parseVietnameseNumber, formatCompactNumber } from '$lib/utils';
 	import type { AdditionalCost } from '$lib/types';
 
 	let {
@@ -42,7 +42,6 @@
 	const valuesStore = form.useStore((state) => state.values);
 
 	// Sync form state back to parent bindables
-	// Keeps live-reactive design working with validation
 	$effect(() => {
 		const values = valuesStore.current;
 		courtHours = values.courtHours;
@@ -50,6 +49,19 @@
 		shuttlecockPrice = values.shuttlecockPrice;
 		shuttlecockCount = values.shuttlecockCount;
 	});
+
+	// Display values for price inputs (supports "14k" shorthand)
+	let courtPriceDisplay = $state(courtPrice > 0 ? formatCompactNumber(courtPrice) : '');
+	let shuttlePriceDisplay = $state(
+		shuttlecockPrice > 0 ? formatCompactNumber(shuttlecockPrice) : ''
+	);
+
+	// Parse and update price with Vietnamese shorthand support
+	function handlePriceInput(displayValue: string, handleChange: (value: number) => void): string {
+		const parsed = parseVietnameseNumber(displayValue);
+		handleChange(parsed);
+		return displayValue;
+	}
 
 	let courtPerHour = $derived.by(() => {
 		if (!courtHours || courtHours <= 0) return 0;
@@ -93,6 +105,9 @@
 
 	// Track validation errors for additional costs
 	let additionalCostErrors = $state<Record<number, { label?: string; amount?: string }>>({});
+
+	// Track display values for additional cost amounts (prevents cursor jumps)
+	let additionalCostDisplays = $state<Record<number, string>>({});
 
 	function updateCostWithValidation(
 		id: number,
@@ -176,16 +191,22 @@
 					<div class="relative">
 						<input
 							id="court-price"
-							type="decimal"
-							value={state.value}
+							type="text"
+							inputmode="decimal"
+							value={courtPriceDisplay}
 							oninput={(e) => {
-								const val = parseFloat((e.target as HTMLInputElement).value);
-								handleChange(isNaN(val) ? 0 : val);
+								courtPriceDisplay = handlePriceInput(
+									(e.target as HTMLInputElement).value,
+									handleChange
+								);
 							}}
-							onblur={handleBlur}
-							min="0"
-							step="1000"
-							placeholder="0"
+							onblur={() => {
+								handleBlur();
+								if (state.value > 0 && courtPriceDisplay === '') {
+									courtPriceDisplay = formatCompactNumber(state.value);
+								}
+							}}
+							placeholder={m.court_price_placeholder()}
 							class="form-input form-input-number pr-5!"
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
@@ -225,16 +246,22 @@
 					<div class="relative">
 						<input
 							id="shuttle-price"
-							type="decimal"
-							value={state.value}
+							type="text"
+							inputmode="decimal"
+							value={shuttlePriceDisplay}
 							oninput={(e) => {
-								const val = parseFloat((e.target as HTMLInputElement).value);
-								handleChange(isNaN(val) ? 0 : val);
+								shuttlePriceDisplay = handlePriceInput(
+									(e.target as HTMLInputElement).value,
+									handleChange
+								);
 							}}
-							onblur={handleBlur}
-							min="0"
-							step="1000"
-							placeholder="0"
+							onblur={() => {
+								handleBlur();
+								if (state.value > 0 && shuttlePriceDisplay === '') {
+									shuttlePriceDisplay = formatCompactNumber(state.value);
+								}
+							}}
+							placeholder={m.shuttle_price_placeholder()}
 							class="form-input form-input-number pr-5!"
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
@@ -328,17 +355,16 @@
 						<div class="w-28">
 							<div class="relative">
 								<input
-									type="number"
-									value={cost.amount}
-									oninput={(e) =>
-										updateCostWithValidation(
-											cost.id,
-											'amount',
-											parseFloat((e.target as HTMLInputElement).value) || 0
-										)}
-									placeholder="0"
-									min="0"
-									step="1000"
+									type="text"
+									inputmode="decimal"
+									value={additionalCostDisplays[cost.id] ??
+										(cost.amount > 0 ? formatCompactNumber(cost.amount) : '')}
+									oninput={(e) => {
+										const raw = (e.target as HTMLInputElement).value;
+										additionalCostDisplays[cost.id] = raw;
+										updateCostWithValidation(cost.id, 'amount', parseVietnameseNumber(raw));
+									}}
+									placeholder={m.amount_placeholder()}
 									class="form-input form-input-number text-sm w-full pr-6"
 									class:border-red-500={additionalCostErrors[cost.id]?.amount}
 								/>
