@@ -10,9 +10,7 @@
 		groupByKey,
 		getGroupColor,
 		getPlayerDisplayName,
-
 		formatCompactNumber
-
 	} from '$lib/utils';
 	import type { PlayerShare } from '$lib/types';
 	import {
@@ -120,8 +118,7 @@
 						{#if idx === 0}
 							{formatCompactNumber(value as number)}
 						{:else}
-
-                {value}
+							{value}
 						{/if}
 					</div>
 					<div

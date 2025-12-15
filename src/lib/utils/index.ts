@@ -11,5 +11,12 @@ export {
 export { AVATAR_COLORS, getAvatarColor, getInitial } from './avatar';
 export { saveSession, loadSession, clearSession, hasPersistedSession } from './persistence';
 export type { PersistedSession } from './persistence';
-export { GROUP_COLORS, getGroupColor, groupByKey, getPlayerDisplayName } from './design';
+export {
+	GROUP_COLORS,
+	getGroupColor,
+	groupByKey,
+	getPlayerDisplayName,
+	getNamedPlayers,
+	getOthersCount
+} from './design';
 export type { ColorScheme } from './design';

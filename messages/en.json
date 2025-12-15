@@ -91,5 +91,7 @@
 	"court_price_placeholder": "e.g., 140k",
 	"shuttle_price_placeholder": "e.g., 50k",
 	"amount_placeholder": "e.g., 20k",
-	"shorthand_hint": "Supports: 14k = 14,000 • 1.5tr = 1,500,000"
+	"shorthand_hint": "Supports: 14k = 14,000 • 1.5tr = 1,500,000",
+	"each_suffix": "/each",
+	"and_others": "+ {count} others"
 }

@@ -38,3 +38,11 @@ export function groupByKey<T>(items: T[], keyFn: (item: T) => number): [number, 
 export function getPlayerDisplayName(player: { name?: string }, index: number): string {
 	return player.name?.trim() ? player.name : m.player_numbered({ n: index + 1 });
 }
+
+export function getNamedPlayers<T extends { name?: string }>(players: T[]): string[] {
+	return players.filter((p) => p.name?.trim()).map((p) => p.name!.trim());
+}
+
+export function getOthersCount(namedCount: number, totalCount: number): number {
+	return namedCount > 0 ? totalCount - 1 : 0;
+}

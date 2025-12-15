@@ -42,5 +42,7 @@
 	"court_price_placeholder": "Ej: 140k",
 	"shuttle_price_placeholder": "Ej: 50k",
 	"amount_placeholder": "Ej: 20k",
-	"shorthand_hint": "Soporta: 14k = 14.000 • 1.5m = 1.500.000"
+	"shorthand_hint": "Soporta: 14k = 14.000 • 1.5m = 1.500.000",
+	"each_suffix": "/c.u.",
+	"and_others": "+ {count} más"
 }

@@ -107,7 +107,7 @@
 					</button>
 
 					<input
-            id={`group-count-${hours}`}
+						id={`group-count-${hours}`}
 						type="number"
 						min="0"
 						step="1"

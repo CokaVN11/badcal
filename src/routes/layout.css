@@ -816,7 +816,7 @@ body {
 	color: white;
 	padding: 16px 20px;
 	border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
-  margin-top: -4px;
+	margin-top: -4px;
 }
 
 .summary-bar-content {

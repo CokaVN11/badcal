@@ -91,5 +91,7 @@
 	"court_price_placeholder": "VD: 140k",
 	"shuttle_price_placeholder": "VD: 50k",
 	"amount_placeholder": "VD: 20k",
-	"shorthand_hint": "Hỗ trợ: 14k = 14.000 • 1,5tr = 1.500.000"
+	"shorthand_hint": "Hỗ trợ: 14k = 14.000 • 1,5tr = 1.500.000",
+	"each_suffix": "/người",
+	"and_others": "+ {count} người khác"
 }
