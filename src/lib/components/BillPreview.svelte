@@ -20,6 +20,8 @@
 		IconPencil
 	} from '@tabler/icons-svelte-runes';
 	import { toast } from 'svelte-sonner';
+	import PaymentQR from './PaymentQR.svelte';
+	import { loadPaymentInfo, getProviderDisplayName } from '$lib/utils/vietqr';
 
 	type Props = {
 		sessionTitle: string;
@@ -91,6 +93,16 @@
 			const name = p.name?.trim() || m.player_numbered({ n: i + 1 });
 			lines.push(`• ${name}: ${formatCurrency(p.share)}`);
 		});
+
+		const paymentInfo = loadPaymentInfo();
+		if (paymentInfo) {
+			const bankName = getProviderDisplayName(paymentInfo.providerKey);
+			lines.push('', `🏦 ${m.qr_bank_label()}: ${bankName}`);
+			lines.push(`📝 ${paymentInfo.accountNumber}`);
+			if (paymentInfo.accountName) {
+				lines.push(`👤 ${paymentInfo.accountName}`);
+			}
+		}
 
 		return lines.join('\n');
 	}
@@ -308,7 +320,7 @@
 									<span class="group-hours">[{hours}h]</span>
 									<span class="group-count">{players.length}x</span>
 									<span class="dots"></span>
-									<span class="group-amount">{formatCurrency(groupShare)}/ea</span>
+									<span class="group-amount">{formatCurrency(groupShare)} {m.each_suffix()} </span>
 								</div>
 								{#if namedPlayers.length > 0}
 									<div class="group-names">
@@ -324,7 +336,7 @@
 					<div class="receipt-footer">
 						<div class="barcode">
 							{#each [2, 1, 3, 1, 2, 1, 3, 2, 1, 2, 3, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 1] as width, idx (idx)}
-								<div class="bar" style="width: {width}px; height: {22 + (idx % 3) * 6}px"></div>
+								<div class="bar" style="width: {width}px; height: 22px"></div>
 							{/each}
 						</div>
 						<div class="footer-text">
@@ -334,6 +346,10 @@
 							{new Date().toLocaleString()}
 						</div>
 					</div>
+
+					<div class="receipt-line-dashed"></div>
+
+					<PaymentQR />
 				</div>
 
 				<div class="torn-edge torn-bottom"></div>
@@ -380,7 +396,7 @@
 			/* Paper gradient - slightly yellowed */
 			linear-gradient(180deg, #fdfcf8 0%, #f9f7f1 20%, #f7f5ed 50%, #f5f3e9 80%, #f2f0e4 100%);
 		background-blend-mode: soft-light, normal;
-		padding: 24px 20px;
+		padding: 16px 16px;
 		font-family: 'JetBrains Mono', 'Courier New', monospace;
 		color: #2d2a26;
 		overflow: hidden;
@@ -542,12 +558,12 @@
 	/* Store header */
 	.receipt-store {
 		text-align: center;
-		margin-bottom: 16px;
+		margin-bottom: 10px;
 	}
 
 	.store-logo {
-		font-size: 36px;
-		margin-bottom: 4px;
+		font-size: 28px;
+		margin-bottom: 2px;
 	}
 
 	.store-name {
@@ -567,17 +583,17 @@
 	/* Lines */
 	.receipt-line-double {
 		border-top: 2px double #8b8680;
-		margin: 12px 0;
+		margin: 8px 0;
 	}
 
 	.receipt-line-dashed {
 		border-top: 1px dashed #a8a39d;
-		margin: 12px 0;
+		margin: 8px 0;
 	}
 
 	/* Sections */
 	.receipt-section {
-		margin: 8px 0;
+		margin: 4px 0;
 	}
 
 	.receipt-title {
@@ -599,7 +615,7 @@
 		font-weight: 700;
 		letter-spacing: 0.1em;
 		color: #6b6560;
-		margin-bottom: 8px;
+		margin-bottom: 4px;
 	}
 
 	/* Items */
@@ -647,12 +663,12 @@
 		align-items: center;
 		font-size: 16px;
 		font-weight: 700;
-		padding: 8px 0;
+		padding: 4px 0;
 	}
 
 	/* Player groups */
 	.player-group {
-		margin-bottom: 10px;
+		margin-bottom: 6px;
 	}
 
 	.group-header {
@@ -690,8 +706,8 @@
 		justify-content: center;
 		align-items: flex-end;
 		gap: 1px;
-		height: 35px;
-		margin: 16px auto 8px;
+		height: 28px;
+		margin: 10px auto 6px;
 		opacity: 0.7;
 	}
 

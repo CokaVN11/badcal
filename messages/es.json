@@ -44,5 +44,16 @@
 	"amount_placeholder": "Ej: 20k",
 	"shorthand_hint": "Soporta: 14k = 14.000 • 1.5m = 1.500.000",
 	"each_suffix": "/c.u.",
-	"and_others": "+ {count} más"
+	"and_others": "+ {count} más",
+	"qr_setup_title": "Configurar QR de pago",
+	"qr_bank_label": "Banco",
+	"qr_select_bank": "Selecciona tu banco",
+	"qr_account_number": "Número de cuenta",
+	"qr_account_placeholder": "Ej: 1234567890",
+	"qr_account_name": "Nombre de cuenta (opcional)",
+	"qr_name_placeholder": "Ej: NGUYEN VAN A",
+	"qr_generate": "Generar QR",
+	"qr_change_account": "Cambiar cuenta",
+	"qr_setup_prompt": "Añadir QR de pago",
+	"qr_setup_hint": "Para que otros escaneen y te paguen"
 }

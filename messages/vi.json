@@ -93,5 +93,16 @@
 	"amount_placeholder": "VD: 20k",
 	"shorthand_hint": "Hỗ trợ: 14k = 14.000 • 1,5tr = 1.500.000",
 	"each_suffix": "/người",
-	"and_others": "+ {count} người khác"
+	"and_others": "+ {count} người khác",
+	"qr_setup_title": "Cài đặt mã QR",
+	"qr_bank_label": "Ngân hàng",
+	"qr_select_bank": "Chọn ngân hàng",
+	"qr_account_number": "Số tài khoản",
+	"qr_account_placeholder": "VD: 1234567890",
+	"qr_account_name": "Tên tài khoản (tuỳ chọn)",
+	"qr_name_placeholder": "VD: NGUYEN VAN A",
+	"qr_generate": "Tạo mã QR",
+	"qr_change_account": "Đổi tài khoản",
+	"qr_setup_prompt": "Thêm mã QR thanh toán",
+	"qr_setup_hint": "Để người khác quét mã chuyển tiền"
 }
