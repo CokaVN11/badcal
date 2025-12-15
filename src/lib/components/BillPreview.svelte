@@ -123,48 +123,39 @@
 		}
 	}
 
-	function createExportElement(source: HTMLElement): HTMLElement {
-		const el = source.cloneNode(true) as HTMLElement;
-		el.classList.remove('animate-pop-in');
-		Object.assign(el.style, {
-			width: '540px',
-			position: 'fixed',
-			left: '-10000px',
-			top: '0',
-			transform: 'none',
-			pointerEvents: 'none',
-			opacity: '1',
-			visibility: 'visible'
-		});
-		return el;
-	}
-
 	async function generateImageBlob(element: HTMLElement): Promise<Blob> {
-		const { toBlob } = await import('html-to-image');
+		const { toPng } = await import('html-to-image');
 
-		// Small delay to ensure styles are computed
-		await new Promise((resolve) => requestAnimationFrame(resolve));
+		// Temporarily remove animation class for clean capture
+		const hadAnimation = element.classList.contains('animate-pop-in');
+		if (hadAnimation) element.classList.remove('animate-pop-in');
 
-		const blob = await toBlob(element, {
-			cacheBust: true,
-			pixelRatio: 2,
-			backgroundColor: '#ffffff',
-			style: {
-				transform: 'none',
-				opacity: '1'
-			},
-			filter: (node) => {
-				// Exclude any nodes that might cause issues
-				if (node instanceof Element) {
-					const tagName = node.tagName?.toLowerCase();
-					// Skip script and style tags
-					if (tagName === 'script' || tagName === 'noscript') return false;
+		try {
+			// Use toPng which is more reliable than toBlob
+			const dataUrl = await toPng(element, {
+				cacheBust: true,
+				pixelRatio: 2,
+				backgroundColor: '#ffffff',
+				skipFonts: false,
+				includeQueryParams: true,
+				filter: (node) => {
+					if (node instanceof Element) {
+						const tagName = node.tagName?.toLowerCase();
+						if (tagName === 'script' || tagName === 'noscript') return false;
+					}
+					return true;
 				}
-				return true;
-			}
-		});
-		if (!blob) throw new Error('Failed to generate image');
-		return blob;
+			});
+
+			// Convert data URL to blob
+			const res = await fetch(dataUrl);
+			const blob = await res.blob();
+			if (!blob || blob.size === 0) throw new Error('Failed to generate image');
+			return blob;
+		} finally {
+			// Restore animation class
+			if (hadAnimation) element.classList.add('animate-pop-in');
+		}
 	}
 
 	async function tryNativeShare(file: File): Promise<boolean> {
@@ -199,18 +190,11 @@
 		}
 		isSharingImage = true;
 
-		let exportEl: HTMLElement | null = null;
 		try {
 			await tick();
 			await waitForFonts();
 
-			exportEl = createExportElement(receiptEl);
-			document.body.append(exportEl);
-
-			// Wait for next frame to ensure element is rendered
-			await new Promise((resolve) => setTimeout(resolve, 100));
-
-			const blob = await generateImageBlob(exportEl);
+			const blob = await generateImageBlob(receiptEl);
 			const filename = buildImageFilename();
 			const file = new File([blob], filename, { type: 'image/png' });
 
@@ -226,7 +210,6 @@
 			}
 			toast.error(m.share_image_failed());
 		} finally {
-			exportEl?.remove();
 			isSharingImage = false;
 		}
 	}
