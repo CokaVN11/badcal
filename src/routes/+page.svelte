@@ -3,8 +3,9 @@
 	// ABOUTME: Switches to Bill Preview mode for sharing
 
 	import { onMount } from 'svelte';
-	import EditorView from '$lib/components/EditorView.svelte';
+	import { SvelteMap } from 'svelte/reactivity';
 	import BillPreview from '$lib/components/BillPreview.svelte';
+	import ProgressiveEditorView from '$lib/components/ProgressiveEditorView.svelte';
 	import type { Player, AdditionalCost } from '$lib/types';
 	import { saveSession, loadSession, clearSession } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
@@ -75,22 +76,40 @@
 		return players.reduce((sum, p) => sum + (p.hours || 0), 0);
 	});
 
-	// Calculate each player's share based on hours played
+	const UNIT = 500;
+	// Calculate each player's share based on hours played (Largest Remainder Method)
+	// Rounds to 500đ units for practical Vietnamese currency handling
 	let playerShares = $derived.by(() => {
-		const total = totalCost;
 		const hours = totalHours;
 		if (hours === 0 || players.length === 0) return [];
 
-		return players.map((p) => ({
+		const roundedTotal = Math.ceil(totalCost / UNIT) * UNIT;
+		const totalUnits = roundedTotal / UNIT; // integer
+
+		const withExact = players.map((p) => {
+			const ratio = (p.hours || 0) / hours;
+			const exactUnits = ratio * totalUnits;
+			const floorUnits = Math.floor(exactUnits);
+			return { ...p, ratio, exactUnits, floorUnits, rem: exactUnits - floorUnits };
+		});
+
+		let unitsLeft = totalUnits - withExact.reduce((sum, p) => sum + p.floorUnits, 0);
+		const sortedByRemainder = [...withExact].sort((a, b) => b.rem - a.rem || a.id - b.id);
+
+		const shares = new SvelteMap<number, number>();
+		sortedByRemainder.forEach((p, index) => {
+			const addOne = index < unitsLeft ? 1 : 0;
+			shares.set(p.id, (p.floorUnits + addOne) * UNIT);
+		});
+
+		return withExact.map((p) => ({
 			...p,
-			ratio: (p.hours || 0) / hours,
-			share: Math.round(((p.hours || 0) / hours) * total)
+			share: shares.get(p.id)!
 		}));
 	});
 
 	function switchToPreview() {
 		currentView = 'preview';
-		console.log(currentView);
 	}
 
 	function switchToEditor() {
@@ -100,7 +119,7 @@
 
 <div class="app-shell">
 	{#if currentView === 'editor'}
-		<EditorView
+		<ProgressiveEditorView
 			bind:sessionTitle
 			bind:sessionDate
 			bind:courtHours

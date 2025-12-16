@@ -10,7 +10,7 @@ export * from './utils';
 // Components
 export { default as BillPreview } from './components/BillPreview.svelte';
 export { default as CostInputs } from './components/CostInputs.svelte';
-export { default as EditorView } from './components/EditorView.svelte';
 export { default as LanguageToggle } from './components/LanguageToggle.svelte';
 export { default as LiveSummary } from './components/LiveSummary.svelte';
 export { default as PlayerList } from './components/PlayerList.svelte';
+export { default as ProgressiveEditorView } from './components/ProgressiveEditorView.svelte';

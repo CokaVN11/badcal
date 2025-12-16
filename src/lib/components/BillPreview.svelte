@@ -21,6 +21,7 @@
 	} from '@tabler/icons-svelte-runes';
 	import { toast } from 'svelte-sonner';
 	import PaymentQR from './PaymentQR.svelte';
+	import ShareSheet from './ShareSheet.svelte';
 	import { loadPaymentInfo, getProviderDisplayName } from '$lib/utils/vietqr';
 
 	type Props = {
@@ -50,6 +51,10 @@
 	let receiptEl: HTMLDivElement | null = $state(null);
 	let isSharingImage = $state(false);
 	let isCopyingText = $state(false);
+
+	let isShareSheetOpen = $state(false);
+	let showNames = $state(false);
+	let includeQR = $state(true);
 
 	const MAX_VISIBLE_EXTRAS = 6;
 
@@ -89,18 +94,30 @@
 			.forEach((c) => lines.push(`• ${c.label}: ${formatCurrency(c.amount)}`));
 
 		lines.push('', `${m.player_shares()}:`);
-		playerShares.forEach((p, i) => {
-			const name = p.name?.trim() || m.player_numbered({ n: i + 1 });
-			lines.push(`• ${name}: ${formatCurrency(p.share)}`);
-		});
 
-		const paymentInfo = loadPaymentInfo();
-		if (paymentInfo) {
-			const bankName = getProviderDisplayName(paymentInfo.providerKey);
-			lines.push('', `🏦 ${m.qr_bank_label()}: ${bankName}`);
-			lines.push(`📝 ${paymentInfo.accountNumber}`);
-			if (paymentInfo.accountName) {
-				lines.push(`👤 ${paymentInfo.accountName}`);
+		if (showNames) {
+			playerShares.forEach((p, i) => {
+				const name = p.name?.trim() || m.player_numbered({ n: i + 1 });
+				lines.push(`• ${name}: ${formatCurrency(p.share)}`);
+			});
+		} else {
+			for (const [hours, players] of groupedByHours) {
+				const groupShare = players[0]?.share ?? 0;
+				lines.push(
+					`• [${hours}${m.hours_unit()}] ${players.length}x: ${formatCurrency(groupShare)} ${m.each_suffix()}`
+				);
+			}
+		}
+
+		if (includeQR) {
+			const paymentInfo = loadPaymentInfo();
+			if (paymentInfo) {
+				const bankName = getProviderDisplayName(paymentInfo.providerKey);
+				lines.push('', `🏦 ${m.qr_bank_label()}: ${bankName}`);
+				lines.push(`📝 ${paymentInfo.accountNumber}`);
+				if (paymentInfo.accountName) {
+					lines.push(`👤 ${paymentInfo.accountName}`);
+				}
 			}
 		}
 
@@ -215,6 +232,49 @@
 			isSharingImage = false;
 		}
 	}
+
+	async function downloadBillImage() {
+		if (!receiptEl) return;
+		isSharingImage = true;
+
+		try {
+			await tick();
+			await waitForFonts();
+
+			const blob = await generateImageBlob(receiptEl);
+			const filename = buildImageFilename();
+			downloadBlob(blob, filename);
+			toast.success(m.image_downloaded());
+		} catch (e) {
+			console.error('Failed to download image:', e);
+			toast.error(m.share_image_failed());
+		} finally {
+			isSharingImage = false;
+		}
+	}
+
+	function openShareSheet() {
+		isShareSheetOpen = true;
+	}
+
+	function closeShareSheet() {
+		isShareSheetOpen = false;
+	}
+
+	function handleShareImage() {
+		closeShareSheet();
+		tick().then(() => shareBillImage());
+	}
+
+	function handleCopyText() {
+		closeShareSheet();
+		copyShareText();
+	}
+
+	function handleDownloadImage() {
+		closeShareSheet();
+		tick().then(() => downloadBillImage());
+	}
 </script>
 
 <div class="min-h-dvh bg-stone-200 flex flex-col">
@@ -310,25 +370,37 @@
 					<div class="receipt-section">
 						<div class="receipt-heading">{m.player_shares().toUpperCase()}</div>
 
-						{#each groupedByHours as [hours, players] (hours)}
-							{@const groupShare = players[0]?.share ?? 0}
-							{@const namedPlayers = getNamedPlayers(players)}
-							{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
-
-							<div class="player-group">
-								<div class="group-header">
-									<span class="group-hours">[{hours}h]</span>
-									<span class="group-count">{players.length}x</span>
+						{#if showNames}
+							{#each playerShares as player, i (player.id)}
+								<div class="receipt-item">
+									<span>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
 									<span class="dots"></span>
-									<span class="group-amount">{formatCurrency(groupShare)} {m.each_suffix()} </span>
+									<span>{formatCurrency(player.share)}</span>
 								</div>
-								{#if namedPlayers.length > 0}
-									<div class="group-names">
-										{namedPlayers[0]}{#if othersCount > 0}, +{othersCount} more{/if}
+							{/each}
+						{:else}
+							{#each groupedByHours as [hours, players] (hours)}
+								{@const groupShare = players[0]?.share ?? 0}
+								{@const namedPlayers = getNamedPlayers(players)}
+								{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
+
+								<div class="player-group">
+									<div class="group-header">
+										<span class="group-hours">[{hours}h]</span>
+										<span class="group-count">{players.length}x</span>
+										<span class="dots"></span>
+										<span class="group-amount"
+											>{formatCurrency(groupShare)} {m.each_suffix()}
+										</span>
 									</div>
-								{/if}
-							</div>
-						{/each}
+									{#if namedPlayers.length > 0}
+										<div class="group-names">
+											{namedPlayers[0]}{#if othersCount > 0}, +{othersCount} more{/if}
+										</div>
+									{/if}
+								</div>
+							{/each}
+						{/if}
 					</div>
 
 					<div class="receipt-line-dashed"></div>
@@ -347,9 +419,11 @@
 						</div>
 					</div>
 
-					<div class="receipt-line-dashed"></div>
+					{#if includeQR}
+						<div class="receipt-line-dashed"></div>
 
-					<PaymentQR />
+						<PaymentQR />
+					{/if}
 				</div>
 
 				<div class="torn-edge torn-bottom"></div>
@@ -367,7 +441,7 @@
 			</button>
 			<button
 				class="btn-primary flex-1 h-12"
-				onclick={shareBillImage}
+				onclick={openShareSheet}
 				disabled={isSharingImage || !receiptEl}
 			>
 				{#if isSharingImage}
@@ -375,10 +449,20 @@
 				{:else}
 					<IconShare class="w-5 h-5" />
 				{/if}
-				{isSharingImage ? m.preparing_image() : m.share_image_btn()}
+				{isSharingImage ? m.preparing_image() : m.share_btn()}
 			</button>
 		</div>
 	</footer>
+
+	<ShareSheet
+		isOpen={isShareSheetOpen}
+		bind:showNames
+		bind:includeQR
+		onClose={closeShareSheet}
+		onShareImage={handleShareImage}
+		onCopyText={handleCopyText}
+		onDownloadImage={handleDownloadImage}
+	/>
 </div>
 
 <style>
