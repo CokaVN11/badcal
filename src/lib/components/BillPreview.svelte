@@ -1,6 +1,21 @@
 <script lang="ts">
-	// ABOUTME: Bill Preview - thermal paper receipt style for social media/screenshot
-	// ABOUTME: Realistic heated paper design with scratches and worn texture
+	// ABOUTME: Bill Preview - dual theme receipt for social media/screenshot
+	// ABOUTME: Supports thermal paper and modern ZaloPay fintech styles
+
+	const PLAYER_COLORS = [
+		'#0033c9',
+		'#00cf6a',
+		'#6e0cdf',
+		'#ff8a00',
+		'#00b4ff',
+		'#14b8a6',
+		'#f43f5e',
+		'#8b5cf6'
+	];
+
+	function getPlayerColor(index: number): string {
+		return PLAYER_COLORS[index % PLAYER_COLORS.length];
+	}
 
 	import { m } from '$lib/paraglide/messages.js';
 	import {
@@ -12,19 +27,27 @@
 		triggerHaptic
 	} from '$lib/utils';
 	import type { AdditionalCost, PlayerShare } from '$lib/types';
-	import { tick } from 'svelte';
+	import { tick, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
+	import { browser } from '$app/environment';
 	import {
 		IconLoader2,
 		IconShare,
 		IconCopy,
 		IconChevronLeft,
-		IconPencil
+		IconPencil,
+		IconReceipt,
+		IconCreditCard,
+		IconUsers,
+		IconClock,
+		IconCheck
 	} from '@tabler/icons-svelte-runes';
 	import { toast } from 'svelte-sonner';
 	import PaymentQR from './PaymentQR.svelte';
 	import ShareSheet from './ShareSheet.svelte';
 	import { loadPaymentInfo, getProviderDisplayName } from '$lib/utils/vietqr';
+
+	type BillTheme = 'thermal' | 'zalopay';
 
 	type Props = {
 		sessionTitle: string;
@@ -58,6 +81,26 @@
 	let showNames = $state(false);
 	let includeQR = $state(true);
 	let showCelebration = $state(false);
+
+	// Theme state - default to zalopay for the modern look
+	const THEME_STORAGE_KEY = 'badcal-bill-theme';
+	let currentTheme: BillTheme = $state('zalopay');
+
+	// Load theme preference from localStorage on mount
+	onMount(() => {
+		const saved = localStorage.getItem(THEME_STORAGE_KEY);
+		if (saved === 'thermal' || saved === 'zalopay') {
+			currentTheme = saved;
+		}
+	});
+
+	function toggleTheme() {
+		currentTheme = currentTheme === 'thermal' ? 'zalopay' : 'thermal';
+		if (browser) {
+			localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+		}
+		triggerHaptic('light');
+	}
 
 	function triggerCelebration() {
 		showCelebration = true;
@@ -163,11 +206,13 @@
 		const hadAnimation = element.classList.contains('animate-pop-in');
 		if (hadAnimation) element.classList.remove('animate-pop-in');
 
+		const bgColor = currentTheme === 'zalopay' ? '#f1f5f9' : 'transparent';
+
 		try {
 			const dataUrl = await toPng(element, {
 				cacheBust: true,
 				pixelRatio: 2,
-				backgroundColor: 'transparent',
+				backgroundColor: bgColor,
 				skipFonts: false,
 				includeQueryParams: true,
 				filter: (node) => {
@@ -291,15 +336,41 @@
 	}
 </script>
 
-<div class="min-h-dvh bg-stone-200 flex flex-col">
+<div
+	class="min-h-dvh flex flex-col {currentTheme === 'zalopay' ? 'bg-(--slate-100)' : 'bg-stone-200'}"
+>
 	<header
-		class="bg-white/95 backdrop-blur-md border-b border-stone-300 px-4 py-2 sticky top-0 z-30"
+		class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 {currentTheme === 'zalopay'
+			? 'bg-white/95 border-(--border)'
+			: 'bg-white/95 border-stone-300'}"
 	>
 		<div class="max-w-lg mx-auto flex items-center gap-3">
 			<button class="btn-icon" onclick={onBack} aria-label={m.edit()}>
 				<IconChevronLeft class="w-5 h-5" />
 			</button>
-			<h1 class="text-lg font-semibold text-stone-800 flex-1">{m.bill_preview_heading()}</h1>
+			<h1
+				class="text-lg font-semibold flex-1 {currentTheme === 'zalopay'
+					? 'text-(--ink)'
+					: 'text-stone-800'}"
+			>
+				{m.bill_preview_heading()}
+			</h1>
+
+			<button
+				class="p-2 rounded-lg transition-colors {currentTheme === 'zalopay'
+					? 'bg-(--zp-blue-50) text-(--zp-blue-600) hover:bg-(--zp-blue-100)'
+					: 'bg-stone-100 text-stone-600 hover:bg-stone-200'}"
+				onclick={toggleTheme}
+				aria-label="Toggle theme"
+				title={currentTheme === 'zalopay' ? m.theme_switch_thermal() : m.theme_switch_zalopay()}
+			>
+				{#if currentTheme === 'zalopay'}
+					<IconReceipt class="w-5 h-5" />
+				{:else}
+					<IconCreditCard class="w-5 h-5" />
+				{/if}
+			</button>
+
 			<button
 				class="btn-icon"
 				onclick={copyShareText}
@@ -313,83 +384,71 @@
 
 	<main class="flex-1 p-4 pb-28">
 		<div class="max-w-md mx-auto">
-			<div class="thermal-receipt animate-pop-in" bind:this={receiptEl}>
-				<div class="torn-edge torn-top"></div>
-
-				<div class="thermal-paper">
-					<div class="scratches"></div>
-
-					<div class="receipt-store">
-						<div class="store-logo">🏸</div>
-						<div class="store-name">{m.app_title()}</div>
-						<div class="store-tagline">BADMINTON COST SPLITTER</div>
+			{#if currentTheme === 'zalopay'}
+				<!-- ZaloPay Modern Theme -->
+				<div class="zp-receipt animate-pop-in" bind:this={receiptEl}>
+					<div class="zp-header">
+						<div class="zp-header-left">
+							<span class="zp-logo">🏸</span>
+							<span class="zp-brand">{m.app_title()}</span>
+						</div>
+						<div class="zp-status"><IconCheck class="w-3 h-3" />{m.status_done()}</div>
 					</div>
 
-					<div class="receipt-line-double"></div>
-
-					<div class="receipt-section">
-						<div class="receipt-title">{sessionTitle || 'Session'}</div>
-						<div class="receipt-meta">
-							<span>{formatDate(sessionDate)}</span>
-							<span>{playerShares.length} players • {totalHours}h</span>
+					<div class="zp-hero">
+						<div class="zp-hero-top">
+							<span class="zp-session">{sessionTitle || m.session_fallback()}</span>
+							<span class="zp-date">{formatDate(sessionDate)}</span>
+						</div>
+						<div class="zp-total">{formatCurrency(totalCost)}</div>
+						<div class="zp-stats">
+							<span>{playerShares.length} {m.players_count()}</span>
+							<span class="zp-dot">•</span>
+							<span>{totalHours}h</span>
 						</div>
 					</div>
 
-					<div class="receipt-line-dashed"></div>
-
-					<div class="receipt-section">
-						<div class="receipt-heading">{m.breakdown().toUpperCase()}</div>
-
-						<div class="receipt-items">
-							{#if courtPrice > 0}
-								<div class="receipt-item">
-									<span>{m.court_fee()}</span>
-									<span class="dots"></span>
-									<span>{formatCurrency(courtPrice)}</span>
-								</div>
-							{/if}
-							{#if shuttlecockTotal > 0}
-								<div class="receipt-item">
-									<span>{m.shuttlecocks()} x{shuttlecockCount}</span>
-									<span class="dots"></span>
-									<span>{formatCurrency(shuttlecockTotal)}</span>
-								</div>
-							{/if}
-							{#each visibleExtras as cost (cost.id)}
-								<div class="receipt-item">
-									<span>{cost.label}</span>
-									<span class="dots"></span>
-									<span>{formatCurrency(cost.amount)}</span>
-								</div>
-							{/each}
-							{#if remainingExtras.length > 0}
-								<div class="receipt-item muted">
-									<span>{m.more_items({ count: remainingExtras.length })}</span>
-									<span class="dots"></span>
-									<span>{formatCurrency(remainingExtrasTotal)}</span>
-								</div>
-							{/if}
-						</div>
+					<div class="zp-section">
+						<div class="zp-section-head">{m.breakdown()}</div>
+						{#if courtPrice > 0}
+							<div class="zp-row">
+								<span>{m.court_fee()}</span>
+								<span class="zp-val">{formatCurrency(courtPrice)}</span>
+							</div>
+						{/if}
+						{#if shuttlecockTotal > 0}
+							<div class="zp-row">
+								<span>{m.shuttlecocks()} ×{shuttlecockCount}</span>
+								<span class="zp-val">{formatCurrency(shuttlecockTotal)}</span>
+							</div>
+						{/if}
+						{#each visibleExtras as cost (cost.id)}
+							<div class="zp-row">
+								<span>{cost.label}</span>
+								<span class="zp-val">{formatCurrency(cost.amount)}</span>
+							</div>
+						{/each}
+						{#if remainingExtras.length > 0}
+							<div class="zp-row zp-muted">
+								<span>{m.more_items({ count: remainingExtras.length })}</span>
+								<span class="zp-val">{formatCurrency(remainingExtrasTotal)}</span>
+							</div>
+						{/if}
 					</div>
 
-					<div class="receipt-line-dashed"></div>
-
-					<div class="receipt-total">
-						<span>{m.total_cost().toUpperCase()}</span>
-						<span>{formatCurrency(totalCost)}</span>
-					</div>
-
-					<div class="receipt-line-double"></div>
-
-					<div class="receipt-section">
-						<div class="receipt-heading">{m.player_shares().toUpperCase()}</div>
-
+					<div class="zp-section">
+						<div class="zp-section-head">{m.player_shares()}</div>
 						{#if showNames}
 							{#each playerShares as player, i (player.id)}
-								<div class="receipt-item">
-									<span>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
-									<span class="dots"></span>
-									<span>{formatCurrency(player.share)}</span>
+								<div class="zp-player">
+									<span class="zp-avatar" style="background:{getPlayerColor(i)}"
+										>{(player.name?.trim() || `P${i + 1}`).charAt(0).toUpperCase()}</span
+									>
+									<span class="zp-name"
+										>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span
+									>
+									<span class="zp-hrs">{player.hours}h</span>
+									<span class="zp-share">{formatCurrency(player.share)}</span>
 								</div>
 							{/each}
 						{:else}
@@ -397,56 +456,176 @@
 								{@const groupShare = players[0]?.share ?? 0}
 								{@const namedPlayers = getNamedPlayers(players)}
 								{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
-
-								<div class="player-group">
-									<div class="group-header">
-										<span class="group-hours">[{hours}h]</span>
-										<span class="group-count">{players.length}x</span>
-										<span class="dots"></span>
-										<span class="group-amount"
-											>{formatCurrency(groupShare)} {m.each_suffix()}
-										</span>
+								<div class="zp-group">
+									<span class="zp-badge">{hours}h</span>
+									<div>
+										<span class="zp-gcount">{players.length}×</span>
+										{#if namedPlayers.length > 0}
+											<span class="zp-gnames"
+												>{namedPlayers[0]}{#if othersCount > 0}+{othersCount}{/if}</span
+											>
+										{/if}
+										<span class="zp-gshare"
+											>{formatCurrency(groupShare)}<small>{m.each_suffix()}</small></span
+										>
 									</div>
-									{#if namedPlayers.length > 0}
-										<div class="group-names">
-											{namedPlayers[0]}{#if othersCount > 0}, +{othersCount} more{/if}
-										</div>
-									{/if}
 								</div>
 							{/each}
 						{/if}
 					</div>
 
-					<div class="receipt-line-dashed"></div>
-
-					<div class="receipt-footer">
-						<div class="barcode">
-							{#each [2, 1, 3, 1, 2, 1, 3, 2, 1, 2, 3, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 1] as width, idx (idx)}
-								<div class="bar" style="width: {width}px; height: 22px"></div>
-							{/each}
-						</div>
-						<div class="footer-text">
-							{m.generated_with()}
-						</div>
-						<div class="footer-date">
-							{new Date().toLocaleString()}
-						</div>
-					</div>
-
 					{#if includeQR}
+						<div class="zp-qr">
+							<PaymentQR />
+						</div>
+					{/if}
+
+					<div class="zp-foot">
+						<span>🏸 {m.generated_with()}</span>
+						<span>{new Date().toLocaleDateString()}</span>
+					</div>
+				</div>
+			{:else}
+				<!-- Thermal Receipt Theme (Original) -->
+				<div class="thermal-receipt animate-pop-in" bind:this={receiptEl}>
+					<div class="torn-edge torn-top"></div>
+
+					<div class="thermal-paper">
+						<div class="scratches"></div>
+
+						<div class="receipt-store">
+							<div class="store-logo">🏸</div>
+							<div class="store-name">{m.app_title()}</div>
+							<div class="store-tagline">{m.app_tagline()}</div>
+						</div>
+
+						<div class="receipt-line-double"></div>
+
+						<div class="receipt-section">
+							<div class="receipt-title">{sessionTitle || m.session_fallback()}</div>
+							<div class="receipt-meta">
+								<span>{formatDate(sessionDate)}</span>
+								<span>{m.thermal_stats({ count: playerShares.length, hours: totalHours })}</span>
+							</div>
+						</div>
+
 						<div class="receipt-line-dashed"></div>
 
-						<PaymentQR />
-					{/if}
-				</div>
+						<div class="receipt-section">
+							<div class="receipt-heading">{m.breakdown().toUpperCase()}</div>
 
-				<div class="torn-edge torn-bottom"></div>
-			</div>
+							<div class="receipt-items">
+								{#if courtPrice > 0}
+									<div class="receipt-item">
+										<span>{m.court_fee()}</span>
+										<span class="dots"></span>
+										<span>{formatCurrency(courtPrice)}</span>
+									</div>
+								{/if}
+								{#if shuttlecockTotal > 0}
+									<div class="receipt-item">
+										<span>{m.shuttlecocks()} x{shuttlecockCount}</span>
+										<span class="dots"></span>
+										<span>{formatCurrency(shuttlecockTotal)}</span>
+									</div>
+								{/if}
+								{#each visibleExtras as cost (cost.id)}
+									<div class="receipt-item">
+										<span>{cost.label}</span>
+										<span class="dots"></span>
+										<span>{formatCurrency(cost.amount)}</span>
+									</div>
+								{/each}
+								{#if remainingExtras.length > 0}
+									<div class="receipt-item muted">
+										<span>{m.more_items({ count: remainingExtras.length })}</span>
+										<span class="dots"></span>
+										<span>{formatCurrency(remainingExtrasTotal)}</span>
+									</div>
+								{/if}
+							</div>
+						</div>
+
+						<div class="receipt-line-dashed"></div>
+
+						<div class="receipt-total">
+							<span>{m.total_cost().toUpperCase()}</span>
+							<span>{formatCurrency(totalCost)}</span>
+						</div>
+
+						<div class="receipt-line-double"></div>
+
+						<div class="receipt-section">
+							<div class="receipt-heading">{m.player_shares().toUpperCase()}</div>
+
+							{#if showNames}
+								{#each playerShares as player, i (player.id)}
+									<div class="receipt-item">
+										<span>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
+										<span class="dots"></span>
+										<span>{formatCurrency(player.share)}</span>
+									</div>
+								{/each}
+							{:else}
+								{#each groupedByHours as [hours, players] (hours)}
+									{@const groupShare = players[0]?.share ?? 0}
+									{@const namedPlayers = getNamedPlayers(players)}
+									{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
+
+									<div class="player-group">
+										<div class="group-header">
+											<span class="group-hours">[{hours}h]</span>
+											<span class="group-count">{players.length}x</span>
+											<span class="dots"></span>
+											<span class="group-amount"
+												>{formatCurrency(groupShare)} {m.each_suffix()}
+											</span>
+										</div>
+										{#if namedPlayers.length > 0}
+											<div class="group-names">
+												{namedPlayers[0]}{#if othersCount > 0}, {m.and_others({
+														count: othersCount
+													})}{/if}
+											</div>
+										{/if}
+									</div>
+								{/each}
+							{/if}
+						</div>
+
+						<div class="receipt-line-dashed"></div>
+
+						<div class="receipt-footer">
+							<div class="barcode">
+								{#each [2, 1, 3, 1, 2, 1, 3, 2, 1, 2, 3, 1, 2, 1, 3, 1, 2, 3, 1, 2, 1, 3, 2, 1, 2, 1, 3, 1, 2, 1] as width, idx (idx)}
+									<div class="bar" style="width: {width}px; height: 22px"></div>
+								{/each}
+							</div>
+							<div class="footer-text">
+								{m.generated_with()}
+							</div>
+							<div class="footer-date">
+								{new Date().toLocaleString()}
+							</div>
+						</div>
+
+						{#if includeQR}
+							<div class="receipt-line-dashed"></div>
+
+							<PaymentQR />
+						{/if}
+					</div>
+
+					<div class="torn-edge torn-bottom"></div>
+				</div>
+			{/if}
 		</div>
 	</main>
 
 	<footer
-		class="fixed inset-x-0 bottom-0 p-3 bg-linear-to-t from-stone-200 via-stone-200 to-transparent z-20"
+		class="fixed inset-x-0 bottom-0 p-3 z-20 {currentTheme === 'zalopay'
+			? 'bg-linear-to-t from-(--slate-100) via-(--slate-100) to-transparent'
+			: 'bg-linear-to-t from-stone-200 via-stone-200 to-transparent'}"
 	>
 		<div class="max-w-lg mx-auto flex gap-3">
 			<button class="btn-secondary flex-1 h-12" onclick={onBack}>
@@ -490,7 +669,251 @@
 </div>
 
 <style>
-	/* Thermal Paper Receipt Styles */
+	/* ===================================
+	   ZALOPAY COMPACT THEME
+	   =================================== */
+	.zp-receipt {
+		background: white;
+		border-radius: 12px;
+		overflow: hidden;
+		box-shadow:
+			0 1px 3px rgba(0, 0, 0, 0.08),
+			0 0 0 1px rgba(0, 0, 0, 0.04);
+	}
+
+	.zp-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 10px 12px;
+		background: var(--zp-blue-500);
+	}
+
+	.zp-header-left {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	.zp-logo {
+		font-size: 18px;
+	}
+
+	.zp-brand {
+		font-size: 14px;
+		font-weight: 700;
+		color: white;
+		letter-spacing: 0.01em;
+	}
+
+	.zp-status {
+		display: flex;
+		align-items: center;
+		gap: 3px;
+		padding: 3px 8px;
+		background: var(--zp-green-500);
+		border-radius: 4px;
+		color: white;
+		font-size: 10px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.02em;
+	}
+
+	.zp-hero {
+		padding: 12px;
+		text-align: center;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.zp-hero-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 4px;
+	}
+
+	.zp-session {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--ink);
+	}
+
+	.zp-date {
+		font-size: 11px;
+		color: var(--ink-muted);
+	}
+
+	.zp-total {
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 28px;
+		font-weight: 700;
+		color: var(--zp-blue-600);
+		letter-spacing: -0.02em;
+		line-height: 1.2;
+	}
+
+	.zp-stats {
+		display: flex;
+		justify-content: center;
+		align-items: center;
+		gap: 6px;
+		margin-top: 4px;
+		font-size: 11px;
+		color: var(--ink-muted);
+		font-weight: 500;
+	}
+
+	.zp-dot {
+		opacity: 0.4;
+	}
+
+	.zp-section {
+		padding: 10px 12px;
+		border-bottom: 1px solid var(--border);
+	}
+
+	.zp-section:last-of-type {
+		border-bottom: none;
+	}
+
+	.zp-section-head {
+		font-size: 10px;
+		font-weight: 700;
+		color: var(--ink-muted);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		margin-bottom: 6px;
+	}
+
+	.zp-row {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 5px 0;
+		font-size: 13px;
+		color: var(--ink);
+	}
+
+	.zp-row.zp-muted {
+		color: var(--ink-muted);
+	}
+
+	.zp-val {
+		font-family: 'JetBrains Mono', monospace;
+		font-weight: 600;
+		font-size: 12px;
+	}
+
+	.zp-player {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 4px 0;
+	}
+
+	.zp-avatar {
+		width: 22px;
+		height: 22px;
+		border-radius: 5px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 10px;
+		font-weight: 700;
+		color: white;
+		flex-shrink: 0;
+	}
+
+	.zp-name {
+		flex: 1;
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--ink);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.zp-hrs {
+		font-size: 11px;
+		color: var(--ink-muted);
+		flex-shrink: 0;
+	}
+
+	.zp-share {
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 12px;
+		font-weight: 700;
+		color: var(--zp-blue-600);
+		flex-shrink: 0;
+	}
+
+	.zp-group {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 6px 0;
+	}
+
+	.zp-badge {
+		padding: 3px 6px;
+		background: var(--zp-blue-500);
+		color: white;
+		border-radius: 4px;
+		font-size: 11px;
+		font-weight: 700;
+		flex-shrink: 0;
+	}
+
+	.zp-gcount {
+		font-size: 12px;
+		font-weight: 600;
+		color: var(--ink);
+	}
+
+	.zp-gnames {
+		flex: 1;
+		font-size: 11px;
+		color: var(--ink-muted);
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	.zp-gshare {
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 13px;
+		font-weight: 700;
+		color: var(--zp-green-600);
+		flex-shrink: 0;
+	}
+
+	.zp-gshare small {
+		font-size: 10px;
+		font-weight: 500;
+		color: var(--ink-muted);
+	}
+
+	.zp-qr {
+		padding: 10px 12px;
+		border-top: 1px solid var(--border);
+	}
+
+	.zp-foot {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 8px 12px;
+		background: var(--slate-50);
+		font-size: 10px;
+		color: var(--ink-muted);
+	}
+
+	/* ===================================
+	   THERMAL RECEIPT THEME (Original)
+	   =================================== */
 	.thermal-receipt {
 		position: relative;
 		filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.15));
@@ -499,9 +922,7 @@
 	.thermal-paper {
 		position: relative;
 		background:
-			/* Subtle noise texture */
 			url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E"),
-			/* Paper gradient - slightly yellowed */
 			linear-gradient(180deg, #fdfcf8 0%, #f9f7f1 20%, #f7f5ed 50%, #f5f3e9 80%, #f2f0e4 100%);
 		background-blend-mode: soft-light, normal;
 		padding: 16px 16px;
@@ -510,19 +931,16 @@
 		overflow: hidden;
 	}
 
-	/* Scratches overlay */
 	.scratches {
 		position: absolute;
 		inset: 0;
 		pointer-events: none;
 		opacity: 0.08;
 		background-image:
-			/* Horizontal scratches */
 			linear-gradient(90deg, transparent 0%, transparent 70%, #8b8680 70.5%, transparent 71%),
 			linear-gradient(90deg, transparent 20%, #8b8680 20.3%, transparent 20.6%),
 			linear-gradient(85deg, transparent 40%, #8b8680 40.2%, transparent 40.4%),
 			linear-gradient(92deg, transparent 60%, #8b8680 60.1%, transparent 60.3%),
-			/* Vertical scratches */
 			linear-gradient(180deg, transparent 30%, #8b8680 30.2%, transparent 30.4%),
 			linear-gradient(178deg, transparent 55%, #8b8680 55.1%, transparent 55.3%),
 			linear-gradient(182deg, transparent 75%, #8b8680 75.2%, transparent 75.5%);
@@ -544,7 +962,6 @@
 			89% 0;
 	}
 
-	/* Torn paper edges */
 	.torn-edge {
 		height: 12px;
 		background: #f9f7f1;
@@ -663,7 +1080,6 @@
 		);
 	}
 
-	/* Store header */
 	.receipt-store {
 		text-align: center;
 		margin-bottom: 10px;
@@ -688,7 +1104,6 @@
 		margin-top: 4px;
 	}
 
-	/* Lines */
 	.receipt-line-double {
 		border-top: 2px double #8b8680;
 		margin: 8px 0;
@@ -699,7 +1114,6 @@
 		margin: 8px 0;
 	}
 
-	/* Sections */
 	.receipt-section {
 		margin: 4px 0;
 	}
@@ -726,7 +1140,6 @@
 		margin-bottom: 4px;
 	}
 
-	/* Items */
 	.receipt-items {
 		display: flex;
 		flex-direction: column;
@@ -764,7 +1177,6 @@
 		min-width: 20px;
 	}
 
-	/* Total */
 	.receipt-total {
 		display: flex;
 		justify-content: space-between;
@@ -774,7 +1186,6 @@
 		padding: 4px 0;
 	}
 
-	/* Player groups */
 	.player-group {
 		margin-bottom: 6px;
 	}
@@ -808,7 +1219,6 @@
 		font-style: italic;
 	}
 
-	/* Barcode */
 	.barcode {
 		display: flex;
 		justify-content: center;
@@ -824,7 +1234,6 @@
 		flex-shrink: 0;
 	}
 
-	/* Footer */
 	.receipt-footer {
 		text-align: center;
 	}
@@ -840,7 +1249,6 @@
 		color: #a8a39d;
 	}
 
-	/* Thermal fade effect - subtle darker edges */
 	.thermal-paper::before {
 		content: '';
 		position: absolute;
@@ -854,7 +1262,6 @@
 		);
 	}
 
-	/* Heat marks - random darker spots */
 	.thermal-paper::after {
 		content: '';
 		position: absolute;

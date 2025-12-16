@@ -125,5 +125,11 @@
 	"share_include_qr": "Include payment QR",
 	"share_include_qr_hint": "Show VietQR code for easy payment",
 	"share_download": "Download",
-	"celebration_shared": "Bill shared!"
+	"celebration_shared": "Bill shared!",
+	"theme_switch_thermal": "Switch to thermal receipt",
+	"theme_switch_zalopay": "Switch to ZaloPay style",
+	"status_done": "Done",
+	"session_fallback": "Session",
+	"app_tagline": "BADMINTON COST SPLITTER",
+	"thermal_stats": "{count} players • {hours}h"
 }

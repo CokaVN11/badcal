@@ -125,5 +125,11 @@
 	"share_include_qr": "Thêm mã QR thanh toán",
 	"share_include_qr_hint": "Hiện mã VietQR để chuyển tiền",
 	"share_download": "Tải xuống",
-	"celebration_shared": "Đã chia sẻ!"
+	"celebration_shared": "Đã chia sẻ!",
+	"theme_switch_thermal": "Đổi sang hóa đơn nhiệt",
+	"theme_switch_zalopay": "Đổi sang kiểu ZaloPay",
+	"status_done": "Xong",
+	"session_fallback": "Buổi chơi",
+	"app_tagline": "CHIA TIỀN CẦU LÔNG",
+	"thermal_stats": "{count} người • {hours} giờ"
 }

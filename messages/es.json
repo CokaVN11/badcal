@@ -76,5 +76,11 @@
 	"share_include_qr": "Incluir QR de pago",
 	"share_include_qr_hint": "Mostrar código VietQR para pago fácil",
 	"share_download": "Descargar",
-	"celebration_shared": "¡Cuenta compartida!"
+	"celebration_shared": "¡Cuenta compartida!",
+	"theme_switch_thermal": "Cambiar a recibo térmico",
+	"theme_switch_zalopay": "Cambiar a estilo ZaloPay",
+	"status_done": "Listo",
+	"session_fallback": "Sesión",
+	"app_tagline": "DIVISOR DE COSTOS BÁDMINTON",
+	"thermal_stats": "{count} jugadores • {hours}h"
 }
