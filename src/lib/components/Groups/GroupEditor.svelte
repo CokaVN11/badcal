@@ -5,6 +5,7 @@
 	import { m } from '$lib/paraglide/messages';
 	import type { Player } from '$lib/types';
 	import { toast } from 'svelte-sonner';
+	import { triggerHaptic } from '$lib/utils';
 	import {
 		DEFAULT_HOUR_STEP,
 		DEFAULT_MAX_PLAYERS,
@@ -55,6 +56,7 @@
 		const viewModel = bucketViewModels.find((bucket) => bucket.hours === hours);
 		const currentCount = viewModel?.count ?? 0;
 		updateCountForHours(hours, currentCount + delta);
+		triggerHaptic('light');
 	}
 
 	function handleCountInput(hours: number, rawValue: string) {
@@ -63,18 +65,7 @@
 	}
 </script>
 
-<div class="space-y-3">
-	<div class="flex items-center justify-between">
-		<div>
-			<h2 class="form-label">{m.grouped_players_heading()}</h2>
-			<p class="text-[11px] text-(--ink-muted) mt-0.5">{m.grouped_players_hint()}</p>
-		</div>
-		<div class="badge badge-paid">
-			{totalPlayers}
-			{m.players_count()}
-		</div>
-	</div>
-
+<div class="space-y-3 mt-2">
 	<div class="space-y-2">
 		{#each bucketViewModels as bucket (bucket.hours)}
 			{@const hours = bucket.hours}

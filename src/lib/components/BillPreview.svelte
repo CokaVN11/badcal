@@ -8,10 +8,12 @@
 		formatDate,
 		groupByKey,
 		getNamedPlayers,
-		getOthersCount
+		getOthersCount,
+		triggerHaptic
 	} from '$lib/utils';
 	import type { AdditionalCost, PlayerShare } from '$lib/types';
 	import { tick } from 'svelte';
+	import { fade } from 'svelte/transition';
 	import {
 		IconLoader2,
 		IconShare,
@@ -55,6 +57,15 @@
 	let isShareSheetOpen = $state(false);
 	let showNames = $state(false);
 	let includeQR = $state(true);
+	let showCelebration = $state(false);
+
+	function triggerCelebration() {
+		showCelebration = true;
+		triggerHaptic('medium');
+		setTimeout(() => {
+			showCelebration = false;
+		}, 1500);
+	}
 
 	const MAX_VISIBLE_EXTRAS = 6;
 
@@ -218,9 +229,12 @@
 			const file = new File([blob], filename, { type: 'image/png' });
 
 			const shared = await tryNativeShare(file);
-			if (!shared) {
+			if (shared) {
+				triggerCelebration();
+			} else {
 				downloadBlob(blob, filename);
 				toast.success(m.image_downloaded());
+				triggerCelebration();
 			}
 		} catch (e) {
 			console.error('Failed to share image:', e);
@@ -463,6 +477,16 @@
 		onCopyText={handleCopyText}
 		onDownloadImage={handleDownloadImage}
 	/>
+
+	{#if showCelebration}
+		<div
+			class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/40 pointer-events-none"
+			transition:fade={{ duration: 300 }}
+		>
+			<span class="text-6xl animate-bounce">🎉</span>
+			<span class="mt-2 text-xl font-bold text-white drop-shadow-lg">{m.celebration_shared()}</span>
+		</div>
+	{/if}
 </div>
 
 <style>

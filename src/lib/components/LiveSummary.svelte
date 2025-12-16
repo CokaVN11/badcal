@@ -9,10 +9,10 @@
 		getInitial,
 		groupByKey,
 		getGroupColor,
-		getPlayerDisplayName,
-		formatCompactNumber
+		getPlayerDisplayName
 	} from '$lib/utils';
 	import type { PlayerShare } from '$lib/types';
+	import AnimatedNumber from './AnimatedNumber.svelte';
 	import {
 		IconCash,
 		IconUsers,
@@ -94,15 +94,7 @@
 	];
 </script>
 
-<div class="space-y-4">
-	<div class="flex items-center justify-between">
-		<h2 class="form-label">{m.summary_heading()}</h2>
-		<div class="live-badge flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50">
-			<span class="live-dot w-2 h-2 rounded-full bg-emerald-500"></span>
-			<span class="text-xs font-semibold text-emerald-700">{m.live_calculation()}</span>
-		</div>
-	</div>
-
+<div class="space-y-4 mt-2">
 	<div class="stats-grid grid grid-cols-3 gap-2">
 		{#each [[totalCost, m.total_cost(), 0], [playerShares.length, m.players_count(), 1], [totalHours, m.total_hours(), 2]] as [value, label, idx], i (i)}
 			{@const style = STAT_STYLES[idx as number]}
@@ -114,11 +106,11 @@
 					class="stat-icon absolute -right-2 -top-2 w-14 h-14 rounded-xl bg-linear-to-br {style.gradient} opacity-10 group-hover:opacity-20 transition-opacity"
 				></div>
 				<div class="relative">
-					<div class="stat-value font-mono text-lg font-bold text-(--ink) leading-tight">
+					<div class="stat-value text-lg font-bold text-(--ink) leading-tight">
 						{#if idx === 0}
-							{formatCompactNumber(value as number)}
+							<AnimatedNumber value={value as number} format="compact" />
 						{:else}
-							{value}
+							<AnimatedNumber value={value as number} format="plain" />
 						{/if}
 					</div>
 					<div

@@ -122,7 +122,7 @@
 
 			<div class="p-4 pt-0 space-y-3 pb-8">
 				<button
-					class="w-full flex items-center justify-center gap-2 py-3.5 bg-(--zp-blue-500) hover:bg-(--zp-blue-600) text-white font-semibold rounded-xl transition-colors"
+					class="w-full flex items-center justify-center gap-2 py-3.5 bg-(--zp-green-500) hover:bg-(--zp-green-600) text-white font-semibold rounded-xl transition-colors"
 					onclick={onShareImage}
 				>
 					<IconShare size={20} />

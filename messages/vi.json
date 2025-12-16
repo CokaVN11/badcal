@@ -124,5 +124,6 @@
 	"share_show_names_hint": "Thêm tên từng người vào hóa đơn",
 	"share_include_qr": "Thêm mã QR thanh toán",
 	"share_include_qr_hint": "Hiện mã VietQR để chuyển tiền",
-	"share_download": "Tải xuống"
+	"share_download": "Tải xuống",
+	"celebration_shared": "Đã chia sẻ!"
 }

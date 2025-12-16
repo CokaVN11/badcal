@@ -129,11 +129,8 @@
 	}
 </script>
 
-<!-- TUTORIAL STEP 4: Use form fields directly (no Provider in Svelte) -->
 <!-- TanStack Form Svelte API uses form instance directly -->
-<div class="space-y-4">
-	<h2 class="form-label">{m.costs_heading()}</h2>
-
+<div class="space-y-4 mt-2">
 	<!-- Court Info -->
 	<div class="grid grid-cols-2 gap-3">
 		<!-- Field-level validation with Zod via helper function -->

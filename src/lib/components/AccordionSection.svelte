@@ -25,9 +25,8 @@
 <div
 	class="accordion-section bg-(--surface) border border-(--border) rounded-xl overflow-hidden transition-all duration-200"
 	id={title}
-	class:is-complete={isComplete}
+	class:is-complete={isComplete && !isExpanded}
 	class:is-expanded={isExpanded}
-	style={isComplete ? 'background: var(--zp-green-50)' : ''}
 >
 	<button
 		class="w-full flex items-center gap-3 p-4 bg-transparent border-0 cursor-pointer text-left transition-colors duration-150 focus:outline-none hover:bg-(--surface-sunken)"
@@ -38,7 +37,7 @@
 		aria-controls={contentId}
 	>
 		<div class="shrink-0">
-			{#if isComplete}
+			{#if isComplete && !isExpanded}
 				<div
 					class="size-6 rounded-full flex justify-center items-center text-white bg-(--zp-green-500)"
 				>
@@ -53,10 +52,10 @@
 
 		<div class="flex-1 min-w-0 text-left">
 			<span class="font-bold text-(--ink)">{title}</span>
-			{#if subtitle && !isComplete}
+			{#if subtitle && !(isComplete && !isExpanded)}
 				<span class="block text-xs text-(--ink-muted) mt-0.5">{subtitle}</span>
 			{/if}
-			{#if isComplete && completeBadge}
+			{#if isComplete && !isExpanded && completeBadge}
 				<span
 					class="inline-flex items-center ml-2 py-1 px-2.5 bg-(--zp-green-100) text-(--zp-green-700) text-xs font-bold font-mono rounded-full"
 				>
@@ -85,5 +84,9 @@
 <style>
 	.accordion-section.is-expanded {
 		box-shadow: var(--shadow-md);
+	}
+
+	.accordion-section.is-complete {
+		border-left: 3px solid var(--zp-green-500);
 	}
 </style>

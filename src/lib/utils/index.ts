@@ -20,3 +20,4 @@ export {
 	getOthersCount
 } from './design';
 export type { ColorScheme } from './design';
+export { triggerHaptic } from './haptics';

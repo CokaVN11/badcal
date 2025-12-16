@@ -124,5 +124,6 @@
 	"share_show_names_hint": "Include individual names in receipt",
 	"share_include_qr": "Include payment QR",
 	"share_include_qr_hint": "Show VietQR code for easy payment",
-	"share_download": "Download"
+	"share_download": "Download",
+	"celebration_shared": "Bill shared!"
 }

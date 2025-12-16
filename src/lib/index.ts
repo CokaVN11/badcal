@@ -8,6 +8,7 @@ export * from './types';
 export * from './utils';
 
 // Components
+export { default as AnimatedNumber } from './components/AnimatedNumber.svelte';
 export { default as BillPreview } from './components/BillPreview.svelte';
 export { default as CostInputs } from './components/CostInputs.svelte';
 export { default as LanguageToggle } from './components/LanguageToggle.svelte';

@@ -75,5 +75,6 @@
 	"share_show_names_hint": "Incluir nombres en el recibo",
 	"share_include_qr": "Incluir QR de pago",
 	"share_include_qr_hint": "Mostrar código VietQR para pago fácil",
-	"share_download": "Descargar"
+	"share_download": "Descargar",
+	"celebration_shared": "¡Cuenta compartida!"
 }

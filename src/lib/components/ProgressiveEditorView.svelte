@@ -4,6 +4,7 @@
 
 	import { m } from '$lib/paraglide/messages.js';
 	import AccordionSection from './AccordionSection.svelte';
+	import AnimatedNumber from './AnimatedNumber.svelte';
 	import CostInputs from './CostInputs.svelte';
 	import GroupEditor from './Groups/GroupEditor.svelte';
 	import PlayerList from './PlayerList.svelte';
@@ -11,7 +12,7 @@
 	import LanguageToggle from './LanguageToggle.svelte';
 	import OnboardingFlow from './OnboardingFlow.svelte';
 	import type { Player, AdditionalCost, PlayerShare } from '$lib/types';
-	import { formatCompactNumber, formatCurrency } from '$lib/utils';
+	import { formatCompactNumber, triggerHaptic } from '$lib/utils';
 	import {
 		IconPingPong,
 		IconShare,
@@ -66,9 +67,9 @@
 		}
 	});
 
-	// Toggle functions
 	function toggleSection(section: 'costs' | 'players' | 'summary') {
 		expandedSection = expandedSection === section ? null : section;
+		triggerHaptic('light');
 	}
 
 	// Derived display values
@@ -110,7 +111,9 @@
 		<div class="summary-bar-content">
 			<div class="summary-total">
 				<div class="summary-total-label">{m.total_cost()}</div>
-				<div class="summary-total-value">{formatCurrency(totalCost)}</div>
+				<div class="summary-total-value">
+					<AnimatedNumber value={totalCost} format="currency" />
+				</div>
 			</div>
 			<div class="summary-stats">
 				<div class="summary-stat">
