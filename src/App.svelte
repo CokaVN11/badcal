@@ -1,9 +1,15 @@
 <script lang="ts">
-	// ABOUTME: Main page - Editor view with form inputs and live calculation
-	// ABOUTME: Switches to Bill Preview mode for sharing
+	// ABOUTME: Root component - Main app with editor/preview views
+	// ABOUTME: Handles locale-based meta tag updates for client-side SPA
 
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
+	import { Toaster } from 'svelte-sonner';
+	import * as m from '$lib/paraglide/messages';
+	import { getLocale, setLocale } from '$lib/paraglide/runtime';
+	import { browser } from '$lib/env';
+
+	import favicon from './lib/assets/favicon.svg';
 	import BillPreview from '$lib/components/BillPreview.svelte';
 	import ProgressiveEditorView from '$lib/components/ProgressiveEditorView.svelte';
 	import type { Player, AdditionalCost } from '$lib/types';
@@ -115,36 +121,62 @@
 	function switchToEditor() {
 		currentView = 'editor';
 	}
+
+	// Reactive locale for meta tags (client-side SPA)
+	let currentLocale = $derived.by(() => getLocale());
+
+	// Update meta when locale changes
+	$effect(() => {
+		if (browser && currentLocale) {
+			document.documentElement.lang = currentLocale;
+			document.title = m.app_title();
+			document.querySelector('meta[name="description"]')?.setAttribute(
+				'content',
+				m.web_description()
+			);
+		}
+	});
 </script>
 
-<div class="app-shell">
-	{#if currentView === 'editor'}
-		<ProgressiveEditorView
-			bind:sessionTitle
-			bind:sessionDate
-			bind:courtHours
-			bind:courtPrice
-			bind:shuttlecockPrice
-			bind:shuttlecockCount
-			bind:additionalCosts
-			bind:players
-			{totalCost}
-			{totalHours}
-			{playerShares}
-			onShare={switchToPreview}
-			onClear={handleClearSession}
-		/>
-	{:else}
-		<BillPreview
-			{sessionTitle}
-			{sessionDate}
-			{courtPrice}
-			{shuttlecockPrice}
-			{shuttlecockCount}
-			{additionalCosts}
-			{playerShares}
-			{totalCost}
-			onBack={switchToEditor}
-		/>
-	{/if}
-</div>
+<svelte:head>
+	<link rel="icon" href={favicon} />
+	<meta name="theme-color" content="#0033C9" />
+	<meta name="description" content={m.web_description()} />
+	<title>{m.app_title()}</title>
+</svelte:head>
+
+<main>
+	<div class="app-shell">
+		{#if currentView === 'editor'}
+			<ProgressiveEditorView
+				bind:sessionTitle
+				bind:sessionDate
+				bind:courtHours
+				bind:courtPrice
+				bind:shuttlecockPrice
+				bind:shuttlecockCount
+				bind:additionalCosts
+				bind:players
+				{totalCost}
+				{totalHours}
+				{playerShares}
+				onShare={switchToPreview}
+				onClear={handleClearSession}
+			/>
+		{:else}
+			<BillPreview
+				{sessionTitle}
+				{sessionDate}
+				{courtPrice}
+				{shuttlecockPrice}
+				{shuttlecockCount}
+				{additionalCosts}
+				{playerShares}
+				{totalCost}
+				onBack={switchToEditor}
+			/>
+		{/if}
+	</div>
+
+	<Toaster richColors closeButton />
+</main>

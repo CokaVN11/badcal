@@ -8,5 +8,35 @@
 		"pathPattern": "./messages/{locale}.json"
 	},
 	"baseLocale": "en",
-	"locales": ["en", "es", "vi"]
+  "locales": [
+    "en",
+    "es",
+    "vi"
+  ],
+  "languageSettings": [
+    {
+      "tag": "en",
+      "languageDisplayName": {
+        "en": "English"
+      }
+    },
+    {
+      "tag": "vi",
+      "languageDisplayName": {
+        "en": "Tiếng Việt"
+      }
+    },
+    {
+      "tag": "es",
+      "languageDisplayName": {
+        "en": "Español"
+      }
+    }
+  ],
+  "strategy": [
+    "cookie",
+    "preferredLanguage",
+    "globalVariable",
+    "baseLocale"
+  ]
 }
