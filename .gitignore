@@ -5,7 +5,14 @@ node_modules
 .vercel
 .netlify
 .wrangler
-/.svelte-kit
+# SvelteKit build output (no longer needed)
+# .svelte-kit/
+
+# Partytown copied files
+/public/~partytown
+
+# Vite build output
+/dist
 /build
 
 # OS
@@ -25,5 +32,3 @@ vite.config.ts.timestamp-*
 # Paraglide
 src/lib/paraglide
 
-# Partytown (generated in postinstall)
-/static/~partytown/
