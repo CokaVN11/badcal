@@ -213,9 +213,9 @@
 							{m.currency()}
 						</span>
 					</div>
-					<p class="text-[11px] text-(--slate-500) mt-1">{m.court_total_hint()}</p>
+					<p class="text-xs text-(--slate-500) mt-1">{m.court_total_hint()}</p>
 					{#if courtPerHour > 0}
-						<p class="text-[11px] text-(--slate-500)">
+						<p class="text-xs text-(--slate-500)">
 							{m.court_per_hour_hint({ amount: formatCurrency(courtPerHour) })}
 						</p>
 					{/if}
@@ -313,7 +313,7 @@
 	<div class="pt-2">
 		<div class="flex items-center justify-between mb-3">
 			<span class="text-xs text-(--slate-500)">{m.additional_costs()}</span>
-			<button type="button" class="btn-secondary text-xs py-1.5 px-3" onclick={addCost}>
+			<button type="button" class="btn-secondary h-11 px-4 text-sm" onclick={addCost}>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -383,7 +383,7 @@
 							onclick={() => removeCost(cost.id)}
 							aria-label={m.remove()}
 						>
-							<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 								<path
 									stroke-linecap="round"
 									stroke-linejoin="round"

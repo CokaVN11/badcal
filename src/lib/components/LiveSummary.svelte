@@ -183,7 +183,7 @@
 										0.03}s;"
 								>
 									<div
-										class="player-avatar w-8 h-8 text-[11px] ring-2 ring-white shadow-sm {getAvatarColor(
+										class="player-avatar w-8 h-8 text-xs ring-2 ring-white shadow-sm {getAvatarColor(
 											globalIndex
 										)}"
 									>

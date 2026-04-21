@@ -189,7 +189,7 @@ body {
 /* === Form Input === */
 .form-input {
 	width: 100%;
-	padding: 10px 12px;
+	padding: 12px 12px;
 	background: var(--surface-sunken);
 	border: 1.5px solid transparent;
 	border-radius: var(--radius-md);

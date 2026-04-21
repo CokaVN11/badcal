@@ -36,8 +36,6 @@
 		else toast(m.group_cannot_remove_named(), { duration: 1400 });
 	}
 
-	let totalPlayers = $derived.by(() => players.length);
-
 	let bucketViewModels = $derived.by(() => createBucketViewModels(players, defaultHours, hourStep));
 	let remainingHourOptions = $derived.by(() => getRemainingHourOptions(bucketViewModels, hourStep));
 
@@ -81,7 +79,7 @@
 						{formatHours(hours)}{m.hours_unit()}
 					</div>
 					{#if isDefault}
-						<div class="text-[11px] text-(--ink-muted)">
+						<div class="text-xs text-(--ink-muted)">
 							{m.default_hours_badge({ hours, unit: m.hours_unit() })}
 						</div>
 					{/if}
@@ -124,12 +122,12 @@
 
 	{#if remainingHourOptions.length > 0}
 		<div class="pt-1">
-			<div class="text-xs text-(--ink-muted) mb-2">{m.custom_hours()}</div>
+			<div class="text-xs text-(--ink-muted) mb-2 font-medium uppercase tracking-wide">{m.custom_hours()}</div>
 			<div class="flex flex-wrap gap-2">
 				{#each remainingHourOptions as hourOption (hourOption)}
 					<button
 						type="button"
-						class="btn-secondary text-xs! py-1.5 px-3"
+						class="btn-secondary h-11 px-4 text-sm"
 						onclick={() => incrementHoursCount(hourOption, 1)}
 						aria-label={m.group_add_hours({ hours: hourOption, unit: m.hours_unit() })}
 					>

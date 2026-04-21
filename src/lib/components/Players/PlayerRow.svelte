@@ -45,7 +45,7 @@
 			class="w-full bg-transparent border-none p-0 text-sm font-medium text-(--slate-800) focus:outline-none placeholder:text-(--slate-400)"
 		/>
 		{#if !isCustom}
-			<div class="text-[11px] text-(--slate-500) mt-0.5">
+			<div class="text-xs text-(--slate-500) mt-0.5">
 				{m.default_hours_badge({ hours: player.hours, unit: m.hours_unit() })}
 			</div>
 		{/if}
@@ -80,7 +80,7 @@
 			</button>
 			<button
 				type="button"
-				class="btn-secondary text-xs py-1.5 px-3"
+				class="btn-secondary h-11 px-4 text-sm"
 				onclick={() => useDefaultHours(player.id)}
 				aria-label={m.use_default_hours()}
 			>
@@ -89,7 +89,7 @@
 		{:else}
 			<button
 				type="button"
-				class="btn-secondary text-xs py-1.5 px-3"
+				class="btn-secondary h-11 px-4 text-sm"
 				onclick={() => enableCustomHours(player.id)}
 				aria-label={m.custom_hours()}
 			>

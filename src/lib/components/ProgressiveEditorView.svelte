@@ -165,8 +165,8 @@
 					<GroupEditor bind:players defaultHours={courtHours} />
 
 					<!-- Optional Details Accordion -->
-					<details class="zp-details">
-						<summary>
+					<details class="zp-details border-dashed border-(--border)">
+						<summary class="opacity-75 hover:opacity-100 transition-opacity">
 							<div class="zp-details-icon"><IconFileText class="w-5 h-5" /></div>
 							<div class="zp-details-content">
 								<div class="zp-details-title">{m.group_details_optional()}</div>

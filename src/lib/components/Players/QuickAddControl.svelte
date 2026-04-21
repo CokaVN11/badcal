@@ -36,12 +36,12 @@
 		inputmode="numeric"
 		placeholder={m.players_count_placeholder()}
 		bind:value={rawCount}
-		class="w-16 form-input form-input-number text-xs py-1.5 px-2"
+		class="w-16 form-input form-input-number text-sm"
 	/>
 
 	<button
 		type="submit"
-		class="btn-secondary py-1.5 px-3 tracking-tighter whitespace-nowrap disabled:opacity-50"
+		class="btn-secondary h-11 px-4 text-sm tracking-tighter whitespace-nowrap disabled:opacity-50"
 		disabled={!canAdd}
 	>
 		{m.add_n_players({ count: clampedCount })}
