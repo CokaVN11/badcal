@@ -32,3 +32,10 @@ vite.config.ts.timestamp-*
 # Paraglide
 src/lib/paraglide
 
+
+# Beads / Dolt files (added by bd init)
+.dolt/
+*.db
+.beads-credential-key
+.omc/
+.serena/

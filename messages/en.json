@@ -7,6 +7,7 @@
 	"add_player_btn": "Add",
 	"bill_preview_heading": "Bill Preview",
 	"session_info": "Session Info",
+  "session_start_time": "Start time",
 	"session_title_placeholder": "e.g., Sunday game at ABC Court",
 	"costs_heading": "Session Costs",
 	"court_hours": "Court hours",

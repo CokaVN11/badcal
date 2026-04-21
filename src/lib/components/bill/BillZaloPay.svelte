@@ -9,9 +9,10 @@
 		getNamedPlayers,
 		getOthersCount
 	} from '$lib/utils';
-	import type { AdditionalCost, PlayerShare } from '$lib/types';
+	import type { AdditionalCost, Player } from '$lib/types';
 	import { IconCheck } from '@tabler/icons-svelte-runes';
 	import PaymentQR from '../PaymentQR.svelte';
+	import { calculatePlayerTimes } from '../Players/playerList.logic';
 
 	const PLAYER_COLORS = [
 		'#0033c9',
@@ -27,11 +28,12 @@
 	type Props = {
 		sessionTitle: string;
 		sessionDate: string;
+		startTime: string | null;
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
 		additionalCosts: AdditionalCost[];
-		playerShares: PlayerShare[];
+		playerShares: Player[];
 		totalCost: number;
 		showNames: boolean;
 		includeQR: boolean;
@@ -40,6 +42,7 @@
 	let {
 		sessionTitle,
 		sessionDate,
+		startTime,
 		courtPrice,
 		shuttlecockPrice,
 		shuttlecockCount,
@@ -132,7 +135,7 @@
 					>
 					<span class="zp-name">{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
 					<span class="zp-hrs">{player.hours}h</span>
-					<span class="zp-share">{formatCurrency(player.share)}</span>
+					<span class="zp-share">{formatCurrency(player.share ?? 0)}</span>
 				</div>
 			{/each}
 		{:else}
@@ -140,8 +143,15 @@
 				{@const groupShare = players[0]?.share ?? 0}
 				{@const namedPlayers = getNamedPlayers(players)}
 				{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
+				{@const minOffset = Math.min(...players.map((p) => p.arrivalOffsetMinutes ?? 0))}
+				{@const timeWindow = calculatePlayerTimes(startTime, minOffset, hours)}
 				<div class="zp-group">
-					<span class="zp-badge">{hours}h</span>
+					<div class="zp-badge-wrap">
+						<span class="zp-badge">{hours}h</span>
+						{#if timeWindow.arrivalTime}
+							<span class="zp-time">{timeWindow.arrivalTime}–{timeWindow.leaveTime}</span>
+						{/if}
+					</div>
 					<div>
 						<span class="zp-gcount">{players.length}×</span>
 						{#if namedPlayers.length > 0}
@@ -356,6 +366,13 @@
 		padding: 6px 0;
 	}
 
+	.zp-badge-wrap {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		flex-shrink: 0;
+	}
+
 	.zp-badge {
 		padding: 3px 6px;
 		background: var(--zp-blue-500);
@@ -363,7 +380,12 @@
 		border-radius: 4px;
 		font-size: 11px;
 		font-weight: 700;
-		flex-shrink: 0;
+	}
+
+	.zp-time {
+		font-size: 0.75rem;
+		color: var(--ink-muted);
+		white-space: nowrap;
 	}
 
 	.zp-gcount {

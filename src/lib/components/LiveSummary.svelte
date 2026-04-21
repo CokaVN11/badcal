@@ -11,7 +11,7 @@
 		getGroupColor,
 		getPlayerDisplayName
 	} from '$lib/utils';
-	import type { PlayerShare } from '$lib/types';
+	import type { Player } from '$lib/types';
 	import AnimatedNumber from './AnimatedNumber.svelte';
 	import {
 		IconCash,
@@ -30,20 +30,20 @@
 		totalCost,
 		totalHours
 	}: {
-		playerShares: PlayerShare[];
+		playerShares: Player[];
 		totalCost: number;
 		totalHours: number;
 	} = $props();
 
 	let copiedId = $state<number | null>(null);
 
-	function getGlobalIndex(player: PlayerShare): number {
+	function getGlobalIndex(player: Player): number {
 		return playerShares.findIndex((p) => p.id === player.id);
 	}
 
-	async function copyAmount(player: PlayerShare) {
+	async function copyAmount(player: Player) {
 		try {
-			await navigator.clipboard.writeText(String(player.share));
+			await navigator.clipboard.writeText(String(player.share ?? 0));
 			copiedId = player.id;
 			setTimeout(() => {
 				copiedId = null;
@@ -65,7 +65,7 @@
 		}
 	}
 
-	function getAvatarItems(players: PlayerShare[]) {
+	function getAvatarItems(players: Player[]) {
 		return players.map((p) => {
 			const idx = getGlobalIndex(p);
 			return { id: p.id, displayName: getPlayerDisplayName(p, idx), globalIndex: idx };
@@ -196,7 +196,7 @@
 										</div>
 										<div class="flex items-center gap-2 mt-0.5">
 											<span class="text-xs {colorScheme.text} font-semibold">
-												{Math.round(player.ratio * 100)}%
+												{Math.round((player.ratio ?? 0) * 100)}%
 											</span>
 										</div>
 									</div>
@@ -211,7 +211,7 @@
 										{:else}
 											<IconCopy size={14} stroke={2} />
 										{/if}
-										<span>{formatCurrency(player.share)}</span>
+										<span>{formatCurrency(player.share ?? 0)}</span>
 									</button>
 								</div>
 							{/each}

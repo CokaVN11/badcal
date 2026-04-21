@@ -17,6 +17,7 @@
 		getGroupColor,
 		getPlayerDisplayName
 	} from '$lib/utils';
+	import { HOUR_OPTIONS } from './Players/playerList.logic';
 	import { IconChevronDown, IconX, IconClock } from '@tabler/icons-svelte-runes';
 	import { SvelteSet } from 'svelte/reactivity';
 	import HoursBadge from './shared/HoursBadge.svelte';
@@ -38,7 +39,6 @@
 		maxQuickAdd: MAX_QUICK_ADD
 	});
 	const playersStore = playerList.players;
-	const customHoursByIdStore = playerList.customHoursById;
 	const actions = playerList.actions;
 
 	const unsubPlayers = playersStore.subscribe((next) => {
@@ -56,7 +56,6 @@
 
 	onDestroy(() => {
 		unsubPlayers();
-		actions.destroy();
 	});
 
 	let groupedPlayers = $derived(groupByKey($playersStore, (p) => p.hours));
@@ -146,43 +145,56 @@
 						</div>
 					</button>
 
+					<div class="flex items-center gap-1.5 px-3 pb-2">
+						{#each HOUR_OPTIONS as chip (chip)}
+							<button
+								type="button"
+								class="h-7 px-2.5 rounded-lg text-xs font-bold transition-colors {chip === hours
+									? `${colorScheme.light} ${colorScheme.text}`
+									: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
+								onclick={() => actions.setGroupHours(chip, groupPlayers.map((p) => p.id))}
+							>
+								{chip}h
+							</button>
+						{/each}
+					</div>
+
 					{#if isExpanded}
 						<div class="group-content border-t border-(--border) bg-(--slate-50)/50">
 							<div class="p-2 space-y-1">
 								{#each groupPlayers as player, playerIndex (player.id)}
 									{@const globalIndex = getGlobalIndex(player)}
-									{@const isCustom = !!$customHoursByIdStore[player.id]}
 									{@const displayName = getPlayerDisplayName(player, globalIndex)}
 									<div
-										class="player-row flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-(--border) hover:shadow-sm transition-all duration-150"
+										class="player-row flex flex-col gap-1.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-(--border) hover:shadow-sm transition-all duration-150"
 										style="animation: slideUp 0.25s ease-out backwards; animation-delay: {playerIndex *
 											0.04}s;"
 									>
-										<div
-											class="player-avatar w-9 h-9 text-xs ring-2 ring-white shadow-sm {getAvatarColor(
-												globalIndex
-											)}"
-										>
-											{getInitial(displayName)}
-										</div>
+										<div class="flex items-center gap-2.5">
+											<div
+												class="player-avatar w-9 h-9 text-xs ring-2 ring-white shadow-sm {getAvatarColor(
+													globalIndex
+												)}"
+											>
+												{getInitial(displayName)}
+											</div>
 
-										<div class="flex-1 min-w-0">
-											<input
-												type="text"
-												value={player.name}
-												oninput={(e) =>
-													actions.updatePlayer(
-														player.id,
-														'name',
-														(e.target as HTMLInputElement).value
-													)}
-												placeholder={displayName}
-												class="w-full bg-transparent border-none p-0 text-sm font-semibold text-(--ink) focus:outline-none placeholder:text-(--slate-400) placeholder:font-normal"
-											/>
-										</div>
+											<div class="flex-1 min-w-0">
+												<input
+													type="text"
+													value={player.name}
+													oninput={(e) =>
+														actions.updatePlayer(
+															player.id,
+															'name',
+															(e.target as HTMLInputElement).value
+														)}
+													placeholder={displayName}
+													class="w-full bg-transparent border-none p-0 text-sm font-semibold text-(--ink) focus:outline-none placeholder:text-(--slate-400) placeholder:font-normal"
+												/>
+											</div>
 
-										<div class="flex items-center gap-0.5">
-											{#if isCustom}
+											<div class="flex items-center gap-0.5">
 												<button
 													type="button"
 													class="stepper-btn w-7 h-7 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
@@ -204,25 +216,29 @@
 												>
 													<span class="text-sm font-bold">+</span>
 												</button>
-											{:else}
 												<button
 													type="button"
-													class="custom-hours-btn h-7 px-2 rounded-lg {colorScheme.light} {colorScheme.text} text-xs font-semibold hover:opacity-80 transition-opacity flex items-center gap-1"
-													onclick={() => actions.enableCustomHours(player.id)}
+													class="delete-btn w-7 h-7 rounded-lg text-(--slate-400) hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
+													onclick={() => actions.removePlayer(player.id)}
+													aria-label={m.remove()}
 												>
-													<IconClock size={12} />
-													{m.custom_hours()}
+													<IconX size={14} stroke={2.5} />
 												</button>
-											{/if}
+											</div>
+										</div>
 
-											<button
-												type="button"
-												class="delete-btn w-7 h-7 rounded-lg text-(--slate-400) hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
-												onclick={() => actions.removePlayer(player.id)}
-												aria-label={m.remove()}
-											>
-												<IconX size={14} stroke={2.5} />
-											</button>
+										<div class="flex items-center gap-1 pl-11">
+											{#each [0, 15, 30, 60] as offset (offset)}
+												<button
+													type="button"
+													class="h-6 px-2 rounded-md text-xs font-medium transition-colors {player.arrivalOffsetMinutes === offset
+														? `${colorScheme.light} ${colorScheme.text}`
+														: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
+													onclick={() => actions.setArrivalOffset(player.id, offset)}
+												>
+													{offset === 0 ? 'On time' : `+${offset}m`}
+												</button>
+											{/each}
 										</div>
 									</div>
 								{/each}

@@ -1,10 +1,8 @@
-// ABOUTME: Shared type definitions for the badminton cost splitter app
-// ABOUTME: Central location for Player, Cost, and Session types
-
 export type Player = {
 	id: number;
 	name: string;
 	hours: number;
+  arrivalOffsetMinutes: number;
 	ratio?: number;
 	share?: number;
 };
@@ -18,13 +16,9 @@ export type AdditionalCost = {
 export type Session = {
 	title: string;
 	date: string;
+  startTime: string | null; // "HH:mm" format or null for all-day
 	courtHours: number;
 	courtPrice: number;
 	shuttlecockPrice: number;
 	shuttlecockCount: number;
-};
-
-export type PlayerShare = Player & {
-	ratio: number;
-	share: number;
 };

@@ -1,4 +1,5 @@
 import type { Player } from '$lib/types';
+import dayjs from 'dayjs';
 
 export const HOUR_STEP = 0.5;
 export const MAX_QUICK_ADD = 50;
@@ -122,7 +123,8 @@ function createPlayers(startId: number, count: number, hours: number): Player[] 
 	return Array.from({ length: count }, (_, index) => ({
 		id: startId + index,
 		name: '',
-		hours
+		hours,
+		arrivalOffsetMinutes: 0
 	}));
 }
 
@@ -222,4 +224,17 @@ function removePlayersFromBucket(
 		nextId: ctx.nextId,
 		toast: triedToRemoveNamedPlayers ? 'CANNOT_REMOVE_NAMED' : undefined
 	};
+}
+
+export function calculatePlayerTimes(startTime: string | null, arrvivalOffsetMinutes: number, playingHours: number): { arrivalTime: string | null; leaveTime: string | null } {
+	if (!startTime) return { arrivalTime: null, leaveTime: null };
+
+	const [hoursPart, minutesPart] = startTime.split(':');
+	const hours = Number(hoursPart);
+	const minutes = Number(minutesPart);
+	const baseTime = dayjs().hour(hours).minute(minutes).second(0).millisecond(0);
+	const arrivalTime = baseTime.add(arrvivalOffsetMinutes, 'minute');
+	const leaveTime = arrivalTime.add(playingHours, 'hour');
+
+	return { arrivalTime: arrivalTime.format('HH:mm'), leaveTime: leaveTime.format('HH:mm') };
 }

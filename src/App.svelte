@@ -6,7 +6,7 @@
 	import { SvelteMap } from 'svelte/reactivity';
 	import { Toaster } from 'svelte-sonner';
 	import * as m from '$lib/paraglide/messages';
-	import { getLocale, setLocale } from '$lib/paraglide/runtime';
+	import { getLocale } from '$lib/paraglide/runtime';
 	import { browser } from '$lib/env';
 
 	import favicon from './lib/assets/favicon.svg';
@@ -21,6 +21,7 @@
 
 	let sessionTitle = $state('');
 	let sessionDate = $state(new Date().toISOString().split('T')[0]);
+	let startTime = $state<string | null>(null);
 	let courtHours = $state(2);
 	let courtPrice = $state(0);
 	let shuttlecockPrice = $state(0);
@@ -33,6 +34,7 @@
 		if (saved) {
 			sessionTitle = saved.sessionTitle;
 			sessionDate = saved.sessionDate;
+      startTime = saved.startTime;
 			courtHours = saved.courtHours;
 			courtPrice = saved.courtPrice;
 			shuttlecockPrice = saved.shuttlecockPrice;
@@ -48,6 +50,7 @@
 		saveSession({
 			sessionTitle,
 			sessionDate,
+      startTime,
 			courtHours,
 			courtPrice,
 			shuttlecockPrice,
@@ -151,6 +154,7 @@
 			<ProgressiveEditorView
 				bind:sessionTitle
 				bind:sessionDate
+				bind:startTime
 				bind:courtHours
 				bind:courtPrice
 				bind:shuttlecockPrice
@@ -167,6 +171,7 @@
 			<BillPreview
 				{sessionTitle}
 				{sessionDate}
+				{startTime}
 				{courtPrice}
 				{shuttlecockPrice}
 				{shuttlecockCount}

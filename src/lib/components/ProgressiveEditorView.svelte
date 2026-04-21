@@ -1,7 +1,4 @@
 <script lang="ts">
-	// ABOUTME: Progressive disclosure editor with accordion sections
-	// ABOUTME: Auto-advances when each section is complete
-
 	import { m } from '$lib/paraglide/messages.js';
 	import AccordionSection from './AccordionSection.svelte';
 	import AnimatedNumber from './AnimatedNumber.svelte';
@@ -11,7 +8,7 @@
 	import LiveSummary from './LiveSummary.svelte';
 	import LanguageToggle from './LanguageToggle.svelte';
 	import OnboardingFlow from './OnboardingFlow.svelte';
-	import type { Player, AdditionalCost, PlayerShare } from '$lib/types';
+	import type { Player, AdditionalCost } from '$lib/types';
 	import { formatCompactNumber, triggerHaptic } from '$lib/utils';
 	import {
 		IconPingPong,
@@ -24,6 +21,7 @@
 	let {
 		sessionTitle = $bindable(),
 		sessionDate = $bindable(),
+    startTime = $bindable(),
 		courtHours = $bindable(),
 		courtPrice = $bindable(),
 		shuttlecockPrice = $bindable(),
@@ -38,6 +36,7 @@
 	}: {
 		sessionTitle: string;
 		sessionDate: string;
+    startTime: string | null;
 		courtHours: number;
 		courtPrice: number;
 		shuttlecockPrice: number;
@@ -46,7 +45,7 @@
 		players: Player[];
 		totalCost: number;
 		totalHours: number;
-		playerShares: PlayerShare[];
+		playerShares: Player[];
 		onShare: () => void;
 		onClear: () => void;
 	} = $props();
@@ -95,6 +94,12 @@
 			class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
 			aria-label={m.session_info()}
 		/>
+    <input
+      type="time"
+      bind:value={startTime}
+      class="w-auto bg-transparent border-none p-0 ml-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+      aria-label={m.session_start_time()}
+    />
 		<button
 			type="button"
 			class="btn-icon btn-icon-danger"
@@ -191,7 +196,7 @@
 		</div>
 	</main>
 
-	<!-- Bottom CTA Bar (replaces FAB) -->
+	<!-- Bottom CTA Bar -->
 	<div class="fixed bottom-0 inset-x-0 p-4 bg-linear-to-t from-white via-white to-transparent z-20">
 		<div class="max-w-lg mx-auto">
 			{#if !canShare}

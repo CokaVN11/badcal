@@ -4,12 +4,13 @@
 import type { Player, AdditionalCost } from '$lib/types';
 
 const STORAGE_KEY = 'badcal_session';
-const STORAGE_VERSION = 1;
+const STORAGE_VERSION = 2;
 
 export interface PersistedSession {
 	version: number;
 	sessionTitle: string;
 	sessionDate: string;
+  startTime: string | null; // "HH:mm" format or null for all-day
 	courtHours: number;
 	courtPrice: number;
 	shuttlecockPrice: number;
@@ -47,6 +48,7 @@ export function loadSession(): Omit<PersistedSession, 'version' | 'savedAt'> | n
 		return {
 			sessionTitle: session.sessionTitle ?? '',
 			sessionDate: session.sessionDate ?? new Date().toISOString().split('T')[0],
+      startTime: session.startTime ?? null,
 			courtHours: session.courtHours ?? 2,
 			courtPrice: session.courtPrice ?? 0,
 			shuttlecockPrice: session.shuttlecockPrice ?? 0,

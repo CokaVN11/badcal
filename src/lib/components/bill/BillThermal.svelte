@@ -9,17 +9,19 @@
 		getNamedPlayers,
 		getOthersCount
 	} from '$lib/utils';
-	import type { AdditionalCost, PlayerShare } from '$lib/types';
+	import type { AdditionalCost, Player } from '$lib/types';
 	import PaymentQR from '../PaymentQR.svelte';
+	import { calculatePlayerTimes } from '../Players/playerList.logic';
 
 	type Props = {
 		sessionTitle: string;
 		sessionDate: string;
+		startTime: string | null;
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
 		additionalCosts: AdditionalCost[];
-		playerShares: PlayerShare[];
+		playerShares: Player[];
 		totalCost: number;
 		showNames: boolean;
 		includeQR: boolean;
@@ -28,6 +30,7 @@
 	let {
 		sessionTitle,
 		sessionDate,
+		startTime,
 		courtPrice,
 		shuttlecockPrice,
 		shuttlecockCount,
@@ -132,7 +135,7 @@
 					<div class="receipt-item">
 						<span>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
 						<span class="dots"></span>
-						<span>{formatCurrency(player.share)}</span>
+						<span>{formatCurrency(player.share ?? 0)}</span>
 					</div>
 				{/each}
 			{:else}
@@ -140,10 +143,15 @@
 					{@const groupShare = players[0]?.share ?? 0}
 					{@const namedPlayers = getNamedPlayers(players)}
 					{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
+					{@const minOffset = Math.min(...players.map((p) => p.arrivalOffsetMinutes ?? 0))}
+					{@const timeWindow = calculatePlayerTimes(startTime, minOffset, hours)}
 
 					<div class="player-group">
 						<div class="group-header">
 							<span class="group-hours">[{hours}h]</span>
+							{#if timeWindow.arrivalTime}
+								<span class="group-time">{timeWindow.arrivalTime}–{timeWindow.leaveTime}</span>
+							{/if}
 							<span class="group-count">{players.length}x</span>
 							<span class="dots"></span>
 							<span class="group-amount"
@@ -474,6 +482,12 @@
 	.group-hours {
 		font-weight: 700;
 		color: #4a4640;
+		margin-right: 6px;
+	}
+
+	.group-time {
+		font-size: 10px;
+		color: #8b8680;
 		margin-right: 6px;
 	}
 

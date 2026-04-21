@@ -18,75 +18,14 @@ function toStep(value: number, step: number) {
 	return Math.max(0, snapped);
 }
 
-function computeNextCustomMap(
-	players: Player[],
-	current: Record<number, boolean>,
-	defaultHours: number
-) {
-	const next: Record<number, boolean> = {};
-	for (const p of players) {
-		const existing = current[p.id];
-		next[p.id] = existing ?? p.hours !== defaultHours;
-	}
-
-	let changed = false;
-	for (const p of players) {
-		if (current[p.id] !== next[p.id]) {
-			changed = true;
-			break;
-		}
-	}
-	if (!changed) {
-		for (const id of Object.keys(current)) {
-			if (!(Number(id) in next)) {
-				changed = true;
-				break;
-			}
-		}
-	}
-
-	return { next, changed };
-}
-
-function computeDefaultHoursPlayers(
-	players: Player[],
-	customHoursById: Record<number, boolean>,
-	defaultHours: number
-) {
-	let nextPlayers: Player[] | null = null;
-	for (let i = 0; i < players.length; i++) {
-		const player = players[i];
-		if (customHoursById[player.id]) continue;
-		if (player.hours === defaultHours) continue;
-		if (!nextPlayers) nextPlayers = players.slice();
-		nextPlayers[i] = { ...player, hours: defaultHours };
-	}
-	return nextPlayers;
-}
-
 export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 	const hourStep = args.hourStep ?? 0.5;
 	const maxQuickAdd = args.maxQuickAdd ?? 50;
 
 	const players = writable<Player[]>(args.players ?? []);
 	const courtHours = writable<number>(args.courtHours ?? 2);
-	const customHoursById = writable<Record<number, boolean>>({});
 
 	const defaultHours = derived(courtHours, (h) => (h > 0 ? h : 1));
-
-	const unsubCustomMap = derived([players, defaultHours], ([$players, $defaultHours]) => {
-		const current = get(customHoursById);
-		const { next, changed } = computeNextCustomMap($players, current, $defaultHours);
-		if (changed) customHoursById.set(next);
-	}).subscribe(() => {});
-
-	const unsubDefaultSync = derived(
-		[players, customHoursById, defaultHours],
-		([$players, $customMap, $defaultHours]) => {
-			const next = computeDefaultHoursPlayers($players, $customMap, $defaultHours);
-			if (next) players.set(next);
-		}
-	).subscribe(() => {});
 
 	function setPlayers(nextPlayers: Player[]) {
 		const current = get(players);
@@ -111,26 +50,30 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 			...Array.from({ length: safeCount }, (_, i) => ({
 				id: startId + i,
 				name: '',
-				hours
+				hours,
+        arrivalOffsetMinutes: 0
 			}))
 		]);
 	}
 
 	function removePlayer(id: number) {
 		players.update((current) => current.filter((p) => p.id !== id));
-		customHoursById.update((m) => {
-			if (!(id in m)) return m;
-			const next = { ...m };
-			delete next[id];
-			return next;
-		});
 	}
 
 	function updatePlayer(id: number, field: keyof Player, value: string | number) {
 		players.update((current) => current.map((p) => (p.id === id ? { ...p, [field]: value } : p)));
-		if (field === 'hours') {
-			customHoursById.update((m) => ({ ...m, [id]: true }));
-		}
+	}
+
+	function setArrivalOffset(id: number, offsetMinutes: number) {
+		players.update((current) =>
+			current.map((p) => (p.id === id ? { ...p, arrivalOffsetMinutes: offsetMinutes } : p))
+		);
+	}
+
+	function setGroupHours(hours: number, playerIds: number[]) {
+		players.update((current) =>
+			current.map((p) => (playerIds.includes(p.id) ? { ...p, hours } : p))
+		);
 	}
 
 	function addHours(id: number, delta: number) {
@@ -141,17 +84,7 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 				return { ...p, hours: next };
 			})
 		);
-		customHoursById.update((m) => ({ ...m, [id]: true }));
-	}
 
-	function enableCustomHours(id: number) {
-		customHoursById.update((m) => ({ ...m, [id]: true }));
-	}
-
-	function useDefaultHours(id: number) {
-		const hours = get(defaultHours);
-		customHoursById.update((m) => ({ ...m, [id]: false }));
-		players.update((current) => current.map((p) => (p.id === id ? { ...p, hours } : p)));
 	}
 
 	function importPlayersFromText(text: string) {
@@ -162,39 +95,29 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 			const trimmed = line.trim();
 			const match = trimmed.match(/^(.+?)[\s,]+(\d+(?:\.\d+)?)$/);
 			if (match) {
-				return { id: startId + i, name: match[1].trim(), hours: parseFloat(match[2]) };
+				return { id: startId + i, name: match[1].trim(), hours: parseFloat(match[2]), arrivalOffsetMinutes: 0 };
 			}
-			return { id: startId + i, name: trimmed, hours };
+			return { id: startId + i, name: trimmed, hours, arrivalOffsetMinutes: 0 };
 		});
 
 		players.update((current) => [...current, ...newPlayers]);
-		customHoursById.update((m) => ({
-			...m,
-			...Object.fromEntries(newPlayers.map((p) => [p.id, p.hours !== hours] as const))
-		}));
 	}
 
-	function destroy() {
-		unsubCustomMap();
-		unsubDefaultSync();
-	}
 
 	return {
 		players,
 		courtHours,
 		defaultHours,
-		customHoursById,
 		actions: {
 			setPlayers,
 			setCourtHours,
 			addPlayers,
 			removePlayer,
 			updatePlayer,
+			setArrivalOffset,
+			setGroupHours,
 			addHours,
-			enableCustomHours,
-			useDefaultHours,
 			importPlayersFromText,
-			destroy
 		}
 	};
 }

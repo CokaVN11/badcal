@@ -4,7 +4,7 @@
 
 	import { m } from '$lib/paraglide/messages.js';
 	import { formatCurrency, formatDate, groupByKey, triggerHaptic } from '$lib/utils';
-	import type { AdditionalCost, PlayerShare } from '$lib/types';
+	import type { AdditionalCost, Player } from '$lib/types';
 	import { tick, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$lib/env';
@@ -34,16 +34,17 @@
 	type Props = {
 		sessionTitle: string;
 		sessionDate: string;
+		startTime: string | null;
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
 		additionalCosts: AdditionalCost[];
-		playerShares: PlayerShare[];
+		playerShares: Player[];
 		totalCost: number;
 		onBack: () => void;
 	};
 
-	let { sessionTitle, sessionDate, courtPrice, shuttlecockPrice, shuttlecockCount, additionalCosts, playerShares, totalCost, onBack }: Props = $props();
+	let { sessionTitle, sessionDate, startTime, courtPrice, shuttlecockPrice, shuttlecockCount, additionalCosts, playerShares, totalCost, onBack }: Props = $props();
 
 	let billZaloPayComponent: any = $state(null);
 	let billThermalComponent: any = $state(null);
@@ -102,7 +103,7 @@
 		additionalCosts.filter((c) => c.amount > 0).forEach((c) => lines.push(`• ${c.label}: ${formatCurrency(c.amount)}`));
 		lines.push('', `${m.player_shares()}:`);
 		if (showNames) {
-			playerShares.forEach((p, i) => lines.push(`• ${p.name?.trim() || m.player_numbered({ n: i + 1 })}: ${formatCurrency(p.share)}`));
+			playerShares.forEach((p, i) => lines.push(`• ${p.name?.trim() || m.player_numbered({ n: i + 1 })}: ${formatCurrency(p.share ?? 0)}`));
 		} else {
 			for (const [hours, players] of groupedByHours) {
 				lines.push(`• [${hours}${m.hours_unit()}] ${players.length}x: ${formatCurrency(players[0]?.share ?? 0)} ${m.each_suffix()}`);
@@ -207,13 +208,13 @@
 			{#if currentTheme === 'zalopay'}
 				<BillZaloPay
 					bind:this={billZaloPayComponent}
-					{sessionTitle} {sessionDate} {courtPrice} {shuttlecockPrice} {shuttlecockCount}
+					{sessionTitle} {sessionDate} {startTime} {courtPrice} {shuttlecockPrice} {shuttlecockCount}
 					{additionalCosts} {playerShares} {totalCost} {showNames} {includeQR}
 				/>
 			{:else}
 				<BillThermal
 					bind:this={billThermalComponent}
-					{sessionTitle} {sessionDate} {courtPrice} {shuttlecockPrice} {shuttlecockCount}
+					{sessionTitle} {sessionDate} {startTime} {courtPrice} {shuttlecockPrice} {shuttlecockCount}
 					{additionalCosts} {playerShares} {totalCost} {showNames} {includeQR}
 				/>
 			{/if}
