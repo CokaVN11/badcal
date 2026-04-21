@@ -126,6 +126,23 @@
 	--space-6: 24px;
 	--space-8: 32px;
 	--space-10: 40px;
+
+	/* === Apple HIG Touch Targets === */
+	--tap-min: 44px;       /* WCAG/HIG minimum */
+	--tap-comfort: 56px;   /* Comfortable thumb target */
+	--tap-chunky: 64px;    /* Critical CTAs */
+}
+
+/* HIG-compliant invisible hit area for small visual targets */
+.hig-tap {
+	position: relative;
+}
+
+.hig-tap::after {
+	content: '';
+	position: absolute;
+	inset: -8px; /* Extends 44px hit area around smaller visuals */
+	background: transparent;
 }
 
 /* === Base Typography === */

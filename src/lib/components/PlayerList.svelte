@@ -18,7 +18,7 @@
 		getPlayerDisplayName
 	} from '$lib/utils';
 	import { HOUR_OPTIONS } from './Players/playerList.logic';
-	import { IconChevronDown, IconX, IconClock } from '@tabler/icons-svelte-runes';
+	import { IconChevronDown, IconX } from '@tabler/icons-svelte-runes';
 	import { SvelteSet } from 'svelte/reactivity';
 	import HoursBadge from './shared/HoursBadge.svelte';
 	import AvatarStack from './shared/AvatarStack.svelte';
@@ -149,7 +149,7 @@
 						{#each HOUR_OPTIONS as chip (chip)}
 							<button
 								type="button"
-								class="h-7 px-2.5 rounded-lg text-xs font-bold transition-colors {chip === hours
+								class="h-11 px-4 rounded-lg text-sm font-bold transition-colors {chip === hours
 									? `${colorScheme.light} ${colorScheme.text}`
 									: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
 								onclick={() => actions.setGroupHours(chip, groupPlayers.map((p) => p.id))}
@@ -197,7 +197,7 @@
 											<div class="flex items-center gap-0.5">
 												<button
 													type="button"
-													class="stepper-btn w-7 h-7 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
+													class="stepper-btn w-11 h-11 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
 													onclick={() => actions.addHours(player.id, -HOUR_STEP)}
 													aria-label={m.decrease_hours()}
 												>
@@ -210,7 +210,7 @@
 												</div>
 												<button
 													type="button"
-													class="stepper-btn w-7 h-7 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
+													class="stepper-btn w-11 h-11 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
 													onclick={() => actions.addHours(player.id, HOUR_STEP)}
 													aria-label={m.increase_hours()}
 												>
@@ -218,11 +218,11 @@
 												</button>
 												<button
 													type="button"
-													class="delete-btn w-7 h-7 rounded-lg text-(--slate-400) hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
+													class="delete-btn w-11 h-11 rounded-lg text-(--slate-400) hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
 													onclick={() => actions.removePlayer(player.id)}
 													aria-label={m.remove()}
 												>
-													<IconX size={14} stroke={2.5} />
+													<IconX size={18} stroke={2.5} />
 												</button>
 											</div>
 										</div>
@@ -231,7 +231,7 @@
 											{#each [0, 15, 30, 60] as offset (offset)}
 												<button
 													type="button"
-													class="h-6 px-2 rounded-md text-xs font-medium transition-colors {player.arrivalOffsetMinutes === offset
+													class="h-11 px-3 rounded-md text-sm font-medium transition-colors {player.arrivalOffsetMinutes === offset
 														? `${colorScheme.light} ${colorScheme.text}`
 														: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
 													onclick={() => actions.setArrivalOffset(player.id, offset)}
