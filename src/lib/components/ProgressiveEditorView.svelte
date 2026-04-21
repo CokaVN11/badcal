@@ -3,25 +3,18 @@
 	import AccordionSection from './AccordionSection.svelte';
 	import AnimatedNumber from './AnimatedNumber.svelte';
 	import CostInputs from './CostInputs.svelte';
-	import GroupEditor from './Groups/GroupEditor.svelte';
 	import PlayerList from './PlayerList.svelte';
 	import LiveSummary from './LiveSummary.svelte';
 	import LanguageToggle from './LanguageToggle.svelte';
 	import OnboardingFlow from './OnboardingFlow.svelte';
 	import type { Player, AdditionalCost } from '$lib/types';
 	import { formatCompactNumber, triggerHaptic } from '$lib/utils';
-	import {
-		IconPingPong,
-		IconShare,
-		IconTrash,
-		IconChevronDown,
-		IconFileText
-	} from '@tabler/icons-svelte-runes';
+	import { IconPingPong, IconShare, IconTrash } from '@tabler/icons-svelte-runes';
 
 	let {
 		sessionTitle = $bindable(),
 		sessionDate = $bindable(),
-    startTime = $bindable(),
+		startTime = $bindable(),
 		courtHours = $bindable(),
 		courtPrice = $bindable(),
 		shuttlecockPrice = $bindable(),
@@ -36,7 +29,7 @@
 	}: {
 		sessionTitle: string;
 		sessionDate: string;
-    startTime: string | null;
+		startTime: string | null;
 		courtHours: number;
 		courtPrice: number;
 		shuttlecockPrice: number;
@@ -50,18 +43,13 @@
 		onClear: () => void;
 	} = $props();
 
-	// Section expansion state
 	let expandedSection = $state<'costs' | 'players' | 'summary' | null>('costs');
-
-	// Completion checks
 	let isCostsComplete = $derived(totalCost > 0);
 	let isPlayersComplete = $derived(players.length > 0 && totalHours > 0);
 	let canShare = $derived(isCostsComplete && isPlayersComplete);
 
-	// Auto-advance logic
 	$effect(() => {
 		if (isCostsComplete && !isPlayersComplete && expandedSection === 'costs') {
-			// Auto-expand players when costs done
 			expandedSection = 'players';
 		}
 	});
@@ -71,48 +59,56 @@
 		triggerHaptic('light');
 	}
 
-	// Derived display values
 	let costsBadge = $derived(isCostsComplete ? formatCompactNumber(totalCost) : undefined);
 	let playersBadge = $derived(isPlayersComplete ? `${players.length} × ${totalHours}h` : undefined);
 </script>
 
-<div class="flex flex-col min-h-dvh bg-(--slate-50)">
-	<!-- Compact Header -->
-	<header class="compact-header sticky top-0 z-30 bg-white/95 backdrop-blur-md">
-		<div class="compact-header-logo text-white"><IconPingPong class="w-5 h-5" /></div>
-		<div class="flex-1 min-w-0">
+<div class="flex min-h-dvh flex-col bg-(--surface-muted)">
+	<header class="compact-header sticky top-0 z-30">
+		<div class="compact-header-logo text-white"><IconPingPong class="h-5 w-5" /></div>
+		<div class="min-w-0 flex-1">
 			<input
 				type="text"
 				bind:value={sessionTitle}
 				placeholder={m.session_title_placeholder()}
-				class="w-full bg-transparent border-none p-0 text-base font-bold text-(--ink) placeholder:text-(--ink-muted) placeholder:font-normal focus:outline-none focus:ring-0"
+				class="w-full bg-transparent border-none p-0 text-base font-semibold tracking-tight text-(--ink) placeholder:font-normal placeholder:text-(--ink-muted) focus:outline-none focus:ring-0"
+			/>
+			<div class="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:hidden">
+				<input
+					type="date"
+					bind:value={sessionDate}
+					class="w-full rounded-full bg-(--surface-sunken) px-3 py-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-2 focus:ring-(--primary)/20"
+					aria-label={m.session_info()}
+				/>
+				<input
+					type="time"
+					bind:value={startTime}
+					class="w-full rounded-full bg-(--surface-sunken) px-3 py-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-2 focus:ring-(--primary)/20"
+					aria-label={m.session_start_time()}
+				/>
+			</div>
+		</div>
+		<div class="hidden items-center gap-2 rounded-full bg-(--surface-sunken) px-3 py-2 sm:flex">
+			<input
+				type="date"
+				bind:value={sessionDate}
+				class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+				aria-label={m.session_info()}
+			/>
+			<input
+				type="time"
+				bind:value={startTime}
+				class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+				aria-label={m.session_start_time()}
 			/>
 		</div>
-		<input
-			type="date"
-			bind:value={sessionDate}
-			class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
-			aria-label={m.session_info()}
-		/>
-    <input
-      type="time"
-      bind:value={startTime}
-      class="w-auto bg-transparent border-none p-0 ml-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
-      aria-label={m.session_start_time()}
-    />
-		<button
-			type="button"
-			class="btn-icon btn-icon-danger"
-			onclick={onClear}
-			aria-label="Clear session"
-		>
-			<IconTrash class="w-5 h-5" />
+		<button type="button" class="btn-icon btn-icon-danger" onclick={onClear} aria-label="Clear session">
+			<IconTrash class="h-5 w-5" />
 		</button>
 		<LanguageToggle />
 	</header>
 
-	<!-- Sticky Summary Bar -->
-	<div class="summary-bar mx-4 mt-3">
+	<div class="mx-4 mt-4 summary-bar">
 		<div class="summary-bar-content">
 			<div class="summary-total">
 				<div class="summary-total-label">{m.total_cost()}</div>
@@ -121,20 +117,14 @@
 				</div>
 			</div>
 			<div class="summary-stats">
-				<div class="summary-stat">
-					<span>{players.length} {m.players_count()}</span>
-				</div>
-				<div class="summary-stat">
-					<span>{totalHours}{m.hours_unit()}</span>
-				</div>
+				<div class="summary-stat"><span>{players.length} {m.players_count()}</span></div>
+				<div class="summary-stat"><span>{totalHours}{m.hours_unit()}</span></div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Main Content: Accordion Sections -->
-	<main class="flex-1 overflow-y-auto pb-28 p-4">
-		<div class="max-w-lg mx-auto space-y-3">
-			<!-- Step 1: Costs -->
+	<main class="flex-1 overflow-y-auto p-4 pb-28">
+		<div class="mx-auto max-w-lg space-y-4">
 			<AccordionSection
 				title={m.costs_heading()}
 				subtitle={m.costs_subtitle()}
@@ -152,7 +142,6 @@
 				/>
 			</AccordionSection>
 
-			<!-- Step 2: Players -->
 			<AccordionSection
 				title={m.players_heading()}
 				subtitle={m.players_subtitle()}
@@ -161,27 +150,9 @@
 				completeBadge={playersBadge}
 				onToggle={() => toggleSection('players')}
 			>
-				<div class="space-y-4">
-					<GroupEditor bind:players defaultHours={courtHours} />
-
-					<!-- Optional Details Accordion -->
-					<details class="zp-details border-dashed border-(--border)">
-						<summary class="opacity-75 hover:opacity-100 transition-opacity">
-							<div class="zp-details-icon"><IconFileText class="w-5 h-5" /></div>
-							<div class="zp-details-content">
-								<div class="zp-details-title">{m.group_details_optional()}</div>
-								<div class="zp-details-hint">{m.group_details_hint()}</div>
-							</div>
-							<IconChevronDown class="zp-details-chevron" />
-						</summary>
-						<div class="zp-details-body">
-							<PlayerList bind:players {courtHours} />
-						</div>
-					</details>
-				</div>
+				<PlayerList bind:players {courtHours} />
 			</AccordionSection>
 
-			<!-- Step 3: Summary (auto-visible when ready) -->
 			{#if canShare}
 				<AccordionSection
 					title={m.summary_heading()}
@@ -196,11 +167,10 @@
 		</div>
 	</main>
 
-	<!-- Bottom CTA Bar -->
-	<div class="fixed bottom-0 inset-x-0 p-4 bg-linear-to-t from-white via-white to-transparent z-20">
-		<div class="max-w-lg mx-auto">
+	<div class="fixed inset-x-0 bottom-0 z-20 bg-linear-to-t from-white via-white/96 to-transparent p-4 backdrop-blur-sm">
+		<div class="mx-auto max-w-lg">
 			{#if !canShare}
-				<div class="text-center text-sm text-(--ink-muted) mb-2">
+				<div class="mb-2 text-center text-sm text-(--ink-muted)">
 					{#if !isCostsComplete}
 						{m.share_hint_add_costs()}
 					{:else if !isPlayersComplete}
@@ -208,13 +178,12 @@
 					{/if}
 				</div>
 			{/if}
-			<button class="btn-primary w-full h-14 text-base" onclick={onShare} disabled={!canShare}>
-				<IconShare class="w-5 h-5" />
+			<button class="btn-primary h-14 w-full text-base" onclick={onShare} disabled={!canShare}>
+				<IconShare class="h-5 w-5" />
 				{m.share_btn()}
 			</button>
 		</div>
 	</div>
 
-	<!-- First-time user onboarding -->
 	<OnboardingFlow />
 </div>

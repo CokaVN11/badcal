@@ -143,7 +143,7 @@
 
 <svelte:head>
 	<link rel="icon" href={favicon} />
-	<meta name="theme-color" content="#0033C9" />
+	<meta name="theme-color" content="#0052ff" />
 	<meta name="description" content={m.web_description()} />
 	<title>{m.app_title()}</title>
 </svelte:head>

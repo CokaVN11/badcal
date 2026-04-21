@@ -46,8 +46,12 @@
 
 	let { sessionTitle, sessionDate, startTime, courtPrice, shuttlecockPrice, shuttlecockCount, additionalCosts, playerShares, totalCost, onBack }: Props = $props();
 
-	let billZaloPayComponent: any = $state(null);
-	let billThermalComponent: any = $state(null);
+	type BillComponentHandle = {
+		getElement: () => HTMLDivElement | null;
+	};
+
+	let billZaloPayComponent = $state<BillComponentHandle | null>(null);
+	let billThermalComponent = $state<BillComponentHandle | null>(null);
 	let isSharingImage = $state(false);
 	let isCopyingText = $state(false);
 	let isShareSheetOpen = $state(false);
@@ -60,11 +64,11 @@
 	let currentTheme: BillTheme = $state('zalopay');
 
 	let themeClasses = $derived(currentTheme === 'zalopay' ? {
-		bg: 'bg-(--slate-100)',
-		header: 'bg-white/95 border-(--border)',
+		bg: 'bg-(--surface-muted)',
+		header: 'bg-white/90 border-(--border)',
 		text: 'text-(--ink)',
-		toggleBtn: 'bg-(--zp-blue-50) text-(--zp-blue-600) hover:bg-(--zp-blue-100)',
-		footer: 'bg-linear-to-t from-(--slate-100) via-(--slate-100) to-transparent'
+		toggleBtn: 'bg-(--primary-soft) text-(--primary) hover:bg-(--primary-soft-strong)',
+		footer: 'bg-linear-to-t from-white via-white/96 to-transparent'
 	} : {
 		bg: 'bg-stone-200',
 		header: 'bg-white/95 border-stone-300',

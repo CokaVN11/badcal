@@ -5,12 +5,12 @@
 
 <div class="empty-state">
 	<div class="empty-state-icon">
-		<IconUsersGroup class="w-8 h-8 text-(--zp-blue-500)" />
+		<IconUsersGroup class="w-8 h-8 text-(--primary)" />
 	</div>
 	<p class="empty-state-title">{m.no_players_yet()}</p>
 	<p class="empty-state-hint">{m.add_players_hint()}</p>
 	<div
-		class="flex items-center justify-center gap-1 mt-3 text-xs text-(--zp-blue-500) animate-bounce"
+		class="flex items-center justify-center gap-1 mt-3 text-xs text-(--primary) animate-bounce"
 	>
 		<IconArrowUp class="w-4 h-4" />
 		<span>{m.quick_add()}</span>

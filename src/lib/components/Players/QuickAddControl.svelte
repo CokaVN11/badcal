@@ -41,7 +41,7 @@
 
 	<button
 		type="submit"
-		class="btn-secondary h-11 px-4 text-sm tracking-tighter whitespace-nowrap disabled:opacity-50"
+		class="btn-secondary w-18 h-11 rounded-sm! px-0! text-sm tracking-tighter whitespace-nowrap disabled:opacity-50"
 		disabled={!canAdd}
 	>
 		{m.add_n_players({ count: clampedCount })}

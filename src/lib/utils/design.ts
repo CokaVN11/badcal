@@ -10,11 +10,11 @@ export type ColorScheme = {
 };
 
 export const GROUP_COLORS: ColorScheme[] = [
-	{ bg: 'from-blue-500 to-indigo-600', light: 'bg-blue-50', text: 'text-blue-700' },
-	{ bg: 'from-emerald-500 to-teal-600', light: 'bg-emerald-50', text: 'text-emerald-700' },
-	{ bg: 'from-amber-500 to-orange-600', light: 'bg-amber-50', text: 'text-amber-700' },
-	{ bg: 'from-rose-500 to-pink-600', light: 'bg-rose-50', text: 'text-rose-700' },
-	{ bg: 'from-violet-500 to-purple-600', light: 'bg-violet-50', text: 'text-violet-700' }
+	{ bg: 'from-[#0052ff] to-[#1740b3]', light: 'bg-[#edf3ff]', text: 'text-[#0052ff]' },
+	{ bg: 'from-[#2f7cff] to-[#0052ff]', light: 'bg-[#edf3ff]', text: 'text-[#1740b3]' },
+	{ bg: 'from-[#1740b3] to-[#0a0b0d]', light: 'bg-[#eef0f3]', text: 'text-[#1740b3]' },
+	{ bg: 'from-[#578bfa] to-[#2f7cff]', light: 'bg-[#f1f6ff]', text: 'text-[#0052ff]' },
+	{ bg: 'from-[#0a0b0d] to-[#282b31]', light: 'bg-[#eef0f3]', text: 'text-[#282b31]' }
 ];
 
 export function getGroupColor(index: number): ColorScheme {

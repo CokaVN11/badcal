@@ -30,7 +30,7 @@
 </script>
 
 <Dialog.Root bind:open>
-	<Dialog.Trigger class="btn-secondary h-11 px-4 text-sm" type="button">
+	<Dialog.Trigger class="btn-secondary h-11 px-4 text-sm rounded-sm!" type="button">
 		<IconFileUpload stroke={1.5} />
 		{m.import_btn()}
 	</Dialog.Trigger>

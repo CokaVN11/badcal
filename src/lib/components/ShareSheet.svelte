@@ -76,7 +76,7 @@
 				>
 					<input type="checkbox" bind:checked={showNames} class="sr-only peer" />
 					<span
-						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--slate-200) peer-checked:bg-(--zp-blue-100) text-(--ink-muted) peer-checked:text-(--zp-blue-600) transition-colors"
+						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--surface-sunken) peer-checked:bg-(--primary-soft) text-(--ink-muted) peer-checked:text-(--primary) transition-colors"
 					>
 						{#if showNames}<IconEye size={18} />{:else}<IconEyeOff size={18} />{/if}
 					</span>
@@ -85,7 +85,7 @@
 						<span class="block text-xs text-(--ink-muted)">{m.share_show_names_hint()}</span>
 					</span>
 					<span
-						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--zp-blue-500) relative transition-colors"
+						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--primary) relative transition-colors"
 					>
 						<span
 							class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {showNames
@@ -100,7 +100,7 @@
 				>
 					<input type="checkbox" bind:checked={includeQR} class="sr-only peer" />
 					<span
-						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--slate-200) peer-checked:bg-(--zp-blue-100) text-lg"
+						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--surface-sunken) peer-checked:bg-(--primary-soft) text-lg"
 					>
 						📱
 					</span>
@@ -109,7 +109,7 @@
 						<span class="block text-xs text-(--ink-muted)">{m.share_include_qr_hint()}</span>
 					</span>
 					<span
-						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--zp-blue-500) relative transition-colors"
+						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--primary) relative transition-colors"
 					>
 						<span
 							class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {includeQR
@@ -122,7 +122,7 @@
 
 			<div class="p-4 pt-0 space-y-3 pb-8">
 				<button
-					class="w-full flex items-center justify-center gap-2 py-3.5 bg-(--zp-green-500) hover:bg-(--zp-green-600) text-white font-semibold rounded-xl transition-colors"
+					class="btn-primary w-full py-3.5"
 					onclick={onShareImage}
 				>
 					<IconShare size={20} />

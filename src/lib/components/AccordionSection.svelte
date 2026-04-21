@@ -23,13 +23,13 @@
 </script>
 
 <div
-	class="accordion-section bg-(--surface) border border-(--border) rounded-xl overflow-hidden transition-all duration-200"
+	class="accordion-section bg-(--surface) border border-(--border) rounded-3xl overflow-hidden transition-all duration-200"
 	id={title}
 	class:is-complete={isComplete && !isExpanded}
 	class:is-expanded={isExpanded}
 >
 	<button
-		class="w-full flex items-center gap-3 p-4 bg-transparent border-0 cursor-pointer text-left transition-colors duration-150 focus:outline-none hover:bg-(--surface-sunken)"
+		class="w-full flex items-center gap-3 p-5 bg-transparent border-0 cursor-pointer text-left transition-colors duration-150 focus:outline-none hover:bg-(--surface-muted)"
 		type="button"
 		onclick={onToggle}
 		onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
@@ -39,25 +39,25 @@
 		<div class="shrink-0">
 			{#if isComplete && !isExpanded}
 				<div
-					class="size-6 rounded-full flex justify-center items-center text-white bg-(--zp-green-500)"
+					class="size-7 rounded-full flex justify-center items-center text-white bg-(--primary) shadow-sm"
 				>
 					<IconCheck size={16} />
 				</div>
 			{:else}
 				<div
-					class="size-6 rounded-full flex justify-center items-center bg-(--slate-200) border-2 border-(--slate-300)"
+					class="size-7 rounded-full flex justify-center items-center bg-(--surface-sunken) border border-(--border)"
 				></div>
 			{/if}
 		</div>
 
 		<div class="flex-1 min-w-0 text-left">
-			<span class="font-bold text-(--ink)">{title}</span>
+			<span class="text-[15px] font-semibold tracking-tight text-(--ink)">{title}</span>
 			{#if subtitle && !(isComplete && !isExpanded)}
 				<span class="block text-xs text-(--ink-muted) mt-0.5">{subtitle}</span>
 			{/if}
 			{#if isComplete && !isExpanded && completeBadge}
 				<span
-					class="inline-flex items-center ml-2 py-1 px-2.5 bg-(--zp-green-100) text-(--zp-green-700) text-xs font-bold font-mono rounded-full"
+					class="inline-flex items-center ml-2 py-1 px-2.5 bg-(--primary-soft) text-(--primary) text-xs font-bold font-mono rounded-full"
 				>
 					{completeBadge}
 				</span>
@@ -65,7 +65,7 @@
 		</div>
 		<IconChevronDown
 			class="shrink-0 text-(--ink-muted) transition-transform duration-200 {isExpanded
-				? 'rotate-180'
+				? 'rotate-180 text-(--primary)'
 				: ''}"
 			size={20}
 		/>
@@ -73,7 +73,7 @@
 	{#if isExpanded}
 		<div
 			id={contentId}
-			class="pt-0 px-4 pb-4 border-t border-(--border)"
+			class="p-5 border-t border-(--border)"
 			transition:slide={{ duration: 200 }}
 		>
 			{@render children()}
@@ -87,6 +87,6 @@
 	}
 
 	.accordion-section.is-complete {
-		border-left: 3px solid var(--zp-green-500);
+		border-color: rgba(0, 82, 255, 0.18);
 	}
 </style>

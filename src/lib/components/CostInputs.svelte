@@ -130,7 +130,7 @@
 </script>
 
 <!-- TanStack Form Svelte API uses form instance directly -->
-<div class="space-y-4 mt-2">
+<div class="space-y-5">
 	<!-- Court Info -->
 	<div class="grid grid-cols-2 gap-3">
 		<!-- Field-level validation with Zod via helper function -->
@@ -143,7 +143,7 @@
 		>
 			{#snippet children({ state, handleChange, handleBlur })}
 				<div>
-					<label for="court-hours" class="text-xs text-(--slate-500) mb-1 block">
+					<label for="court-hours" class="form-label !mb-2 text-xs">
 						{m.court_hours()}
 					</label>
 					<div class="relative">
@@ -182,7 +182,7 @@
 		>
 			{#snippet children({ state, handleChange, handleBlur })}
 				<div>
-					<label for="court-price" class="text-xs text-(--slate-500) mb-1 block">
+					<label for="court-price" class="form-label !mb-2 text-xs">
 						{m.court_price()}
 					</label>
 					<div class="relative">
@@ -237,7 +237,7 @@
 		>
 			{#snippet children({ state, handleChange, handleBlur })}
 				<div>
-					<label for="shuttle-price" class="text-xs text-(--slate-500) mb-1 block">
+					<label for="shuttle-price" class="form-label !mb-2 text-xs">
 						{m.shuttlecock_price()}
 					</label>
 					<div class="relative">
@@ -283,7 +283,7 @@
 		>
 			{#snippet children({ state, handleChange, handleBlur })}
 				<div>
-					<label for="shuttle-count" class="text-xs text-(--slate-500) mb-1 block">
+					<label for="shuttle-count" class="form-label !mb-2 text-xs">
 						{m.shuttlecock_count()}
 					</label>
 					<input
@@ -313,7 +313,7 @@
 	<div class="pt-2">
 		<div class="flex items-center justify-between mb-3">
 			<span class="text-xs text-(--slate-500)">{m.additional_costs()}</span>
-			<button type="button" class="btn-secondary h-11 px-4 text-sm" onclick={addCost}>
+			<button type="button" class="btn-secondary h-8 text-sm rounded-sm!" onclick={addCost}>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
 						stroke-linecap="round"
@@ -322,7 +322,9 @@
 						d="M12 4v16m8-8H4"
 					/>
 				</svg>
-				{m.add_cost_btn()}
+				<span>
+					{m.add_cost_btn()}
+				</span>
 			</button>
 		</div>
 
