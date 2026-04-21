@@ -140,5 +140,9 @@
 	"delete_lineup": "Delete lineup",
 	"saved_lineups_empty": "No saved lineups yet.",
   "cannot_save_empty_lineup": "Can't save an empty lineup.",
-  "late_indicator": "late"
+  "late_indicator": "late",
+  "settlement_heading": "Settlement",
+  "settlement_all_paid": "All settled! 🎉",
+  "settlement_progress": "{paid} of {total} paid",
+  "settlement_remaining": "{amount} remaining"
 }

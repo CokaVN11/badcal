@@ -3,7 +3,8 @@
 	// ABOUTME: Supports thermal paper and modern ZaloPay fintech styles
 
 	import { m } from '$lib/paraglide/messages.js';
-	import { formatCurrency, formatDate, groupByKey, triggerHaptic } from '$lib/utils';
+	import { formatCurrency, formatDate, groupByKey, triggerHaptic, getInitial } from '$lib/utils';
+	import { SvelteSet } from 'svelte/reactivity';
 	import type { AdditionalCost, Player } from '$lib/types';
 	import { tick, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
@@ -88,6 +89,22 @@
 		currentTheme = currentTheme === 'thermal' ? 'zalopay' : 'thermal';
 		if (browser) localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
 		triggerHaptic('light');
+	}
+
+	let paidPlayerIds = $state(new SvelteSet<number>());
+	let paidCount = $derived(paidPlayerIds.size);
+	let allPaid = $derived(playerShares.length > 0 && paidCount === playerShares.length);
+	let remainingAmount = $derived(
+		playerShares.filter(p => !paidPlayerIds.has(p.id)).reduce((sum, p) => sum + (p.share ?? 0), 0)
+	);
+
+	function togglePaid(id: number) {
+		if (paidPlayerIds.has(id)) {
+			paidPlayerIds.delete(id);
+		} else {
+			paidPlayerIds.add(id);
+			triggerHaptic('light');
+		}
 	}
 
 	let shuttlecockTotal = $derived(shuttlecockPrice * shuttlecockCount);
@@ -222,6 +239,39 @@
 					{additionalCosts} {playerShares} {totalCost} {showNames} {includeQR}
 				/>
 			{/if}
+		<!-- Settlement tracker -->
+		<div class="mt-4 rounded-2xl bg-white shadow-sm border border-(--border) overflow-hidden">
+			<div class="flex items-center justify-between px-4 py-3 border-b border-(--border)">
+				<span class="text-sm font-semibold text-(--ink)">{m.settlement_heading()}</span>
+				{#if allPaid}
+					<span class="text-xs font-semibold text-green-600">{m.settlement_all_paid()}</span>
+				{:else}
+					<span class="text-xs text-(--ink-muted)">
+						{m.settlement_progress({ paid: paidCount, total: playerShares.length })}
+						{#if remainingAmount > 0}· {m.settlement_remaining({ amount: formatCurrency(remainingAmount) })}{/if}
+					</span>
+				{/if}
+			</div>
+			{#each playerShares as player (player.id)}
+				{@const isPaid = paidPlayerIds.has(player.id)}
+				{@const displayName = player.name?.trim() || m.player_numbered({ n: playerShares.indexOf(player) + 1 })}
+				<button
+					type="button"
+					class="w-full flex items-center gap-3 px-4 py-3 border-b border-(--border) last:border-b-0 text-left transition-colors {isPaid ? 'bg-green-50' : 'hover:bg-(--surface-muted) active:bg-(--surface-sunken)'}"
+					onclick={() => togglePaid(player.id)}
+				>
+					<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold shrink-0 transition-colors {isPaid ? 'bg-green-500 text-white' : 'bg-(--slate-100) text-(--ink-soft)'}">
+						{#if isPaid}✓{:else}{getInitial(displayName)}{/if}
+					</div>
+					<span class="flex-1 text-sm font-medium transition-colors {isPaid ? 'text-(--ink-muted) line-through' : 'text-(--ink)'}">
+						{displayName}
+					</span>
+					<span class="text-sm font-mono font-semibold shrink-0 {isPaid ? 'text-green-600' : 'text-(--ink)'}">
+						{formatCurrency(player.share ?? 0)}
+					</span>
+				</button>
+			{/each}
+		</div>
 		</div>
 	</main>
 

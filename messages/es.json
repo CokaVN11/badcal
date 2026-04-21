@@ -88,5 +88,9 @@
 	"lineup_name": "Nombre de plantilla",
 	"apply_lineup": "Aplicar",
 	"delete_lineup": "Eliminar plantilla",
-	"saved_lineups_empty": "No hay plantillas guardadas."
+	"saved_lineups_empty": "No hay plantillas guardadas.",
+	"settlement_heading": "Liquidación",
+	"settlement_all_paid": "¡Todo saldado! 🎉",
+	"settlement_progress": "{paid} de {total} pagados",
+	"settlement_remaining": "Faltan {amount}"
 }

@@ -140,5 +140,9 @@
 	"delete_lineup": "Xóa danh sách",
 	"saved_lineups_empty": "Chưa có danh sách nào.",
 	"cannot_save_empty_lineup": "Không thể lưu danh sách trống.",
-	"late_indicator": "muộn"
+	"late_indicator": "muộn",
+	"settlement_heading": "Thanh toán",
+	"settlement_all_paid": "Tất cả đã trả! 🎉",
+	"settlement_progress": "{paid}/{total} đã trả",
+	"settlement_remaining": "Còn {amount}"
 }
