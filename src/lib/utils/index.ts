@@ -21,3 +21,4 @@ export {
 } from './design';
 export type { ColorScheme } from './design';
 export { triggerHaptic } from './haptics';
+export { loadSavedLineups, upsertSavedLineup, deleteSavedLineup } from './saved-lineups';

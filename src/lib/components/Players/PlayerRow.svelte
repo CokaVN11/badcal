@@ -47,7 +47,7 @@
 			{getInitial(displayName)}
 		</div>
 
-		<div class="flex-1 min-w-0">
+		<div class="flex-1 flex-col min-w-0 flex overflow-hidden">
 			<input
 				type="text"
 				value={player.name}
@@ -55,6 +55,11 @@
 				placeholder={displayName}
 				class="w-full bg-transparent border-none p-0 text-sm font-semibold text-(--ink) focus:outline-none placeholder:text-(--slate-400) placeholder:font-normal"
 			/>
+			{#if player.arrivalOffsetMinutes > 0}
+				<span class="shrink-0 text-[8px] font-medium text-amber-600 rounded-full leading-none">
+					{m.late_indicator()} +{player.arrivalOffsetMinutes}m
+				</span>
+			{/if}
 		</div>
 
 		<div class="flex items-center gap-0.5">

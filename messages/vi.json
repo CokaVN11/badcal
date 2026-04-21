@@ -132,5 +132,13 @@
 	"status_done": "Xong",
 	"session_fallback": "Buổi chơi",
 	"app_tagline": "CHIA TIỀN CẦU LÔNG",
-	"thermal_stats": "{count} người • {hours} giờ"
+	"thermal_stats": "{count} người • {hours} giờ",
+	"saved_lineups": "Danh sách",
+	"save_current_lineup": "Lưu",
+	"lineup_name": "Tên danh sách",
+	"apply_lineup": "Áp dụng",
+	"delete_lineup": "Xóa danh sách",
+	"saved_lineups_empty": "Chưa có danh sách nào.",
+	"cannot_save_empty_lineup": "Không thể lưu danh sách trống.",
+	"late_indicator": "muộn"
 }

@@ -102,7 +102,12 @@
 				aria-label={m.session_start_time()}
 			/>
 		</div>
-		<button type="button" class="btn-icon btn-icon-danger" onclick={onClear} aria-label="Clear session">
+		<button
+			type="button"
+			class="btn-icon btn-icon-danger"
+			onclick={onClear}
+			aria-label="Clear session"
+		>
 			<IconTrash class="h-5 w-5" />
 		</button>
 		<LanguageToggle />
@@ -117,8 +122,14 @@
 				</div>
 			</div>
 			<div class="summary-stats">
-				<div class="summary-stat"><span>{players.length} {m.players_count()}</span></div>
-				<div class="summary-stat"><span>{totalHours}{m.hours_unit()}</span></div>
+				<div class="summary-stat">
+					<span class="text-sm text-(--ink-muted) lowercase"> {m.players_count()} </span>
+					<span class="font-semibold text-lg">{players.length}</span>
+				</div>
+				<div class="summary-stat">
+					<span class="text-sm text-(--ink-muted)"> {m.hours_unit()}</span>
+					<span class="font-semibold text-lg">{totalHours}</span>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -167,7 +178,9 @@
 		</div>
 	</main>
 
-	<div class="fixed inset-x-0 bottom-0 z-20 bg-linear-to-t from-white via-white/96 to-transparent p-4 backdrop-blur-sm">
+	<div
+		class="fixed inset-x-0 bottom-0 z-20 bg-linear-to-t from-white via-white/96 to-transparent p-4 backdrop-blur-sm"
+	>
 		<div class="mx-auto max-w-lg">
 			{#if !canShare}
 				<div class="mb-2 text-center text-sm text-(--ink-muted)">

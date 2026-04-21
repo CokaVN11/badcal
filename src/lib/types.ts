@@ -22,3 +22,11 @@ export type Session = {
 	shuttlecockPrice: number;
 	shuttlecockCount: number;
 };
+
+export type SavedLineup = {
+	id: string;
+	name: string;
+	playerNames: string[];
+	createdAt: number;
+	updatedAt: number;
+};

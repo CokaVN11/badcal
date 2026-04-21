@@ -132,5 +132,13 @@
 	"status_done": "Done",
 	"session_fallback": "Session",
 	"app_tagline": "BADMINTON COST SPLITTER",
-	"thermal_stats": "{count} players • {hours}h"
+	"thermal_stats": "{count} players • {hours}h",
+	"saved_lineups": "Lineups",
+	"save_current_lineup": "Save",
+	"lineup_name": "Lineup name",
+	"apply_lineup": "Apply",
+	"delete_lineup": "Delete lineup",
+	"saved_lineups_empty": "No saved lineups yet.",
+  "cannot_save_empty_lineup": "Can't save an empty lineup.",
+  "late_indicator": "late"
 }

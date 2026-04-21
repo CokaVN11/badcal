@@ -9,6 +9,9 @@
 	import { get } from 'svelte/store';
 	import QuickAddControl from './Players/QuickAddControl.svelte';
 	import ImportPlayersDialog from './Players/ImportPlayersDialog.svelte';
+	import SavedLineupsDialog from './Players/SavedLineupsDialog.svelte';
+	import { loadSavedLineups, upsertSavedLineup, deleteSavedLineup } from '$lib/utils';
+	import type { SavedLineup } from '$lib/types';
 	import PlayerRow from './Players/PlayerRow.svelte';
 	import { createPlayerListStore } from './Players/playerList.store';
 	import { groupByKey, getGroupColor, getPlayerDisplayName } from '$lib/utils';
@@ -17,6 +20,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import HoursBadge from './shared/HoursBadge.svelte';
 	import AvatarStack from './shared/AvatarStack.svelte';
+	import { toast } from 'svelte-sonner';
 
 	type Props = {
 		players: Player[];
@@ -35,6 +39,43 @@
 	});
 	const playersStore = playerList.players;
 	const actions = playerList.actions;
+
+	let savedLineups = $state<SavedLineup[]>(loadSavedLineups());
+
+	function handleSaveLineup(name: string) {
+		const names = actions.extractLineupNames();
+		if (names.length === 0){
+      toast.error(m.cannot_save_empty_lineup());
+      return;
+    }
+		const now = Date.now();
+		const lineup: SavedLineup = {
+			id: crypto.randomUUID(),
+			name,
+			playerNames: names,
+			createdAt: now,
+			updatedAt: now
+		};
+    console.log('Saving lineup', lineup);
+		upsertSavedLineup(lineup);
+		savedLineups = loadSavedLineups();
+	}
+
+	function handleApplyLineup(lineup: SavedLineup) {
+		actions.applyLineup(lineup);
+	}
+
+	function handleDeleteLineup(id: string) {
+		deleteSavedLineup(id);
+		savedLineups = loadSavedLineups();
+	}
+
+	function handleRenameLineup(id: string, newName: string) {
+		const lineup = savedLineups.find((l) => l.id === id);
+		if (!lineup) return;
+		upsertSavedLineup({ ...lineup, name: newName, updatedAt: Date.now() });
+		savedLineups = loadSavedLineups();
+	}
 
 	const unsubPlayers = playersStore.subscribe((next) => {
 		if (players !== next) players = next;
@@ -82,6 +123,13 @@
 		<div class="flex items-center gap-2">
 			<QuickAddControl onAdd={actions.addPlayers} max={MAX_QUICK_ADD} />
 			<ImportPlayersDialog onImport={actions.importPlayersFromText} />
+			<SavedLineupsDialog
+				lineups={savedLineups}
+				onSave={handleSaveLineup}
+				onApply={handleApplyLineup}
+				onDelete={handleDeleteLineup}
+				onRename={handleRenameLineup}
+			/>
 		</div>
 	</div>
 
@@ -158,7 +206,7 @@
 					</div>
 
 					{#if isExpanded}
-						<div class="group-content border-t border-(--border) bg-(--slate-50)/50">
+						<div class="group-content border-t border-(--border)">
 							<div class="p-2 space-y-1">
 								{#each groupPlayers as player, playerIndex (player.id)}
 									<PlayerRow

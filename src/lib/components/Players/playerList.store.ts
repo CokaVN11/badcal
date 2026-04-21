@@ -1,4 +1,5 @@
 import type { Player } from '$lib/types';
+import type { SavedLineup } from '$lib/types';
 import { derived, get, writable } from 'svelte/store';
 
 type CreatePlayerListStoreArgs = {
@@ -65,8 +66,10 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 	}
 
 	function setArrivalOffset(id: number, offsetMinutes: number) {
+		const baseHours = get(defaultHours);
+		const newHour = offsetMinutes > 0 ? baseHours - offsetMinutes / 60 : baseHours;
 		players.update((current) =>
-			current.map((p) => (p.id === id ? { ...p, arrivalOffsetMinutes: offsetMinutes } : p))
+			current.map((p) => (p.id === id ? { ...p, arrivalOffsetMinutes: offsetMinutes, hours: newHour } : p))
 		);
 	}
 
@@ -104,6 +107,24 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 	}
 
 
+	function extractLineupNames(): string[] {
+		return get(players)
+			.map((p) => p.name.trim())
+			.filter((name) => name.length > 0);
+	}
+
+	function applyLineup(lineup: SavedLineup) {
+		const hours = get(defaultHours);
+		const startId = Date.now();
+		const newPlayers: Player[] = lineup.playerNames.map((name, i) => ({
+			id: startId + i,
+			name,
+			hours,
+			arrivalOffsetMinutes: 0
+		}));
+		players.set(newPlayers);
+	}
+
 	return {
 		players,
 		courtHours,
@@ -118,6 +139,8 @@ export function createPlayerListStore(args: CreatePlayerListStoreArgs = {}) {
 			setGroupHours,
 			addHours,
 			importPlayersFromText,
+			extractLineupNames,
+			applyLineup,
 		}
 	};
 }

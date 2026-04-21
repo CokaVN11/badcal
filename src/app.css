@@ -745,12 +745,9 @@ body::before {
 .summary-stat {
 	display: flex;
 	align-items: center;
-	gap: 6px;
+  flex-direction: column;
 	padding: 10px 14px;
-	background: rgba(255, 255, 255, 0.08);
-	border: 1px solid rgba(255, 255, 255, 0.08);
-	border-radius: var(--radius-pill);
-	font-size: 13px;
+	font-size: 12px;
 	font-weight: 600;
 }
 
