@@ -8,11 +8,14 @@
 		"build": "vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"postinstall": "svelte-kit sync && partytown copylib static/~partytown || true",
+		"postinstall": "partytown copylib static/~partytown || true",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
-		"lint": "prettier --check . && eslint ."
+		"lint": "prettier --check . && eslint .",
+		"db:migration:create": "ts-node --project tsconfig.json -r reflect-metadata import { DataSource } from 'typeorm'; new DataSource({ type: 'postgres', url: process.env.DATABASE_URL, entities: ['src/lib/server/db/entities/*.ts'], migrations: ['src/lib/server/db/migrations/*.ts'] }).runMigration(); console.log('Hand-author your migration file in src/lib/server/db/migrations/ then run db:migration:run')",
+		"db:migration:run": "node --import reflect-metadata ts-node/esm --project tsconfig.json src/lib/server/db/typeorm-cli-data-source.ts migration:run",
+		"db:migration:revert": "node --import reflect-metadata ts-node/esm --project tsconfig.json src/lib/server/db/typeorm-cli-data-source.ts migration:revert"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -52,9 +55,13 @@
 		"dayjs": "^1.11.20",
 		"html-to-image": "^1.11.13",
 		"openai": "^6.10.0",
+		"pg": "^8.20.0",
 		"qrcode": "^1.5.4",
+		"reflect-metadata": "^0.2.2",
 		"svelte-sonner": "^1.0.7",
+		"typeorm": "^0.3.28",
 		"vietnam-qr-pay": "^1.5.0",
 		"zod": "^4.1.13"
-	}
+	},
+	"packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
 }

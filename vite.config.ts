@@ -18,13 +18,16 @@ export default defineConfig(({ command }) => ({
 			allow: ['..']
 		}
 	},
+	ssr: {
+		external: ['reflect-metadata']
+	},
 	resolve: {
 		alias: {
 			$lib: path.resolve('./src/lib')
 		}
 	},
 	build: {
-		sourcemap: command === 'serve',
+		sourcemap: command === 'serve'
 	},
 	optimizeDeps: {
 		exclude: ['svelte']
