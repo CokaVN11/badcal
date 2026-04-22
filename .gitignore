@@ -5,8 +5,7 @@ node_modules
 .vercel
 .netlify
 .wrangler
-# SvelteKit build output (no longer needed)
-# .svelte-kit/
+.svelte-kit/
 
 # Partytown copied files
 /public/~partytown

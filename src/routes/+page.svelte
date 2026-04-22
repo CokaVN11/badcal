@@ -4,12 +4,10 @@
 
 	import { onMount } from 'svelte';
 	import { SvelteMap } from 'svelte/reactivity';
-	import { Toaster } from 'svelte-sonner';
 	import * as m from '$lib/paraglide/messages';
 	import { getLocale } from '$lib/paraglide/runtime';
 	import { browser } from '$lib/env';
 
-	import favicon from './lib/assets/favicon.svg';
 	import BillPreview from '$lib/components/BillPreview.svelte';
 	import ProgressiveEditorView from '$lib/components/ProgressiveEditorView.svelte';
 	import type { Player, AdditionalCost } from '$lib/types';
@@ -34,7 +32,7 @@
 		if (saved) {
 			sessionTitle = saved.sessionTitle;
 			sessionDate = saved.sessionDate;
-      startTime = saved.startTime;
+			startTime = saved.startTime;
 			courtHours = saved.courtHours;
 			courtPrice = saved.courtPrice;
 			shuttlecockPrice = saved.shuttlecockPrice;
@@ -50,7 +48,7 @@
 		saveSession({
 			sessionTitle,
 			sessionDate,
-      startTime,
+			startTime,
 			courtHours,
 			courtPrice,
 			shuttlecockPrice,
@@ -133,55 +131,43 @@
 		if (browser && currentLocale) {
 			document.documentElement.lang = currentLocale;
 			document.title = m.app_title();
-			document.querySelector('meta[name="description"]')?.setAttribute(
-				'content',
-				m.web_description()
-			);
+			document
+				.querySelector('meta[name="description"]')
+				?.setAttribute('content', m.web_description());
 		}
 	});
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-	<meta name="theme-color" content="#0052ff" />
-	<meta name="description" content={m.web_description()} />
-	<title>{m.app_title()}</title>
-</svelte:head>
-
-<main>
-	<div class="app-shell">
-		{#if currentView === 'editor'}
-			<ProgressiveEditorView
-				bind:sessionTitle
-				bind:sessionDate
-				bind:startTime
-				bind:courtHours
-				bind:courtPrice
-				bind:shuttlecockPrice
-				bind:shuttlecockCount
-				bind:additionalCosts
-				bind:players
-				{totalCost}
-				{totalHours}
-				{playerShares}
-				onShare={switchToPreview}
-				onClear={handleClearSession}
-			/>
-		{:else}
-			<BillPreview
-				{sessionTitle}
-				{sessionDate}
-				{startTime}
-				{courtPrice}
-				{shuttlecockPrice}
-				{shuttlecockCount}
-				{additionalCosts}
-				{playerShares}
-				{totalCost}
-				onBack={switchToEditor}
-			/>
-		{/if}
-	</div>
-
-	<Toaster richColors closeButton />
-</main>
+<div class="app-shell">
+	{#if currentView === 'editor'}
+		<ProgressiveEditorView
+			bind:sessionTitle
+			bind:sessionDate
+			bind:startTime
+			bind:courtHours
+			bind:courtPrice
+			bind:shuttlecockPrice
+			bind:shuttlecockCount
+			bind:additionalCosts
+			bind:players
+			{totalCost}
+			{totalHours}
+			{playerShares}
+			onShare={switchToPreview}
+			onClear={handleClearSession}
+		/>
+	{:else}
+		<BillPreview
+			{sessionTitle}
+			{sessionDate}
+			{startTime}
+			{courtPrice}
+			{shuttlecockPrice}
+			{shuttlecockCount}
+			{additionalCosts}
+			{playerShares}
+			{totalCost}
+			onBack={switchToEditor}
+		/>
+	{/if}
+</div>

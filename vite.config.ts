@@ -3,12 +3,12 @@ import { paraglideVitePlugin } from '@inlang/paraglide-js';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 import path from 'node:path';
-import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { sveltekit } from '@sveltejs/kit/vite';
 
 export default defineConfig(({ command }) => ({
 	plugins: [
 		tailwindcss(),
-		svelte(),
+		sveltekit(),
 		paraglideVitePlugin({ project: './project.inlang', outdir: './src/lib/paraglide' }),
 		devtoolsJson()
 	],
@@ -25,7 +25,6 @@ export default defineConfig(({ command }) => ({
 	},
 	build: {
 		sourcemap: command === 'serve',
-		outDir: 'dist'
 	},
 	optimizeDeps: {
 		exclude: ['svelte']

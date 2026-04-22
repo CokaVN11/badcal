@@ -4,13 +4,13 @@
 	"version": "0.0.1",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "vite dev",
 		"build": "vite build",
 		"preview": "vite preview",
-		"prepare": "echo 'No sync needed'",
-		"postinstall": "partytown copylib public/~partytown || true",
-		"check": "svelte-check --tsconfig ./tsconfig.json",
-		"check:watch": "svelte-check --tsconfig ./tsconfig.json --watch",
+		"prepare": "svelte-kit sync || echo ''",
+		"postinstall": "partytown copylib static/~partytown || true",
+		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
+		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint ."
 	},
