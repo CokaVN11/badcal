@@ -5,7 +5,7 @@
 	import { computeTotals, computePlayerShares } from '$lib/utils/share-calc';
 	import { togglePaid } from '$lib/api/sharing';
 	import BillPreview from '$lib/components/BillPreview.svelte';
-	import type { Player, AdditionalCost } from '$lib/types';
+	import type { Player, ExtraCost } from '$lib/types';
 
 	type Props = {
 		data: {
@@ -125,7 +125,7 @@
 				courtPrice={payload.courtPrice}
 				shuttlecockPrice={payload.shuttlecockPrice}
 				shuttlecockCount={payload.shuttlecockCount}
-				additionalCosts={payload.additionalCosts as AdditionalCost[]}
+				additionalCosts={payload.additionalCosts as ExtraCost[]}
 				{playerShares}
 				{totalCost}
 				onBack={() => {}}

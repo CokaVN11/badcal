@@ -23,22 +23,11 @@ export const load: PageServerLoad = async ({ params }) => {
 	return {
 		session: {
 			id: session.id,
-			data: session.data as {
-				sessionTitle: string;
-				sessionDate: string;
-				startTime: string | null;
-				courtHours: number;
-				courtPrice: number;
-				shuttlecockPrice: number;
-				shuttlecockCount: number;
-				additionalCosts: Array<{ label: string; amount: number }>;
-				players: Array<{
-					id: number;
-					name: string;
-					hours: number;
-					arrivalOffsetMinutes: number;
-				}>;
-			},
+			sessionTitle: session.sessionTitle ?? '',
+			sessionDate: session.sessionDate ?? '',
+			courtBlocks: session.courtBlocks,
+			groups: session.groups,
+			extraCosts: session.extraCosts,
 			createdAt: session.createdAt,
 		},
 		paidPlayerIds,

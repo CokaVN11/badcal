@@ -10,7 +10,7 @@
 
 	import BillPreview from '$lib/components/BillPreview.svelte';
 	import ProgressiveEditorView from '$lib/components/ProgressiveEditorView.svelte';
-	import type { Player, AdditionalCost } from '$lib/types';
+	import type { Player, ExtraCost } from '$lib/types';
 	import { saveSession, loadSession, clearSession } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
 	import { computeContentHash } from '$lib/utils/content-hash';
@@ -29,7 +29,7 @@
 	let courtPrice = $state(0);
 	let shuttlecockPrice = $state(0);
 	let shuttlecockCount = $state(1);
-	let additionalCosts = $state<AdditionalCost[]>([]);
+	let additionalCosts = $state<ExtraCost[]>([]);
 	let players = $state<Player[]>([]);
 
 	onMount(() => {

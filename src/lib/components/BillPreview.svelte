@@ -5,7 +5,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { formatCurrency, formatDate, groupByKey, triggerHaptic, getInitial } from '$lib/utils';
 	import { SvelteSet } from 'svelte/reactivity';
-	import type { AdditionalCost, Player } from '$lib/types';
+	import type { ExtraCost, Player } from '$lib/types';
 	import { tick, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$lib/env';
@@ -39,7 +39,7 @@
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
-		additionalCosts: AdditionalCost[];
+		additionalCosts: ExtraCost[];
 		playerShares: Player[];
 		totalCost: number;
 		onBack: () => void;

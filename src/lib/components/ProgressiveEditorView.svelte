@@ -7,7 +7,7 @@
 	import LiveSummary from './LiveSummary.svelte';
 	import LanguageToggle from './LanguageToggle.svelte';
 	import OnboardingFlow from './OnboardingFlow.svelte';
-	import type { Player, AdditionalCost } from '$lib/types';
+	import type { Player, ExtraCost } from '$lib/types';
 	import { formatCompactNumber, triggerHaptic } from '$lib/utils';
 	import { IconPingPong, IconShare, IconTrash } from '@tabler/icons-svelte-runes';
 
@@ -36,7 +36,7 @@
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
-		additionalCosts: AdditionalCost[];
+		additionalCosts: ExtraCost[];
 		players: Player[];
 		totalCost: number;
 		totalHours: number;

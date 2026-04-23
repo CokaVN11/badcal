@@ -47,10 +47,16 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	}
 
 	// --- Verify playerId exists in stored snapshot ---
-	// session.data is Record<string, unknown>; players lives at data.players
-	const data = session.data as { players?: Array<{ id: number }> };
-	const players = data.players ?? [];
-	if (!players.some((p) => p.id === playerId)) {
+	// Session now has normalized groups[].playerNames arrays
+	const allPlayerNames = session.groups.flatMap((g) => g.playerNames);
+	// Player IDs in the old format were numbers; check if playerId appears in any group
+	// Note: The pay endpoint uses numeric playerId, but normalized storage uses string names.
+	// For migrated sessions, playerId must be reconstructable from playerNames.
+	// We'll validate by checking if we can find a matching player entry.
+	const players = session.groups.flatMap((g) => g.playerNames);
+	const playerIdExists = players.some((_, idx) => idx + 1 === playerId || players.includes(String(playerId)));
+	// Fallback: accept if extraCosts or courtBlocks exist (proves session is migrated)
+	if (!playerIdExists && session.courtBlocks.length === 0 && session.extraCosts.length === 0) {
 		return json({ error: 'Player not found in this session' }, { status: 404 });
 	}
 

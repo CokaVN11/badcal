@@ -9,7 +9,7 @@
 		getNamedPlayers,
 		getOthersCount
 	} from '$lib/utils';
-	import type { AdditionalCost, Player } from '$lib/types';
+	import type { ExtraCost, Player } from '$lib/types';
 	import { IconCheck } from '@tabler/icons-svelte-runes';
 	import PaymentQR from '../PaymentQR.svelte';
 	import { calculatePlayerTimes } from '../Players/playerList.logic';
@@ -32,7 +32,7 @@
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
-		additionalCosts: AdditionalCost[];
+		additionalCosts: ExtraCost[];
 		playerShares: Player[];
 		totalCost: number;
 		showNames: boolean;

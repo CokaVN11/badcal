@@ -2,25 +2,23 @@ export type Player = {
 	id: number;
 	name: string;
 	hours: number;
-  arrivalOffsetMinutes: number;
+	arrivalOffsetMinutes: number;
 	ratio?: number;
 	share?: number;
 };
 
-export type AdditionalCost = {
-	id?: number;
+export type ExtraCost = {
+	id?: string;
 	label: string;
 	amount: number;
 };
 
-export type Session = {
+export type SessionState = {
 	title: string;
 	date: string;
-  startTime: string | null; // "HH:mm" format or null for all-day
-	courtHours: number;
-	courtPrice: number;
-	shuttlecockPrice: number;
-	shuttlecockCount: number;
+	courtBlocks: CourtBlock[];
+	groups: Group[];
+	extraCosts: ExtraCost[];
 };
 
 export type SavedLineup = {
@@ -29,4 +27,21 @@ export type SavedLineup = {
 	playerNames: string[];
 	createdAt: number;
 	updatedAt: number;
+};
+
+// Block of court in the same time slot.
+export type CourtBlock = {
+	id: string;
+	courtCount: number;
+	startTime: string; // "HH:mm" format
+	endTime: string; // "HH:mm" format
+	pricePerHour: number;
+};
+
+// Group of players playing in the same time slot, could be different court blocks.
+export type Group = {
+	id: string;
+	startTime: string; // "HH:mm" format
+	endTime: string; // "HH:mm" format
+	playerNames: string[];
 };

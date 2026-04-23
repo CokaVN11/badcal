@@ -6,22 +6,14 @@ import { createOrReuseSession } from '$lib/server/sharing/session-store.js';
 /**
  * POST /api/sessions
  *
- * Create a sharing session or reuse an existing one for the same
- * canonical content.
+ * Create a sharing session or reuse an existing one for identical canonical content.
  *
  * Route contract:
- *   Input:  SessionPayload — see $lib/server/sharing/session-store.ts
+ *   Input:  HashablePayload — sessionTitle, sessionDate, courtBlocks, extraCosts, groups
  *   Output: { id: string }  — the UUID of the created or reused session
  *
- * The canonical content hash is computed server-side from the validated
- * payload. Any client-supplied hash is ignored.
- *
- * Fields used for hashing:
- *   sessionTitle, sessionDate, startTime, courtHours, courtPrice,
- *   shuttlecockPrice, shuttlecockCount, normalized additionalCosts,
- *   normalized players
- *
- * Race-safety: concurrent identical POSTs will return the same session ID.
+ * The canonical content hash is computed server-side from the validated payload.
+ * Race-safety: concurrent identical POSTs return the same session ID (unique constraint + retry).
  */
 export const POST: RequestHandler = async ({ request }) => {
 	let body: unknown;
@@ -33,44 +25,53 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	const payload = body as HashablePayload;
 
-	// --- Validate required top-level fields ---
-	const required = [
-		'sessionTitle',
-		'sessionDate',
-		'startTime',
-		'courtHours',
-		'courtPrice',
-		'shuttlecockPrice',
-		'shuttlecockCount',
-		'additionalCosts',
-		'players'
-	] as const;
-
-	for (const field of required) {
-		if (payload[field] === undefined) {
-			return json({ error: `Missing required field: ${field}` }, { status: 400 });
-		}
+	// --- Validate required fields ---
+	if (!payload.sessionTitle || typeof payload.sessionTitle !== 'string') {
+		return json({ error: 'Missing or invalid: sessionTitle' }, { status: 400 });
 	}
-
-	if (!Array.isArray(payload.additionalCosts)) {
-		return json({ error: 'additionalCosts must be an array' }, { status: 400 });
+	if (!payload.sessionDate || typeof payload.sessionDate !== 'string') {
+		return json({ error: 'Missing or invalid: sessionDate' }, { status: 400 });
 	}
-	if (!Array.isArray(payload.players)) {
-		return json({ error: 'players must be an array' }, { status: 400 });
+	if (!Array.isArray(payload.courtBlocks)) {
+		return json({ error: 'courtBlocks must be an array' }, { status: 400 });
+	}
+	if (!Array.isArray(payload.extraCosts)) {
+		return json({ error: 'extraCosts must be an array' }, { status: 400 });
+	}
+	if (!Array.isArray(payload.groups)) {
+		return json({ error: 'groups must be an array' }, { status: 400 });
 	}
 
 	// --- Compute server-side canonical hash ---
 	const contentHash = await computeContentHash(payload);
 
+	// --- Build normalized payload for createOrReuseSession ---
+	const normalizedPayload = {
+		sessionTitle: payload.sessionTitle,
+		sessionDate: payload.sessionDate,
+		courtBlocks: payload.courtBlocks.map((cb) => ({
+			courtCount: cb.courtCount,
+			startTime: cb.startTime,
+			endTime: cb.endTime,
+			pricePerHour: cb.pricePerHour
+		})),
+		groups: payload.groups.map((g) => ({
+			startTime: g.startTime,
+			endTime: g.endTime,
+			playerNames: g.playerNames
+		})),
+		extraCosts: payload.extraCosts.map((ec) => ({
+			label: ec.label,
+			amount: ec.amount
+		}))
+	};
+
 	// --- Race-safe create-or-reuse ---
-	// The session-store helper is find-then-save (not atomic), so we delegate
-	// to it for now. For true race-safety under concurrent inserts the TOCTOU
-	// window between findOne and save would need a unique-constraint retry
-	// loop. The existing findOne-then-save path is sufficient here because the
-	// unique constraint on contentHash prevents duplicates at the DB level,
-	// and a retry on the unique-violation error in the catch block would
-	// make it fully race-safe when callers are genuinely concurrent.
-	const session = await createOrReuseSession(contentHash, payload);
+	const session = await createOrReuseSession(contentHash, normalizedPayload);
+
+	if (!session?.id) {
+		return json({ error: 'Failed to create or reuse session' }, { status: 500 });
+	}
 
 	return json({ id: session.id }, { status: 200 });
 };

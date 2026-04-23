@@ -7,7 +7,7 @@
 	import { costInputSchema, additionalCostSchema } from '$lib/schemas';
 	import { zodFieldValidator } from '$lib/form-helpers';
 	import { formatCurrency, parseVietnameseNumber, formatCompactNumber } from '$lib/utils';
-	import type { AdditionalCost } from '$lib/types';
+	import type { ExtraCost } from '$lib/types';
 
 	let {
 		courtHours = $bindable(),
@@ -20,7 +20,7 @@
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
-		additionalCosts: AdditionalCost[];
+		additionalCosts: ExtraCost[];
 	} = $props();
 
 	// Create reactive schema with Paraglide messages
@@ -111,7 +111,7 @@
 
 	function updateCostWithValidation(
 		id: number,
-		field: keyof Omit<AdditionalCost, 'id'>,
+		field: keyof Omit<ExtraCost, 'id'>,
 		value: string | number
 	) {
 		// Update the value

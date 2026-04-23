@@ -1,7 +1,7 @@
 // ABOUTME: localStorage persistence for session data
 // ABOUTME: Auto-saves form state, restores on page load
 
-import type { Player, AdditionalCost } from '$lib/types';
+import type { Player, ExtraCost } from '$lib/types';
 
 const STORAGE_KEY = 'badcal_session';
 const STORAGE_VERSION = 2;
@@ -10,12 +10,12 @@ export interface PersistedSession {
 	version: number;
 	sessionTitle: string;
 	sessionDate: string;
-  startTime: string | null; // "HH:mm" format or null for all-day
+	startTime: string | null; // "HH:mm" format or null for all-day
 	courtHours: number;
 	courtPrice: number;
 	shuttlecockPrice: number;
 	shuttlecockCount: number;
-	additionalCosts: AdditionalCost[];
+	additionalCosts: ExtraCost[];
 	players: Player[];
 	savedAt: number;
 }
@@ -24,7 +24,7 @@ export function saveSession(data: Omit<PersistedSession, 'version' | 'savedAt'>)
 	try {
 		const session: PersistedSession = {
 			...data,
-			additionalCosts: data.additionalCosts.map((c, i) => ({ ...c, id: c.id ?? i })),
+			additionalCosts: data.additionalCosts.map((c, i) => ({ ...c, id: c.id ?? String(i) })),
 			version: STORAGE_VERSION,
 			savedAt: Date.now()
 		};
@@ -49,16 +49,18 @@ export function loadSession(): Omit<PersistedSession, 'version' | 'savedAt'> | n
 		return {
 			sessionTitle: session.sessionTitle ?? '',
 			sessionDate: session.sessionDate ?? new Date().toISOString().split('T')[0],
-      startTime: session.startTime ?? null,
+			startTime: session.startTime ?? null,
 			courtHours: session.courtHours ?? 2,
 			courtPrice: session.courtPrice ?? 0,
 			shuttlecockPrice: session.shuttlecockPrice ?? 0,
 			shuttlecockCount: session.shuttlecockCount ?? 1,
-			additionalCosts: (session.additionalCosts ?? []).map((c: { id?: number; label: string; amount: number }, i: number) => ({
-				id: c.id ?? i,
-				label: c.label,
-				amount: c.amount,
-			})),
+			additionalCosts: (session.additionalCosts ?? []).map(
+				(c: { id?: string | number; label: string; amount: number }, i: number) => ({
+					id: String(c.id ?? i),
+					label: c.label,
+					amount: c.amount
+				})
+			),
 			players: session.players ?? []
 		};
 	} catch {
