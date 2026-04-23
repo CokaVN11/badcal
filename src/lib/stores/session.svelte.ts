@@ -25,13 +25,16 @@ export function hydrate() {
 	initialized = true;
 }
 
-// persist — auto-save on every change
-$effect(() => {
-	if (!browser || !initialized) return;
-	// $effect tracks reactive dependencies automatically
-	// Any state change triggers this effect
-	localStorage.setItem('badcal_session_v4', JSON.stringify(state));
-});
+// persist — call this after hydrate() to set up auto-save
+// Uses a closure effect so Svelte tracks reactive state changes
+export function persist() {
+	if (!browser) return;
+	// This creates an effect inside a function call (legal in Svelte 5 runes)
+	$effect(() => {
+		if (!initialized) return;
+		localStorage.setItem('badcal_session_v4', JSON.stringify(state));
+	});
+}
 
 // clear — reset to defaults + remove from localStorage
 export function clear() {
