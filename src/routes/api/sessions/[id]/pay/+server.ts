@@ -1,5 +1,3 @@
-export const runtime = 'nodejs';
-
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { findSessionById, markPaid, unmarkPaid } from '$lib/server/sharing/session-store.js';

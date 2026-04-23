@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "prisma generate && vite build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
 		"postinstall": "partytown copylib static/~partytown || true",
@@ -13,9 +13,8 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
 		"format": "prettier --write .",
 		"lint": "prettier --check . && eslint .",
-		"db:migration:create": "ts-node --project tsconfig.json -r reflect-metadata import { DataSource } from 'typeorm'; new DataSource({ type: 'postgres', url: process.env.DATABASE_URL, entities: ['src/lib/server/db/entities/*.ts'], migrations: ['src/lib/server/db/migrations/*.ts'] }).runMigration(); console.log('Hand-author your migration file in src/lib/server/db/migrations/ then run db:migration:run')",
-		"db:migration:run": "node --import reflect-metadata ts-node/esm --project tsconfig.json src/lib/server/db/typeorm-cli-data-source.ts migration:run",
-		"db:migration:revert": "node --import reflect-metadata ts-node/esm --project tsconfig.json src/lib/server/db/typeorm-cli-data-source.ts migration:revert"
+		"db:migrate": "prisma migrate deploy",
+		"db:generate": "prisma generate"
 	},
 	"devDependencies": {
 		"@eslint/compat": "^1.4.0",
@@ -35,6 +34,7 @@
 		"prettier": "^3.6.2",
 		"prettier-plugin-svelte": "^3.4.0",
 		"prettier-plugin-tailwindcss": "^0.7.1",
+		"prisma": "^7.8.0",
 		"svelte": "^5.43.8",
 		"svelte-check": "^4.3.4",
 		"tailwindcss": "^4.1.17",
@@ -45,6 +45,8 @@
 	},
 	"dependencies": {
 		"@lucide/svelte": "^0.560.0",
+		"@prisma/adapter-pg": "^7.8.0",
+		"@prisma/client": "^7.8.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
 		"@sveltejs/kit": "^2.57.1",
 		"@tabler/icons-svelte-runes": "^3.36.0",
@@ -57,9 +59,7 @@
 		"openai": "^6.10.0",
 		"pg": "^8.20.0",
 		"qrcode": "^1.5.4",
-		"reflect-metadata": "^0.2.2",
 		"svelte-sonner": "^1.0.7",
-		"typeorm": "^0.3.28",
 		"vietnam-qr-pay": "^1.5.0",
 		"zod": "^4.1.13"
 	},

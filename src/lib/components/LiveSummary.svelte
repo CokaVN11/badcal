@@ -24,6 +24,7 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import HoursBadge from './shared/HoursBadge.svelte';
 	import AvatarStack from './shared/AvatarStack.svelte';
+	import { toast } from 'svelte-sonner';
 
 	let {
 		playerShares,
@@ -75,6 +76,16 @@
 			return { id: p.id, displayName: getPlayerDisplayName(p, idx), globalIndex: idx };
 		});
 	}
+
+  async function copyShareLink() {
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      toast.success(m.copied_to_clipboard());
+    } catch {
+      // Silent fail
+      toast.error(m.copy_failed());
+    }
+  }
 
 	const STAT_STYLES = [
 		{
@@ -138,7 +149,7 @@
 				<button
 					type="button"
 					class="flex items-center gap-1.5 rounded-lg bg-(--primary) px-3 py-1.5 text-xs font-semibold text-white hover:opacity-80 transition-opacity"
-					onclick={() => navigator.clipboard.writeText(shareUrl)}
+					onclick={() => copyShareLink()}
 				>
 					<IconCopy size={12} />
 					Copy

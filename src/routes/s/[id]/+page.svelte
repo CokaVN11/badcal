@@ -78,7 +78,6 @@
 		} else {
 			localPaidIds.delete(selectedPlayerId);
 		}
-		localPaidIds = new Set(localPaidIds); // trigger reactivity
 		pendingToggle = selectedPlayerId;
 		try {
 			await togglePaid(session.id, selectedPlayerId, newPaid);
@@ -89,7 +88,6 @@
 			} else {
 				localPaidIds.add(selectedPlayerId);
 			}
-			localPaidIds = new Set(localPaidIds);
 		} finally {
 			pendingToggle = null;
 		}

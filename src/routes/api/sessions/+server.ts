@@ -1,4 +1,3 @@
-export const runtime = 'nodejs';
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { computeContentHash, type HashablePayload } from '$lib/utils/content-hash.js';
@@ -44,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		'shuttlecockPrice',
 		'shuttlecockCount',
 		'additionalCosts',
-		'players',
+		'players'
 	] as const;
 
 	for (const field of required) {

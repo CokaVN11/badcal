@@ -1,0 +1,33 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Session {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contentHash String       @unique @map("content_hash")
+  data        Json
+  createdAt   DateTime     @default(now()) @map("created_at")
+  paidStatuses PaidStatus[]
+
+  @@map("sessions")
+  @@index([contentHash], name: "idx_sessions_content_hash")
+}
+
+model PaidStatus {
+  sessionId String   @map("session_id") @db.Uuid
+  playerId  Int      @map("player_id")
+  paidAt    DateTime @default(now()) @map("paid_at")
+  session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@id([sessionId, playerId])
+  @@map("paid_status")
+  @@index([sessionId], name: "idx_paid_status_session")
+}

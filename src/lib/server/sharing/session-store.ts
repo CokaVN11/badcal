@@ -3,9 +3,9 @@
  * All functions are narrow — session CRUD and paid-status toggles only.
  * No business logic lives here; routes call these for data access.
  */
-import { getDataSource } from '../db/data-source.server.js';
-import { Session } from '../db/entities/Session.js';
-import { PaidStatus } from '../db/entities/PaidStatus.js';
+import { getPrisma } from '../db/prisma.server.js';
+import type { Session, PaidStatus } from '../../../../generated/prisma/client.js';
+import type { Prisma } from '../../../../generated/prisma/client.js';
 
 export interface SessionPayload {
 	sessionTitle: string;
@@ -26,14 +26,12 @@ export interface SessionPayload {
 
 /** Load a session by its UUID. Returns null if not found. */
 export async function findSessionById(id: string): Promise<Session | null> {
-	const ds = await getDataSource();
-	return ds.getRepository(Session).findOne({ where: { id } });
+	return getPrisma().session.findUnique({ where: { id } });
 }
 
 /** Load a session by its canonical content hash. Returns null if not found. */
 export async function findSessionByContentHash(hash: string): Promise<Session | null> {
-	const ds = await getDataSource();
-	return ds.getRepository(Session).findOne({ where: { contentHash: hash } });
+	return getPrisma().session.findUnique({ where: { contentHash: hash } });
 }
 
 /**
@@ -44,35 +42,35 @@ export async function createOrReuseSession(
 	hash: string,
 	payload: SessionPayload
 ): Promise<Session> {
-	const ds = await getDataSource();
-	const repo = ds.getRepository(Session);
+	const prisma = getPrisma();
 
-	const existing = await repo.findOne({ where: { contentHash: hash } });
+	const existing = await prisma.session.findUnique({ where: { contentHash: hash } });
 	if (existing) return existing;
 
-	const session = repo.create({ contentHash: hash, data: payload as unknown as Record<string, unknown> });
-	return repo.save(session);
+	return prisma.session.create({ data: { contentHash: hash, data: payload as unknown as Prisma.InputJsonValue } });
 }
 
 /** List paid player IDs for a session. Returns empty array if none. */
 export async function listPaidPlayerIds(sessionId: string): Promise<number[]> {
-	const ds = await getDataSource();
-	const rows = await ds.getRepository(PaidStatus).find({ where: { sessionId } });
-	return rows.map((r) => r.playerId);
+	const rows = await getPrisma().paidStatus.findMany({ where: { sessionId } });
+	return rows.map((r: PaidStatus) => r.playerId);
 }
 
 /**
  * Mark a player as paid for a session.
- * Idempotent — inserting the same (sessionId, playerId) pair replaces the existing row.
+ * Idempotent — upsert handles the same (sessionId, playerId) pair safely.
  */
 export async function markPaid(sessionId: string, playerId: number): Promise<void> {
-	const ds = await getDataSource();
-	const repo = ds.getRepository(PaidStatus);
-	await repo.save(repo.create({ sessionId, playerId, paidAt: new Date() }));
+	await getPrisma().paidStatus.upsert({
+		where: { sessionId_playerId: { sessionId, playerId } },
+		create: { sessionId, playerId, paidAt: new Date() },
+		update: { paidAt: new Date() },
+	});
 }
 
 /** Remove a player's paid status for a session. */
 export async function unmarkPaid(sessionId: string, playerId: number): Promise<void> {
-	const ds = await getDataSource();
-	await ds.getRepository(PaidStatus).delete({ sessionId, playerId });
+	await getPrisma().paidStatus.delete({
+		where: { sessionId_playerId: { sessionId, playerId } },
+	});
 }

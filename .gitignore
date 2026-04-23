@@ -39,3 +39,4 @@ src/lib/paraglide
 .omc/
 .serena/
 .gstack/
+generated/prisma
