@@ -25,7 +25,9 @@
 		totalHours,
 		playerShares,
 		onShare,
-		onClear
+		onClear,
+		shareUrl = '',
+		isGeneratingShare = false
 	}: {
 		sessionTitle: string;
 		sessionDate: string;
@@ -41,6 +43,8 @@
 		playerShares: Player[];
 		onShare: () => void;
 		onClear: () => void;
+		shareUrl?: string;
+		isGeneratingShare?: boolean;
 	} = $props();
 
 	let expandedSection = $state<'costs' | 'players' | 'summary' | null>('costs');
@@ -172,7 +176,7 @@
 					isExpanded={expandedSection === 'summary'}
 					onToggle={() => toggleSection('summary')}
 				>
-					<LiveSummary {playerShares} {totalCost} {totalHours} />
+					<LiveSummary {playerShares} {totalCost} {totalHours} {shareUrl} {isGeneratingShare} />
 				</AccordionSection>
 			{/if}
 		</div>

@@ -330,7 +330,7 @@
 
 		{#if additionalCosts.length > 0}
 			<div class="space-y-2">
-				{#each additionalCosts as cost (cost.id)}
+				{#each additionalCosts as cost, i (cost.id ?? i)}
 					<div
 						class="flex items-center gap-2 animate-slide-in"
 						style="animation-fill-mode: backwards;"
@@ -340,14 +340,14 @@
 								type="text"
 								value={cost.label}
 								oninput={(e) =>
-									updateCostWithValidation(cost.id, 'label', (e.target as HTMLInputElement).value)}
+									updateCostWithValidation(cost.id ?? i, 'label', (e.target as HTMLInputElement).value)}
 								placeholder={m.cost_label_placeholder()}
 								class="form-input text-sm w-full"
-								class:border-red-500={additionalCostErrors[cost.id]?.label}
+								class:border-red-500={additionalCostErrors[cost.id ?? i]?.label}
 							/>
-							{#if additionalCostErrors[cost.id]?.label}
+							{#if additionalCostErrors[cost.id ?? i]?.label}
 								<p class="text-xs text-red-500 mt-1">
-									{additionalCostErrors[cost.id].label}
+									{additionalCostErrors[cost.id ?? i].label}
 								</p>
 							{/if}
 						</div>
@@ -356,16 +356,16 @@
 								<input
 									type="text"
 									inputmode="decimal"
-									value={additionalCostDisplays[cost.id] ??
+									value={additionalCostDisplays[cost.id ?? i] ??
 										(cost.amount > 0 ? formatCompactNumber(cost.amount) : '')}
 									oninput={(e) => {
 										const raw = (e.target as HTMLInputElement).value;
-										additionalCostDisplays[cost.id] = raw;
-										updateCostWithValidation(cost.id, 'amount', parseVietnameseNumber(raw));
+										additionalCostDisplays[cost.id ?? i] = raw;
+										updateCostWithValidation(cost.id ?? i, 'amount', parseVietnameseNumber(raw));
 									}}
 									placeholder={m.amount_placeholder()}
 									class="form-input form-input-number text-sm w-full pr-6"
-									class:border-red-500={additionalCostErrors[cost.id]?.amount}
+									class:border-red-500={additionalCostErrors[cost.id ?? i]?.amount}
 								/>
 								<span
 									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-(--slate-400) pointer-events-none"
@@ -373,16 +373,16 @@
 									{m.currency()}
 								</span>
 							</div>
-							{#if additionalCostErrors[cost.id]?.amount}
+							{#if additionalCostErrors[cost.id ?? i]?.amount}
 								<p class="text-xs text-red-500 mt-1">
-									{additionalCostErrors[cost.id].amount}
+									{additionalCostErrors[cost.id ?? i].amount}
 								</p>
 							{/if}
 						</div>
 						<button
 							type="button"
 							class="btn-icon btn-icon-danger"
-							onclick={() => removeCost(cost.id)}
+							onclick={() => removeCost(cost.id ?? i)}
 							aria-label={m.remove()}
 						>
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">

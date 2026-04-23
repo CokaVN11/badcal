@@ -28,11 +28,15 @@
 	let {
 		playerShares,
 		totalCost,
-		totalHours
+		totalHours,
+		shareUrl = '',
+		isGeneratingShare = false
 	}: {
 		playerShares: Player[];
 		totalCost: number;
 		totalHours: number;
+		shareUrl?: string;
+		isGeneratingShare?: boolean;
 	} = $props();
 
 	let copiedId = $state<number | null>(null);
@@ -122,6 +126,26 @@
 			</div>
 		{/each}
 	</div>
+
+	<!-- Share link section -->
+	{#if shareUrl || isGeneratingShare}
+		<div class="share-link-bar flex items-center gap-3 rounded-xl bg-white border border-(--border) px-4 py-3">
+			{#if isGeneratingShare}
+				<div class="h-4 w-4 animate-spin rounded-full border-2 border-(--primary) border-t-transparent"></div>
+				<span class="text-sm text-(--ink-soft)">Generating link…</span>
+			{:else if shareUrl}
+				<span class="text-xs font-mono text-(--ink-muted) truncate flex-1">{shareUrl}</span>
+				<button
+					type="button"
+					class="flex items-center gap-1.5 rounded-lg bg-(--primary) px-3 py-1.5 text-xs font-semibold text-white hover:opacity-80 transition-opacity"
+					onclick={() => navigator.clipboard.writeText(shareUrl)}
+				>
+					<IconCopy size={12} />
+					Copy
+				</button>
+			{/if}
+		</div>
+	{/if}
 
 	{#if playerShares.length > 0}
 		<div class="shares-section space-y-2">

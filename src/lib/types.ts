@@ -8,7 +8,7 @@ export type Player = {
 };
 
 export type AdditionalCost = {
-	id: number;
+	id?: number;
 	label: string;
 	amount: number;
 };

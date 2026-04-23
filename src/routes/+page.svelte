@@ -13,9 +13,14 @@
 	import type { Player, AdditionalCost } from '$lib/types';
 	import { saveSession, loadSession, clearSession } from '$lib/utils';
 	import { toast } from 'svelte-sonner';
+	import { computeContentHash } from '$lib/utils/content-hash';
+	import { createOrReuseSession } from '$lib/api/sharing';
 
 	let currentView = $state<'editor' | 'preview'>('editor');
 	let isHydrated = $state(false);
+	let shareUrl = $state('');
+	let isGeneratingShare = $state(false);
+	let lastContentHash = $state('');
 
 	let sessionTitle = $state('');
 	let sessionDate = $state(new Date().toISOString().split('T')[0]);
@@ -136,6 +141,44 @@
 				?.setAttribute('content', m.web_description());
 		}
 	});
+
+	// Generate share link when summary becomes available and content changes
+	async function generateShareUrl() {
+		const payload = {
+			sessionTitle,
+			sessionDate,
+			startTime: startTime ?? '',
+			courtHours,
+			courtPrice,
+			shuttlecockPrice,
+			shuttlecockCount,
+			additionalCosts,
+			players
+		};
+		const hash = await computeContentHash(payload);
+		if (hash === lastContentHash) return; // unchanged
+		lastContentHash = hash;
+		isGeneratingShare = true;
+		try {
+			const result = await createOrReuseSession(payload);
+			shareUrl = `${window.location.origin}/s/${result.id}`;
+		} catch {
+			shareUrl = '';
+		} finally {
+			isGeneratingShare = false;
+		}
+	}
+
+	$effect(() => {
+		if (canShare && !isGeneratingShare) {
+			generateShareUrl();
+		} else if (!canShare) {
+			shareUrl = '';
+			lastContentHash = '';
+		}
+	});
+
+	let canShare = $derived(totalCost > 0 && players.length > 0 && totalHours > 0);
 </script>
 
 <div class="app-shell">
@@ -155,6 +198,8 @@
 			{playerShares}
 			onShare={switchToPreview}
 			onClear={handleClearSession}
+			{shareUrl}
+			{isGeneratingShare}
 		/>
 	{:else}
 		<BillPreview

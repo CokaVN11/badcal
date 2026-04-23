@@ -24,6 +24,7 @@ export function saveSession(data: Omit<PersistedSession, 'version' | 'savedAt'>)
 	try {
 		const session: PersistedSession = {
 			...data,
+			additionalCosts: data.additionalCosts.map((c, i) => ({ ...c, id: c.id ?? i })),
 			version: STORAGE_VERSION,
 			savedAt: Date.now()
 		};
@@ -53,7 +54,11 @@ export function loadSession(): Omit<PersistedSession, 'version' | 'savedAt'> | n
 			courtPrice: session.courtPrice ?? 0,
 			shuttlecockPrice: session.shuttlecockPrice ?? 0,
 			shuttlecockCount: session.shuttlecockCount ?? 1,
-			additionalCosts: session.additionalCosts ?? [],
+			additionalCosts: (session.additionalCosts ?? []).map((c: { id?: number; label: string; amount: number }, i: number) => ({
+				id: c.id ?? i,
+				label: c.label,
+				amount: c.amount,
+			})),
 			players: session.players ?? []
 		};
 	} catch {
