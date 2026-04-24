@@ -1,8 +1,9 @@
 import { z } from 'zod';
+import { m } from '$lib/paraglide/messages';
 
-export const formSchema = z.object({
-	sessionTitle: z.string().min(1, 'Session title is required'),
-	sessionDate: z.string().min(1, 'Date is required')
+export const sessionFormSchema = z.object({
+	title: z.string().min(1, m.validation_session_title_required()),
+	date: z.string().min(1, m.validation_session_date_required())
 });
 
-export type FormSchema = typeof formSchema;
+export type SessionFormSchema = typeof sessionFormSchema;

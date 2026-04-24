@@ -1,31 +1,31 @@
 <script lang="ts">
 	import { getContext, onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { sessionStore } from '$lib/stores/session.svelte';
+	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { IconPlus, IconTrash } from '@tabler/icons-svelte-runes';
 	import { toast } from 'svelte-sonner';
 	import { createOrReuseSession } from '$lib/api/sharing';
-	import type { Group } from '$lib/types';
+	import type { CourtBlock, Group } from '$lib/types';
 
 	const setReady = getContext<{ setReady: (v: boolean) => void }>('layout').setReady;
 
 	onMount(() => {
-		if ((sessionStore.courtBlocks?.length ?? 0) === 0) {
+		if ((sessionStorage.courtBlocks?.length ?? 0) === 0) {
 			goto('/create');
 		}
 	});
 
 	let groups = $state<Group[]>(
-		(sessionStore.groups?.length ?? 0) > 0
-			? [...sessionStore.groups]
+		(sessionStorage.groups?.length ?? 0) > 0
+			? [...sessionStorage.groups]
 			: [{ id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] }]
 	);
 
 	let saving = $state(false);
 
 	$effect(() => {
-		sessionStore.groups = groups;
+		sessionStorage.groups = groups;
 	});
 
 	let isValid = $derived(groups.some((g) => g.playerNames.length > 0));
@@ -77,20 +77,20 @@
 		saving = true;
 		try {
 			const payload = {
-				sessionTitle: sessionStore.sessionTitle,
-				sessionDate: sessionStore.sessionDate,
-				courtBlocks: sessionStore.courtBlocks.map((b) => ({
+				title: sessionStorage.title,
+				date: sessionStorage.date,
+				courtBlocks: sessionStorage.courtBlocks.map((b) => ({
 					courtCount: b.courtCount,
 					startTime: b.startTime,
 					endTime: b.endTime,
 					pricePerHour: b.pricePerHour
-				})),
+				})) as CourtBlock[],
 				groups: groups.map((g) => ({
 					startTime: g.startTime,
 					endTime: g.endTime,
 					playerNames: g.playerNames
-				})),
-				extraCosts: sessionStore.extraCosts.map((c) => ({ label: c.label, amount: c.amount }))
+				})) as Group[],
+				extraCosts: sessionStorage.extraCosts.map((c) => ({ label: c.label, amount: c.amount }))
 			};
 
 			const result = await createOrReuseSession(payload);
@@ -104,9 +104,9 @@
 </script>
 
 <div class="pb-24">
-	<header class="sticky top-0 z-20 backdrop-blur-md border-b bg-white/90 border-(--border) px-4 py-3">
-		<h1 class="text-lg font-semibold text-(--ink)">{m.onboarding_step2_title()}</h1>
-		<p class="text-sm text-(--ink-muted)">{m.onboarding_step2_desc()}</p>
+	<header class="sticky top-0 z-20 backdrop-blur-md border-b bg-white/90 border-border px-4 py-3">
+		<h1 class="text-lg font-semibold text-ink">{m.onboarding_step2_title()}</h1>
+		<p class="text-sm text-ink-muted">{m.onboarding_step2_desc()}</p>
 	</header>
 
 	<form
@@ -117,18 +117,18 @@
 		<!-- Groups -->
 		<section class="space-y-3">
 			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-semibold text-(--ink)">{m.grouped_players_heading()}</h2>
+				<h2 class="text-sm font-semibold text-ink">{m.grouped_players_heading()}</h2>
 				<button type="button" onclick={addGroup} class="btn btn-xs btn-outline">
 					<IconPlus class="h-3 w-3" /> Add group
 				</button>
 			</div>
 
 			{#each groups as group, gi (group.id)}
-				<div class="rounded-2xl bg-white shadow-sm border border-(--border) p-4 space-y-3">
+				<div class="rounded-2xl bg-white shadow-sm border border-border p-4 space-y-3">
 					<div class="flex items-center justify-between">
-						<span class="text-xs font-medium text-(--ink-muted)">Group {gi + 1}</span>
+						<span class="text-xs font-medium text-ink-muted">Group {gi + 1}</span>
 						{#if groups.length > 1}
-							<button type="button" onclick={() => removeGroup(group.id)} class="text-(--ink-muted) hover:text-red-500">
+							<button type="button" onclick={() => removeGroup(group.id)} class="text-ink-muted hover:text-red-500">
 								<IconTrash class="h-4 w-4" />
 							</button>
 						{/if}
@@ -137,7 +137,7 @@
 					<!-- Time window -->
 					<div class="flex items-center gap-2">
 						<div class="flex-1">
-							<label class="text-xs text-(--ink-muted)">Start</label>
+							<label class="text-xs text-ink-muted">Start</label>
 							<input
 								type="time"
 								bind:value={group.startTime}
@@ -145,7 +145,7 @@
 							/>
 						</div>
 						<div class="flex-1">
-							<label class="text-xs text-(--ink-muted)">End</label>
+							<label class="text-xs text-ink-muted">End</label>
 							<input
 								type="time"
 								bind:value={group.endTime}
@@ -156,12 +156,12 @@
 
 					<!-- Players in group -->
 					<div>
-						<label class="text-xs text-(--ink-muted)">Players</label>
+						<label class="text-xs text-ink-muted">Players</label>
 						<div class="flex flex-wrap gap-1 mt-1">
 							{#each group.playerNames as name, ni (ni)}
 								<span class="badge badge-outline gap-1">
 									{name}
-									<button type="button" onclick={() => removePlayer(group.id, ni)} class="text-(--ink-muted) hover:text-red-500">×</button>
+									<button type="button" onclick={() => removePlayer(group.id, ni)} class="text-ink-muted hover:text-red-500">×</button>
 								</span>
 							{/each}
 						</div>

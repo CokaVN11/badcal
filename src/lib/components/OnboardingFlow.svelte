@@ -4,9 +4,7 @@
 
 	import { m } from '$lib/paraglide/messages.js';
 	import CoachMark from './CoachMark.svelte';
-	import { onMount } from 'svelte';
-
-	const STORAGE_KEY = 'badcal_onboarding_complete';
+	import { appStorage } from '$lib/stores/storage.svelte';
 
 	type Step = {
 		title: () => string;
@@ -17,6 +15,9 @@
 
 	let currentStep = $state(0);
 	let isActive = $state(false);
+
+	// Reactive onboarding state — synced with localStorage automatically
+	const isOnboardingComplete = $derived(appStorage.onboardingComplete);
 
 	// Steps use functions to ensure i18n messages are reactive to language changes
 	const steps: Step[] = [
@@ -40,9 +41,9 @@
 		}
 	];
 
-	onMount(() => {
-		const complete = localStorage.getItem(STORAGE_KEY);
-		if (!complete) {
+	// Check if onboarding was already completed on mount
+	$effect(() => {
+		if (!isOnboardingComplete) {
 			// Delay slightly so layout renders first
 			setTimeout(() => {
 				isActive = true;
@@ -64,7 +65,7 @@
 
 	function completeOnboarding() {
 		isActive = false;
-		localStorage.setItem(STORAGE_KEY, 'true');
+		appStorage.onboardingComplete = true;
 	}
 
 	let currentStepData = $derived(steps[currentStep]);

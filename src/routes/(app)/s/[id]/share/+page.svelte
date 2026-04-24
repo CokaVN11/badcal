@@ -43,11 +43,11 @@
 	});
 </script>
 
-<div class="min-h-dvh flex flex-col bg-(--surface-muted)">
-	<header class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 bg-white/90 border-(--border)">
+<div class="min-h-dvh flex flex-col bg-surface-muted">
+	<header class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 bg-white/90 border-border">
 		<div class="max-w-lg mx-auto flex items-center gap-3">
-			<a href={`/s/${data.session.id}`} class="text-(--ink-muted) hover:text-(--ink)">← Back</a>
-			<h1 class="text-lg font-semibold flex-1 text-(--ink)">{m.share_sheet_title()}</h1>
+			<a href={`/s/${data.session.id}`} class="text-ink-muted hover:text-ink">← Back</a>
+			<h1 class="text-lg font-semibold flex-1 text-ink">{m.share_sheet_title()}</h1>
 		</div>
 	</header>
 
@@ -55,27 +55,27 @@
 		<div class="max-w-sm mx-auto w-full space-y-6 text-center">
 			<!-- Session info -->
 			<div>
-				<h2 class="text-xl font-semibold text-(--ink)">{data.session.sessionTitle}</h2>
-				<p class="text-sm text-(--ink-muted)">{data.session.sessionDate}</p>
+				<h2 class="text-xl font-semibold text-ink">{data.session.sessionTitle}</h2>
+				<p class="text-sm text-ink-muted">{data.session.sessionDate}</p>
 			</div>
 
 			<!-- QR Code -->
 			{#if qrDataUrl}
-				<div class="flex justify-center rounded-2xl bg-white p-4 shadow-sm border border-(--border)">
+				<div class="flex justify-center rounded-2xl bg-white p-4 shadow-sm border border-border">
 					<img src={qrDataUrl} alt="QR code for share link" class="w-60 h-60" />
 				</div>
 			{:else}
-				<div class="flex justify-center rounded-2xl bg-white p-4 shadow-sm border border-(--border)">
-					<div class="w-60 h-60 flex items-center justify-center text-(--ink-muted)">
+				<div class="flex justify-center rounded-2xl bg-white p-4 shadow-sm border border-border">
+					<div class="w-60 h-60 flex items-center justify-center text-ink-muted">
 						Loading QR...
 					</div>
 				</div>
 			{/if}
 
 			<!-- Share URL -->
-			<div class="rounded-2xl bg-white shadow-sm border border-(--border) p-4">
-				<p class="text-xs text-(--ink-muted) mb-2">Share link</p>
-				<p class="text-sm font-mono text-(--ink) break-all">{shareUrl()}</p>
+			<div class="rounded-2xl bg-white shadow-sm border border-border p-4">
+				<p class="text-xs text-ink-muted mb-2">Share link</p>
+				<p class="text-sm font-mono text-ink break-all">{shareUrl()}</p>
 			</div>
 
 			<!-- Copy button -->

@@ -12,8 +12,6 @@ export interface CreateSessionResult {
 	id: string;
 }
 
-export interface PayToggleResult {}
-
 /** Create a sharing session or reuse an existing one for identical content. */
 export async function createOrReuseSession(
 	payload: SessionState
@@ -37,7 +35,7 @@ export async function togglePaid(
 	sessionId: string,
 	playerId: number,
 	paid: boolean
-): Promise<PayToggleResult> {
+): Promise<{ success: boolean }> {
 	const res = await fetch(`/api/sessions/${sessionId}/pay`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -49,5 +47,5 @@ export async function togglePaid(
 		throw new Error((err as { error: string }).error ?? 'Failed to toggle paid status');
 	}
 
-	return res.json() as Promise<PayToggleResult>;
+	return res.json() as Promise<{ success: boolean }>;
 }

@@ -1,17 +1,12 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { setContext } from 'svelte';
-	import { sessionStore, hydrate, persist } from '$lib/stores/session.svelte';
+	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import LanguageToggle from '$lib/components/LanguageToggle.svelte';
+	import { Button } from '$lib/components/ui/button';
 	import * as m from '$lib/paraglide/messages';
 
 	let { children } = $props();
-
-	onMount(() => {
-		hydrate();
-		persist();
-	});
 
 	// ready signal set by child pages via context
 	let ready = $state(false);
@@ -35,53 +30,49 @@
 	});
 
 	const ctaDisabled = $derived.by(() => {
-		if (route === '/create') return !(ready && sessionStore.courtBlocks.length > 0);
-		if (route === '/details') return !(ready && sessionStore.groups.some((g) => g.playerNames.length > 0));
+		if (route === '/create') return !(ready && sessionStorage.courtBlocks.length > 0);
+		if (route === '/details') return !(ready && sessionStorage.groups.some((g) => g.playerNames.length > 0));
 		return !ready;
 	});
+
+	const sessionId = $derived(route.startsWith('/s/') ? route.split('/')[2] : undefined);
 
 	const ctaHref = $derived.by(() => {
 		if (route === '/create') return '/details';
 		if (route === '/details') return undefined; // triggers form submit via button
-		if (route.startsWith('/s/') && route.endsWith('/review')) {
-			return `/s/${route.split('/')[2]}/share`;
-		}
-		if (route.startsWith('/s/') && !route.endsWith('/share')) {
-			return `/s/${route.split('/')[2]}/share`;
-		}
+		if (sessionId) return `/s/${sessionId}/share`;
 		return undefined;
 	});
 
 	const showFooter = $derived(!route.endsWith('/share'));
 </script>
 
-<div class="min-h-dvh flex flex-col bg-(--surface-muted)">
+<div class="min-h-dvh flex flex-col bg-surface-container-high">
 	{@render children()}
 </div>
 
 {#if showFooter}
-	<footer class="fixed inset-x-0 bottom-0 z-40 border-t border-(--border) bg-white/95 backdrop-blur-md">
+	<footer class="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-white/95 backdrop-blur-md">
 		<div class="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
 			{#if ctaHref !== undefined}
-				<a
+				<Button
 					href={ctaHref}
-					class="btn btn-primary flex-1 h-12"
-					aria-disabled={ctaDisabled}
-					class:opacity-50={ctaDisabled}
-					class:cursor-not-allowed={ctaDisabled}
+					variant="default"
+					class="flex-1 h-12"
+					disabled={ctaDisabled}
 				>
 					{ctaLabel}
-				</a>
+				</Button>
 			{:else}
-				<button
+				<Button
 					type="submit"
 					form="details-form"
-					class="btn btn-primary flex-1 h-12"
+					variant="default"
+					class="flex-1 h-12"
 					disabled={ctaDisabled}
-					aria-disabled={ctaDisabled}
 				>
 					{ctaLabel}
-				</button>
+				</Button>
 			{/if}
 			<LanguageToggle />
 		</div>

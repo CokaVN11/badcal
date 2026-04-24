@@ -3,7 +3,7 @@
 	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import { togglePaid } from '$lib/api/sharing';
-	import { sessionStore } from '$lib/stores/session.svelte';
+	import { sessionStore } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
 
 	let { data }: { data: PageData } = $props();
@@ -58,14 +58,14 @@
 	}
 </script>
 
-<div class="min-h-dvh flex flex-col bg-(--surface-muted)">
-	<header class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 bg-white/90 border-(--border)">
+<div class="min-h-dvh flex flex-col bg-surface-muted">
+	<header class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 bg-white/90 border-border">
 		<div class="max-w-lg mx-auto flex items-center gap-3">
-			<button onclick={() => history.back()} class="text-(--ink-muted) hover:text-(--ink)">
+			<button onclick={() => history.back()} class="text-ink-muted hover:text-ink">
 				←
 			</button>
-			<h1 class="text-lg font-semibold flex-1 text-(--ink)">{m.bill_preview_heading()}</h1>
-			<a href={`/s/${data.session.id}/review`} class="text-sm text-(--primary) underline">
+			<h1 class="text-lg font-semibold flex-1 text-ink">{m.bill_preview_heading()}</h1>
+			<a href={`/s/${data.session.id}/review`} class="text-sm text-primary underline">
 				Review
 			</a>
 		</div>
@@ -74,9 +74,9 @@
 	<main class="flex-1 p-4 pb-28">
 		<div class="max-w-md mx-auto space-y-4">
 			<!-- Session info card -->
-			<div class="rounded-2xl bg-white shadow-sm border border-(--border) p-4">
-				<h2 class="font-semibold text-(--ink)">{data.session.sessionTitle}</h2>
-				<p class="text-sm text-(--ink-muted)">{data.session.sessionDate}</p>
+			<div class="rounded-2xl bg-white shadow-sm border border-border p-4">
+				<h2 class="font-semibold text-ink">{data.session.sessionTitle}</h2>
+				<p class="text-sm text-ink-muted">{data.session.sessionDate}</p>
 				<div class="mt-2 flex flex-wrap gap-1">
 					{#each data.session.groups as group}
 						{#each group.playerNames as name}
@@ -93,14 +93,14 @@
 				{#if allPaid}
 					<p class="mt-2 text-sm font-medium text-green-600">All paid ✓</p>
 				{:else}
-					<p class="mt-2 text-sm text-(--ink-muted)">{paidCount}/{allPlayers.length} paid</p>
+					<p class="mt-2 text-sm text-ink-muted">{paidCount}/{allPlayers.length} paid</p>
 				{/if}
 			</div>
 
 			<!-- Who are you + Mark paid -->
-			<div class="rounded-2xl bg-white shadow-sm border border-(--border) overflow-hidden">
-				<div class="px-4 py-3 border-b border-(--border)">
-					<span class="text-sm font-semibold text-(--ink)">{m.players_heading()}</span>
+			<div class="rounded-2xl bg-white shadow-sm border border-border overflow-hidden">
+				<div class="px-4 py-3 border-b border-border">
+					<span class="text-sm font-semibold text-ink">{m.players_heading()}</span>
 				</div>
 				<div class="p-4 space-y-3">
 					<select

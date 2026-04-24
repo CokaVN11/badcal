@@ -3,6 +3,7 @@
 
 import { QRPay, BanksObject } from 'vietnam-qr-pay';
 import QRCode from 'qrcode';
+import { paymentStorage } from '$lib/stores/storage.svelte';
 
 export type ProviderType = 'bank' | 'ewallet';
 
@@ -125,40 +126,29 @@ export function isValidAccountNumber(accountNumber: string, providerKey?: string
 	return /^\d{6,19}$/.test(cleaned);
 }
 
-const STORAGE_KEY = 'badcal_payment_info';
-
 export type SavedPaymentInfo = {
 	providerKey: ProviderKey;
 	accountNumber: string;
 	accountName?: string;
 };
 
+/**
+ * @deprecated Use paymentStorage.paymentInfo directly instead
+ */
 export function savePaymentInfo(info: SavedPaymentInfo): void {
-	if (typeof localStorage === 'undefined') return;
-	localStorage.setItem(STORAGE_KEY, JSON.stringify(info));
+	paymentStorage.paymentInfo = info;
 }
 
+/**
+ * @deprecated Use paymentStorage.paymentInfo directly instead
+ */
 export function loadPaymentInfo(): SavedPaymentInfo | null {
-	if (typeof localStorage === 'undefined') return null;
-	const saved = localStorage.getItem(STORAGE_KEY);
-	if (!saved) return null;
-
-	try {
-		const parsed = JSON.parse(saved);
-		if (parsed.bankKey) {
-			return {
-				providerKey: parsed.bankKey,
-				accountNumber: parsed.accountNumber,
-				accountName: parsed.accountName
-			};
-		}
-		return parsed;
-	} catch {
-		return null;
-	}
+	return paymentStorage.paymentInfo;
 }
 
+/**
+ * @deprecated Use paymentStorage.paymentInfo = null instead
+ */
 export function clearPaymentInfo(): void {
-	if (typeof localStorage === 'undefined') return;
-	localStorage.removeItem(STORAGE_KEY);
+	paymentStorage.paymentInfo = null;
 }

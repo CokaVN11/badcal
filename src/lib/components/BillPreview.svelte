@@ -9,6 +9,8 @@
 	import { tick, onMount } from 'svelte';
 	import { fade } from 'svelte/transition';
 	import { browser } from '$lib/env';
+	import { appStorage } from '$lib/stores/storage.svelte';
+	import type { BillTheme } from '$lib/utils/bill-share';
 	import {
 		IconLoader2,
 		IconShare,
@@ -63,9 +65,8 @@
 	let includeQR = $state(true);
 	let showCelebration = $state(false);
 
-	// Theme state - default to zalopay for the modern look
-	const THEME_STORAGE_KEY = 'badcal-bill-theme';
-	let currentTheme: BillTheme = $state('zalopay');
+	// Theme state — synced with localStorage automatically
+	let currentTheme: BillTheme = $state(appStorage.billTheme as BillTheme);
 
 	let themeClasses = $derived(currentTheme === 'zalopay' ? {
 		bg: 'bg-surface-muted',
@@ -84,13 +85,15 @@
 	let receiptEl: HTMLDivElement | null = $derived(currentTheme === 'zalopay' ? billZaloPayComponent?.getElement() ?? null : billThermalComponent?.getElement() ?? null);
 
 	onMount(() => {
-		const saved = localStorage.getItem(THEME_STORAGE_KEY);
-		if (saved === 'thermal' || saved === 'zalopay') currentTheme = saved;
+		// Sync currentTheme with storage on mount
+		if (appStorage.billTheme === 'thermal' || appStorage.billTheme === 'zalopay') {
+			currentTheme = appStorage.billTheme as BillTheme;
+		}
 	});
 
 	function toggleTheme() {
 		currentTheme = currentTheme === 'thermal' ? 'zalopay' : 'thermal';
-		if (browser) localStorage.setItem(THEME_STORAGE_KEY, currentTheme);
+		if (browser) appStorage.billTheme = currentTheme;
 		triggerHaptic('light');
 	}
 
