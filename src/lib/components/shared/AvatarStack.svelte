@@ -42,7 +42,7 @@
 	{/each}
 	{#if overflowCount > 0}
 		<div
-			class="rounded-full ring-2 ring-white bg-(--slate-200) text-(--slate-600) font-bold flex items-center justify-center {sizeClasses[
+			class="rounded-full ring-2 ring-white bg-slate-200 text-slate-600 font-bold flex items-center justify-center {sizeClasses[
 				size
 			]}"
 		>

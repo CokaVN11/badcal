@@ -9,7 +9,8 @@
 		getNamedPlayers,
 		getOthersCount
 	} from '$lib/utils';
-	import type { ExtraCost, Player } from '$lib/types';
+	import type { ExtraCost, Player, Group, CourtBlock } from '$lib/types';
+	import { computeMinuteProportionShares, computeCourtTotal, parseTime } from '$lib/utils/share-calc';
 	import { IconCheck } from '@tabler/icons-svelte-runes';
 	import PaymentQR from '../PaymentQR.svelte';
 	import { calculatePlayerTimes } from '../Players/playerList.logic';
@@ -37,6 +38,9 @@
 		totalCost: number;
 		showNames: boolean;
 		includeQR: boolean;
+		groups?: Group[];
+		courtBlocks?: CourtBlock[];
+		extraCosts?: ExtraCost[];
 	};
 
 	let {
@@ -50,7 +54,10 @@
 		playerShares,
 		totalCost,
 		showNames,
-		includeQR
+		includeQR,
+		groups,
+		courtBlocks,
+		extraCosts
 	}: Props = $props();
 
 	let receiptEl: HTMLDivElement | null = $state(null);
@@ -62,11 +69,68 @@
 
 	const MAX_VISIBLE_EXTRAS = 6;
 
+	// Compute shares from groups if provided
+	type CompatPlayer = { id: number; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
+	const computedShares = $derived(
+		groups?.length && courtBlocks?.length
+			? computeMinuteProportionShares(groups, courtBlocks, extraCosts ?? [])
+			: []
+	);
+	const compatShares = $derived<CompatPlayer[]>(
+		computedShares.length > 0
+			? computedShares.map((s, i) => ({
+					id: i,
+					name: s.name,
+					hours: Math.round(s.playerMinutes / 60 * 10) / 10,
+					arrivalOffsetMinutes: 0,
+					share: s.courtShare + s.extraShare,
+					playerMinutes: s.playerMinutes,
+					courtShare: s.courtShare,
+					extraShare: s.extraShare,
+					total: s.total
+				}))
+			: []
+	);
+	const displayShares = $derived<CompatPlayer[]>(
+		computedShares.length > 0 ? compatShares : (playerShares as unknown as CompatPlayer[])
+	);
+	const compatGroupedByHours = $derived<[number, CompatPlayer[]][]>(() => {
+		if (computedShares.length === 0) return [];
+		const groups: Record<number, CompatPlayer[]> = {};
+		for (const s of computedShares) {
+			const hours = Math.round(s.playerMinutes / 60 * 10) / 10;
+			if (!groups[hours]) groups[hours] = [];
+			groups[hours].push({
+				id: 0,
+				name: s.name,
+				hours,
+				arrivalOffsetMinutes: 0,
+				share: s.courtShare + s.extraShare,
+				playerMinutes: s.playerMinutes,
+				courtShare: s.courtShare,
+				extraShare: s.extraShare,
+				total: s.total
+			});
+		}
+		return Object.entries(groups)
+			.map(([k, v]) => [Number(k), v] as [number, CompatPlayer[]])
+			.sort((a, b) => b[0] - a[0]);
+	});
+
 	function getPlayerColor(index: number): string {
 		return PLAYER_COLORS[index % PLAYER_COLORS.length];
 	}
 
-	let totalHours = $derived(playerShares.reduce((sum, p) => sum + (p.hours || 0), 0));
+	const compatTotalHours = $derived(
+		computedShares.length > 0
+			? computedShares.reduce((sum, s) => sum + s.playerMinutes, 0) / 60
+			: 0
+	);
+	let totalHours = $derived(
+		computedShares.length > 0
+			? compatTotalHours
+			: playerShares.reduce((sum, p) => sum + (p.hours || 0), 0)
+	);
 	let paidExtras = $derived(additionalCosts.filter((c) => c.amount > 0));
 	let visibleExtras = $derived(paidExtras.slice(0, MAX_VISIBLE_EXTRAS));
 	let remainingExtras = $derived(paidExtras.slice(MAX_VISIBLE_EXTRAS));
@@ -91,7 +155,7 @@
 		</div>
 		<div class="zp-total">{formatCurrency(totalCost)}</div>
 		<div class="zp-stats">
-			<span>{playerShares.length} {m.players_count()}</span>
+			<span>{displayShares.length} {m.players_count()}</span>
 			<span class="zp-dot">•</span>
 			<span>{totalHours}h</span>
 		</div>
@@ -128,7 +192,7 @@
 	<div class="zp-section">
 		<div class="zp-section-head">{m.player_shares()}</div>
 		{#if showNames}
-			{#each playerShares as player, i (player.id)}
+			{#each displayShares as player, i (player.id)}
 				<div class="zp-player">
 					<span class="zp-avatar" style="background:{getPlayerColor(i)}"
 						>{(player.name?.trim() || `P${i + 1}`).charAt(0).toUpperCase()}</span
@@ -139,7 +203,7 @@
 				</div>
 			{/each}
 		{:else}
-			{#each groupedByHours as [hours, players] (hours)}
+			{#each (typeof compatGroupedByHours === 'function' ? compatGroupedByHours() : compatGroupedByHours) as [hours, players] (hours)}
 				{@const groupShare = players[0]?.share ?? 0}
 				{@const namedPlayers = getNamedPlayers(players)}
 				{@const othersCount = getOthersCount(namedPlayers.length, players.length)}

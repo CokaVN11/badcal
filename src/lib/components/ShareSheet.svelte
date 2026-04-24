@@ -54,15 +54,15 @@
 			tabindex="-1"
 		>
 			<div class="flex justify-center pt-3 pb-1">
-				<div class="w-10 h-1 bg-(--slate-300) rounded-full"></div>
+				<div class="w-10 h-1 bg-slate-300 rounded-full"></div>
 			</div>
 
-			<div class="flex items-center justify-between px-4 pb-3 border-b border-(--border)">
-				<h2 id="share-sheet-title" class="text-lg font-bold text-(--ink)">
+			<div class="flex items-center justify-between px-4 pb-3 border-b border-border">
+				<h2 id="share-sheet-title" class="text-lg font-bold text-ink">
 					{m.share_sheet_title()}
 				</h2>
 				<button
-					class="p-2 text-(--ink-muted) hover:text-(--ink) hover:bg-(--slate-100) rounded-full transition-colors"
+					class="p-2 text-ink-muted hover:text-ink hover:bg-slate-100 rounded-full transition-colors"
 					onclick={onClose}
 					aria-label={m.close()}
 				>
@@ -72,20 +72,20 @@
 
 			<div class="p-4 space-y-3">
 				<label
-					class="flex items-center gap-3 p-3 bg-(--slate-50) rounded-xl cursor-pointer hover:bg-(--slate-100) transition-colors"
+					class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors"
 				>
 					<input type="checkbox" bind:checked={showNames} class="sr-only peer" />
 					<span
-						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--surface-sunken) peer-checked:bg-(--primary-soft) text-(--ink-muted) peer-checked:text-(--primary) transition-colors"
+						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-surface-muted peer-checked:bg-primary-soft text-ink-muted peer-checked:text-primary transition-colors"
 					>
 						{#if showNames}<IconEye size={18} />{:else}<IconEyeOff size={18} />{/if}
 					</span>
 					<span class="flex-1 min-w-0">
-						<span class="block text-sm font-semibold text-(--ink)">{m.share_show_names()}</span>
-						<span class="block text-xs text-(--ink-muted)">{m.share_show_names_hint()}</span>
+						<span class="block text-sm font-semibold text-ink">{m.share_show_names()}</span>
+						<span class="block text-xs text-ink-muted">{m.share_show_names_hint()}</span>
 					</span>
 					<span
-						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--primary) relative transition-colors"
+						class="shrink-0 w-10 h-6 rounded-full bg-slate-300 peer-checked:bg-primary relative transition-colors"
 					>
 						<span
 							class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {showNames
@@ -96,20 +96,20 @@
 				</label>
 
 				<label
-					class="flex items-center gap-3 p-3 bg-(--slate-50) rounded-xl cursor-pointer hover:bg-(--slate-100) transition-colors"
+					class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl cursor-pointer hover:bg-slate-100 transition-colors"
 				>
 					<input type="checkbox" bind:checked={includeQR} class="sr-only peer" />
 					<span
-						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-(--surface-sunken) peer-checked:bg-(--primary-soft) text-lg"
+						class="shrink-0 w-10 h-10 flex items-center justify-center rounded-full bg-surface-muted peer-checked:bg-primary-soft text-lg"
 					>
 						📱
 					</span>
 					<span class="flex-1 min-w-0">
-						<span class="block text-sm font-semibold text-(--ink)">{m.share_include_qr()}</span>
-						<span class="block text-xs text-(--ink-muted)">{m.share_include_qr_hint()}</span>
+						<span class="block text-sm font-semibold text-ink">{m.share_include_qr()}</span>
+						<span class="block text-xs text-ink-muted">{m.share_include_qr_hint()}</span>
 					</span>
 					<span
-						class="shrink-0 w-10 h-6 rounded-full bg-(--slate-300) peer-checked:bg-(--primary) relative transition-colors"
+						class="shrink-0 w-10 h-6 rounded-full bg-slate-300 peer-checked:bg-primary relative transition-colors"
 					>
 						<span
 							class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow transition-transform {includeQR
@@ -131,14 +131,14 @@
 
 				<div class="grid grid-cols-2 gap-3">
 					<button
-						class="flex items-center justify-center gap-2 py-3 bg-(--slate-100) hover:bg-(--slate-200) text-(--ink) font-medium rounded-xl transition-colors"
+						class="flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-slate-200 text-ink font-medium rounded-xl transition-colors"
 						onclick={onCopyText}
 					>
 						<IconCopy size={18} />
 						<span>{m.copy_text_btn()}</span>
 					</button>
 					<button
-						class="flex items-center justify-center gap-2 py-3 bg-(--slate-100) hover:bg-(--slate-200) text-(--ink) font-medium rounded-xl transition-colors"
+						class="flex items-center justify-center gap-2 py-3 bg-slate-100 hover:bg-slate-200 text-ink font-medium rounded-xl transition-colors"
 						onclick={onDownloadImage}
 					>
 						<IconDownload size={18} />

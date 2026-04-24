@@ -60,9 +60,9 @@
 		<Dialog.Content
 			class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl outline-none data-[state=open]:animate-fade-in"
 		>
-			<div class="p-4 border-b border-(--slate-200)">
+			<div class="p-4 border-b border-slate-200">
 				<div class="flex items-center justify-between">
-					<Dialog.Title class="text-lg font-semibold text-(--slate-800)">
+					<Dialog.Title class="text-lg font-semibold text-slate-800">
 						{m.saved_lineups()}
 					</Dialog.Title>
 					<Dialog.Close class="btn-icon" type="button" aria-label={m.cancel()}>
@@ -73,29 +73,28 @@
 
 			<div class="p-4 space-y-4 max-h-96 overflow-y-auto">
 				{#if lineups.length === 0}
-					<p class="text-sm text-(--slate-500) text-center py-4">{m.saved_lineups_empty()}</p>
+					<p class="text-sm text-slate-500 text-center py-4">{m.saved_lineups_empty()}</p>
 				{:else}
 					<div class="space-y-2">
 						{#each lineups as lineup (lineup.id)}
-							<div class="flex items-center gap-2 p-3 rounded-xl bg-(--slate-50) border border-(--slate-200)">
+							<div class="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-200">
 								{#if renamingId === lineup.id}
 									<input
 										class="form-input flex-1 h-9 text-sm"
 										bind:value={renameValue}
 										onkeydown={(e) => handleRenameKeydown(e, lineup.id)}
 										onblur={() => commitRename(lineup.id)}
-										autofocus
 									/>
 								{:else}
 									<div class="flex-1 min-w-0">
 										<button
 											type="button"
-											class="text-sm font-medium text-(--slate-800) truncate block w-full text-left hover:text-(--slate-600)"
+											class="text-sm font-medium text-slate-800 truncate block w-full text-left hover:text-slate-600"
 											onclick={() => startRename(lineup)}
 										>
 											{lineup.name}
 										</button>
-										<span class="text-xs text-(--slate-500)"
+										<span class="text-xs text-slate-500"
 											>{lineup.playerNames.length}
 											{lineup.playerNames.length === 1 ? m.player() : m.players_count()}</span
 										>
@@ -112,7 +111,7 @@
 									</button>
 									<button
 										type="button"
-										class="btn-icon text-(--slate-400) hover:text-red-500"
+										class="btn-icon text-slate-400 hover:text-red-500"
 										onclick={() => onDelete(lineup.id)}
 										aria-label={m.delete_lineup()}
 									>
@@ -125,7 +124,7 @@
 				{/if}
 			</div>
 
-			<div class="p-4 border-t border-(--slate-200)">
+			<div class="p-4 border-t border-slate-200">
 				<div class="flex gap-2">
 					<input
 						class="form-input flex-1 h-11 text-sm"

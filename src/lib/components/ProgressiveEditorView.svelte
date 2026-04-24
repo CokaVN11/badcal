@@ -67,7 +67,7 @@
 	let playersBadge = $derived(isPlayersComplete ? `${players.length} × ${totalHours}h` : undefined);
 </script>
 
-<div class="flex min-h-dvh flex-col bg-(--surface-muted)">
+<div class="flex min-h-dvh flex-col bg-surface-muted">
 	<header class="compact-header sticky top-0 z-30">
 		<div class="compact-header-logo text-white"><IconPingPong class="h-5 w-5" /></div>
 		<div class="min-w-0 flex-1">
@@ -75,34 +75,34 @@
 				type="text"
 				bind:value={sessionTitle}
 				placeholder={m.session_title_placeholder()}
-				class="w-full bg-transparent border-none p-0 text-base font-semibold tracking-tight text-(--ink) placeholder:font-normal placeholder:text-(--ink-muted) focus:outline-none focus:ring-0"
+				class="w-full bg-transparent border-none p-0 text-base font-semibold tracking-tight text-ink placeholder:font-normal placeholder:text-ink-muted focus:outline-none focus:ring-0"
 			/>
 			<div class="mt-2 grid grid-cols-1 gap-2 min-[360px]:grid-cols-2 sm:hidden">
 				<input
 					type="date"
 					bind:value={sessionDate}
-					class="w-full rounded-full bg-(--surface-sunken) px-3 py-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-2 focus:ring-(--primary)/20"
+					class="w-full rounded-full bg-surface-muted px-3 py-2 text-sm text-ink-soft focus:outline-none focus:ring-2 focus:ring-primary/20"
 					aria-label={m.session_info()}
 				/>
 				<input
 					type="time"
 					bind:value={startTime}
-					class="w-full rounded-full bg-(--surface-sunken) px-3 py-2 text-sm text-(--ink-soft) focus:outline-none focus:ring-2 focus:ring-(--primary)/20"
+					class="w-full rounded-full bg-surface-muted px-3 py-2 text-sm text-ink-soft focus:outline-none focus:ring-2 focus:ring-primary/20"
 					aria-label={m.session_start_time()}
 				/>
 			</div>
 		</div>
-		<div class="hidden items-center gap-2 rounded-full bg-(--surface-sunken) px-3 py-2 sm:flex">
+		<div class="hidden items-center gap-2 rounded-full bg-surface-muted px-3 py-2 sm:flex">
 			<input
 				type="date"
 				bind:value={sessionDate}
-				class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+				class="w-auto bg-transparent border-none p-0 text-sm text-ink-soft focus:outline-none focus:ring-0"
 				aria-label={m.session_info()}
 			/>
 			<input
 				type="time"
 				bind:value={startTime}
-				class="w-auto bg-transparent border-none p-0 text-sm text-(--ink-soft) focus:outline-none focus:ring-0"
+				class="w-auto bg-transparent border-none p-0 text-sm text-ink-soft focus:outline-none focus:ring-0"
 				aria-label={m.session_start_time()}
 			/>
 		</div>
@@ -127,11 +127,11 @@
 			</div>
 			<div class="summary-stats">
 				<div class="summary-stat">
-					<span class="text-sm text-(--ink-muted) lowercase"> {m.players_count()} </span>
+					<span class="text-sm text-ink-muted lowercase"> {m.players_count()} </span>
 					<span class="font-semibold text-lg">{players.length}</span>
 				</div>
 				<div class="summary-stat">
-					<span class="text-sm text-(--ink-muted)"> {m.hours_unit()}</span>
+					<span class="text-sm text-ink-muted"> {m.hours_unit()}</span>
 					<span class="font-semibold text-lg">{totalHours}</span>
 				</div>
 			</div>
@@ -187,7 +187,7 @@
 	>
 		<div class="mx-auto max-w-lg">
 			{#if !canShare}
-				<div class="mb-2 text-center text-sm text-(--ink-muted)">
+				<div class="mb-2 text-center text-sm text-ink-muted">
 					{#if !isCostsComplete}
 						{m.share_hint_add_costs()}
 					{:else if !isPlayersComplete}

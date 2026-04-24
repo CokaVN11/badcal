@@ -10,11 +10,11 @@ export type ColorScheme = {
 };
 
 export const GROUP_COLORS: ColorScheme[] = [
-	{ bg: 'from-[#0052ff] to-[#1740b3]', light: 'bg-[#edf3ff]', text: 'text-[#0052ff]' },
-	{ bg: 'from-[#2f7cff] to-[#0052ff]', light: 'bg-[#edf3ff]', text: 'text-[#1740b3]' },
-	{ bg: 'from-[#1740b3] to-[#0a0b0d]', light: 'bg-[#eef0f3]', text: 'text-[#1740b3]' },
-	{ bg: 'from-[#578bfa] to-[#2f7cff]', light: 'bg-[#f1f6ff]', text: 'text-[#0052ff]' },
-	{ bg: 'from-[#0a0b0d] to-[#282b31]', light: 'bg-[#eef0f3]', text: 'text-[#282b31]' }
+	{ bg: 'from-[#0144DB] to-[#012d8a]', light: 'bg-[#e8eeff]', text: 'text-[#0144DB]' },
+	{ bg: 'from-[#2f7cff] to-[#0144DB]', light: 'bg-[#e8eeff]', text: 'text-[#012d8a]' },
+	{ bg: 'from-[#1740b3] to-[#0a0b0d]', light: 'bg-[#EFEFEF]', text: 'text-[#1740b3]' },
+	{ bg: 'from-[#33D387] to-[#1f9d68]', light: 'bg-[#eaf8f1]', text: 'text-[#33D387]' },
+	{ bg: 'from-[#0a0b0d] to-[#282b31]', light: 'bg-[#EFEFEF]', text: 'text-[#282b31]' }
 ];
 
 export function getGroupColor(index: number): ColorScheme {

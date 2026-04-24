@@ -70,16 +70,16 @@
 			{@const count = bucket.count}
 			{@const isDefault = bucket.isDefault}
 			<div
-				class="flex items-center gap-3 p-3 rounded-xl border border-(--border) bg-white"
+				class="flex items-center gap-3 p-3 rounded-xl border border-border bg-white"
 				class:ring-2={isDefault}
-				class:ring-(--zp-blue-200)={isDefault}
+				class:ring-zp-blue-200={isDefault}
 			>
 				<div class="min-w-0">
-					<div class="text-sm font-semibold text-(--ink)">
+					<div class="text-sm font-semibold text-ink">
 						{formatHours(hours)}{m.hours_unit()}
 					</div>
 					{#if isDefault}
-						<div class="text-xs text-(--ink-muted)">
+						<div class="text-xs text-ink-muted">
 							{m.default_hours_badge({ hours, unit: m.hours_unit() })}
 						</div>
 					{/if}
@@ -122,7 +122,7 @@
 
 	{#if remainingHourOptions.length > 0}
 		<div class="pt-1">
-			<div class="text-xs text-(--ink-muted) mb-2 font-medium uppercase tracking-wide">{m.custom_hours()}</div>
+			<div class="text-xs text-ink-muted mb-2 font-medium uppercase tracking-wide">{m.custom_hours()}</div>
 			<div class="flex flex-wrap gap-2">
 				{#each remainingHourOptions as hourOption (hourOption)}
 					<button

@@ -162,7 +162,7 @@
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
 						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
 						>
 							h
 						</span>
@@ -208,14 +208,14 @@
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
 						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
 						>
 							{m.currency()}
 						</span>
 					</div>
-					<p class="text-xs text-(--slate-500) mt-1">{m.court_total_hint()}</p>
+					<p class="text-xs text-slate-500 mt-1">{m.court_total_hint()}</p>
 					{#if courtPerHour > 0}
-						<p class="text-xs text-(--slate-500)">
+						<p class="text-xs text-slate-500">
 							{m.court_per_hour_hint({ amount: formatCurrency(courtPerHour) })}
 						</p>
 					{/if}
@@ -263,7 +263,7 @@
 							class:border-red-500={state.meta.errors.length > 0}
 						/>
 						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
+							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
 						>
 							{m.currency()}
 						</span>
@@ -312,7 +312,7 @@
 	<!-- Array items managed outside TanStack Form for simplicity -->
 	<div class="pt-2">
 		<div class="flex items-center justify-between mb-3">
-			<span class="text-xs text-(--slate-500)">{m.additional_costs()}</span>
+			<span class="text-xs text-slate-500">{m.additional_costs()}</span>
 			<button type="button" class="btn-secondary h-8 text-sm rounded-sm!" onclick={addCost}>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
 					<path
@@ -368,7 +368,7 @@
 									class:border-red-500={additionalCostErrors[cost.id ?? i]?.amount}
 								/>
 								<span
-									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-(--slate-400) pointer-events-none"
+									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none"
 								>
 									{m.currency()}
 								</span>

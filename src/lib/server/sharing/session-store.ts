@@ -69,8 +69,12 @@ export async function createOrReuseSession(
 	const prisma = getPrisma();
 	try {
 		const session = await prisma.session.create({
-				data: { contentHash: hash, sessionTitle: payload.sessionTitle, sessionDate: payload.sessionDate }
-			});
+			data: {
+				contentHash: hash,
+				sessionTitle: payload.sessionTitle,
+				sessionDate: payload.sessionDate
+			}
+		});
 		await prisma.courtBlock.createMany({
 			data: payload.courtBlocks.map((cb) => ({ ...cb, sessionId: session.id }))
 		});
@@ -87,6 +91,14 @@ export async function createOrReuseSession(
 		}
 		throw e;
 	}
+}
+
+export async function getRecentSessions(limit: number = 5) {
+	return getPrisma().session.findMany({
+		orderBy: { createdAt: 'desc' },
+		take: limit,
+		include: { courtBlocks: true, groups: true, extraCosts: true }
+	});
 }
 
 /** List paid player IDs for a session. Returns empty array if none. */
