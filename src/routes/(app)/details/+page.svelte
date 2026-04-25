@@ -36,10 +36,12 @@
 		}
 	});
 
+	const DEFAULT_TIME_RANGE = { startTime: '19:00', endTime: '21:00' };
+
 	let groups = $state<Group[]>(
 		(sessionStorage.groups?.length ?? 0) > 0
 			? [...sessionStorage.groups]
-			: [{ id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] }]
+			: [{ id: crypto.randomUUID(), ...DEFAULT_TIME_RANGE, playerNames: [] }]
 	);
 
 	let expandedGroups = $state<Record<string, boolean>>({});
@@ -78,7 +80,7 @@
 	}
 
 	function addGroup() {
-		const newGroup = { id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] };
+		const newGroup = { id: crypto.randomUUID(), ...DEFAULT_TIME_RANGE, playerNames: [] };
 		groups = [...groups, newGroup];
 		expandedGroups = { ...expandedGroups, [newGroup.id]: true };
 	}
@@ -86,7 +88,7 @@
 	function removeGroup(id: string) {
 		groups = groups.filter((g) => g.id !== id);
 		if (groups.length === 0) {
-			groups = [{ id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] }];
+			groups = [{ id: crypto.randomUUID(), ...DEFAULT_TIME_RANGE, playerNames: [] }];
 		}
 	}
 
@@ -140,7 +142,7 @@
 
 			const result = await createOrReuseSession(payload);
 			await goto(`/s/${result.id}`);
-		} catch (e) {
+		} catch {
 			toast.error('Failed to create session');
 		} finally {
 			saving = false;
@@ -165,20 +167,20 @@
 
 <div class="pb-32">
 	<!-- Sticky Header -->
-	<header class="sticky top-0 z-50 bg-white border-b border-[--color-border] shadow-xs flex items-center justify-between px-4 h-16 w-full">
+	<header class="sticky top-0 z-50 bg-white border-b border-border shadow-xs flex items-center justify-between px-4 h-16 w-full">
 		<div class="flex items-center gap-3">
 			<button
 				onclick={() => goto('/create')}
-				class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[--color-neutral] transition-all active:scale-95"
+				class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-neutral transition-all active:scale-95"
 			>
-				<IconArrowLeft class="h-5 w-5 text-[--color-primary]" />
+				<IconArrowLeft class="h-5 w-5 text-primary" />
 			</button>
-			<h1 class="font-[--font-display] font-bold text-lg tracking-tight text-[--color-ink]">
+			<h1 class="font-display! font-bold text-lg tracking-tight text-ink">
 				{m.onboarding_step2_title()}
 			</h1>
 		</div>
-		<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[--color-neutral] transition-all active:scale-95">
-			<IconDotsVertical class="h-5 w-5 text-[--color-ink-soft]" />
+		<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-neutral transition-all active:scale-95">
+			<IconDotsVertical class="h-5 w-5 text-ink-soft" />
 		</button>
 	</header>
 
@@ -187,35 +189,35 @@
 		<section class="mb-6">
 			<div class="flex items-center justify-between mb-3">
 				<div class="flex items-center gap-3">
-					<div class="h-10 w-10 rounded-full bg-[--color-primary-soft] flex items-center justify-center">
-						<IconPingPong class="h-5 w-5 text-[--color-primary]" />
+					<div class="h-10 w-10 rounded-full bg-primary-soft flex items-center justify-center">
+						<IconPingPong class="h-5 w-5 text-primary" />
 					</div>
 					<div>
-						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">
+						<p class="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">
 							{sessionStorage.title || 'Session'}
 						</p>
-						<p class="font-[--font-display] font-semibold text-base text-[--color-ink]">
+						<p class="font-display! font-semibold text-base text-ink">
 							{formatDate(sessionStorage.date)}
 						</p>
 					</div>
 				</div>
-				<span class="bg-[--color-secondary-soft] text-[--color-secondary] px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+				<span class="bg-secondary-soft text-secondary px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
 					ĐANG CHỜ
 				</span>
 			</div>
 
 			<!-- Cost Summary Card -->
-			<div class="bg-white rounded-xl p-4 shadow-card border border-[--color-border]">
-				<div class="flex justify-between items-center pb-4 border-b border-[--color-neutral] mb-4">
+			<div class="bg-white rounded-xl p-4 shadow-card border border-border">
+				<div class="flex justify-between items-center pb-4 border-b border-neutral mb-4">
 					<div>
-						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Tổng thời gian</p>
-						<p class="font-[--font-display] font-bold text-2xl text-[--color-primary]">
-							{totalHours()} <span class="text-sm font-normal text-[--color-ink-muted]">giờ</span>
+						<p class="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">Tổng thời gian</p>
+						<p class="font-display! font-bold text-2xl text-primary">
+							{totalHours()} <span class="text-sm font-normal text-ink-muted">giờ</span>
 						</p>
 					</div>
 					<div class="text-right">
-						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Dự kiến chi phí</p>
-						<p class="font-[--font-display] font-bold text-2xl text-[--color-ink]">
+						<p class="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">Dự kiến chi phí</p>
+						<p class="font-display! font-bold text-2xl text-ink">
 							{formatCurrency(estimatedCost())}
 						</p>
 					</div>
@@ -223,19 +225,19 @@
 				<div class="flex items-center gap-3">
 					<div class="flex -space-x-2">
 						{#if totalPlayers > 0}
-							{#each Array(Math.min(3, totalPlayers)) as _, i}
-								<div class="w-8 h-8 rounded-full border-2 border-white bg-[--color-primary-soft] flex items-center justify-center text-[10px] font-bold text-[--color-primary]">
+							{#each Array(Math.min(3, totalPlayers)) as _, i (i)}
+								<div class="w-8 h-8 rounded-full border-2 border-white bg-primary-soft flex items-center justify-center text-[10px] font-bold text-primary">
 									{i + 1}
 								</div>
 							{/each}
 							{#if totalPlayers > 3}
-								<div class="w-8 h-8 rounded-full border-2 border-white bg-[--color-neutral] flex items-center justify-center text-[10px] font-bold text-[--color-ink-muted]">
+								<div class="w-8 h-8 rounded-full border-2 border-white bg-neutral flex items-center justify-center text-[10px] font-bold text-ink-muted">
 									+{totalPlayers - 3}
 								</div>
 							{/if}
 						{/if}
 					</div>
-					<p class="text-sm text-[--color-ink-muted]">{totalPlayers} người đã đăng ký</p>
+					<p class="text-sm text-ink-muted">{totalPlayers} người đã đăng ký</p>
 				</div>
 			</div>
 		</section>
@@ -243,8 +245,8 @@
 		<!-- Expanded Players Section -->
 		<section class="mb-6">
 			<div class="flex items-center justify-between mb-3">
-				<h2 class="font-[--font-display] font-semibold text-base text-[--color-ink]">Người chơi</h2>
-				<button class="text-[--color-primary] font-semibold text-xs flex items-center gap-1 active:scale-95 transition-all">
+				<h2 class="font-display! font-semibold text-base text-ink">Người chơi</h2>
+				<button class="text-primary font-semibold text-xs flex items-center gap-1 active:scale-95 transition-all">
 					Chỉnh từng người
 					<IconPencil class="h-4 w-4" />
 				</button>
@@ -255,34 +257,34 @@
 					{@const isExpanded = expandedGroups[group.id]}
 					{@const playerCount = group.playerNames.length}
 
-					<div class="bg-white rounded-xl overflow-hidden shadow-card border border-[--color-border] {isExpanded ? 'border-2 border-[--color-primary]' : ''}">
+					<div class="bg-white rounded-xl overflow-hidden shadow-card border border-border {isExpanded ? 'border-2 border-primary' : ''}">
 						<!-- Group Header -->
 						<button
 							type="button"
 							onclick={() => toggleGroup(group.id)}
-							class="w-full p-4 flex items-center justify-between {isExpanded ? 'bg-[--color-primary-soft]/20 border-b border-[--color-neutral]' : ''}"
+							class="w-full p-4 flex items-center justify-between {isExpanded ? 'bg-primary-soft/20 border-b border-neutral' : ''}"
 						>
 							<div class="flex items-center gap-2">
 								{#if isExpanded}
-									<IconStack2 class="h-5 w-5 text-[--color-primary]" />
+									<IconStack2 class="h-5 w-5 text-primary" />
 								{:else}
-									<IconUsers class="h-5 w-5 text-[--color-ink-soft]" />
+									<IconUsers class="h-5 w-5 text-ink-soft" />
 								{/if}
-								<span class="font-semibold text-[--color-ink] {isExpanded ? 'font-bold' : ''}">
+								<span class="font-semibold text-ink {isExpanded ? 'font-bold' : ''}">
 									{isExpanded ? 'Nhóm ' + (gi + 1) + ' (Đã mở)' : 'Nhóm ' + (gi + 1)}
 								</span>
-								<span class="bg-[--color-neutral] px-2 py-0.5 rounded text-[10px] font-semibold text-[--color-ink-muted]">
+								<span class="bg-neutral px-2 py-0.5 rounded text-[10px] font-semibold text-ink-muted">
 									{formatTime(group.startTime)} - {formatTime(group.endTime)}
 								</span>
 							</div>
 							<div class="flex items-center gap-2">
-								<span class="text-sm text-[--color-ink-muted] {isExpanded ? 'font-semibold text-[--color-primary]' : ''}">
+								<span class="text-sm text-ink-muted {isExpanded ? 'font-semibold text-primary' : ''}">
 									{playerCount} người
 								</span>
 								{#if isExpanded}
-									<IconChevronUp class="h-5 w-5 text-[--color-primary]" />
+									<IconChevronUp class="h-5 w-5 text-primary" />
 								{:else}
-									<IconChevronDown class="h-5 w-5 text-[--color-ink-soft]" />
+									<IconChevronDown class="h-5 w-5 text-ink-soft" />
 								{/if}
 							</div>
 						</button>
@@ -294,12 +296,12 @@
 								{#if playerCount > 0}
 									<div class="flex flex-wrap gap-2">
 										{#each group.playerNames as name, ni (ni)}
-											<span class="inline-flex items-center gap-1 bg-[--color-primary-soft] text-[--color-primary] px-3 py-1.5 rounded-full text-sm font-medium">
+											<span class="inline-flex items-center gap-1 bg-primary-soft text-primary px-3 py-1.5 rounded-full text-sm font-medium">
 												{name}
 												<button
 													type="button"
 													onclick={() => removePlayer(group.id, ni)}
-													class="hover:text-[--color-error] transition-colors"
+													class="hover:text-error transition-colors"
 												>
 													<IconX class="h-3 w-3" />
 												</button>
@@ -313,7 +315,7 @@
 									<input
 										type="text"
 										placeholder={m.player_name_placeholder()}
-										class="w-full h-11 px-4 rounded-xl border border-[--color-border] bg-white text-sm focus:outline-none focus:border-[--color-primary] focus:ring-2 focus:ring-[--color-primary-soft] transition-all"
+										class="w-full h-11 px-4 rounded-xl border border-border bg-white text-sm focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft transition-all"
 										onkeydown={(e) => {
 											if (e.key === 'Enter') {
 												e.preventDefault();
@@ -329,7 +331,7 @@
 								<div>
 									<textarea
 										placeholder="Dán danh sách tên (phân cách bằng dấu phẩy hoặc xuống dòng)"
-										class="w-full h-16 px-4 py-3 rounded-xl border border-[--color-border] bg-white text-sm resize-none focus:outline-none focus:border-[--color-primary] focus:ring-2 focus:ring-[--color-primary-soft] transition-all"
+										class="w-full h-16 px-4 py-3 rounded-xl border border-border bg-white text-sm resize-none focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary-soft transition-all"
 										onblur={(e) => handleBulkPaste(group.id, e)}
 									></textarea>
 								</div>
@@ -339,7 +341,7 @@
 									<button
 										type="button"
 										onclick={() => removeGroup(group.id)}
-										class="w-full py-3 border-2 border-dashed border-[--color-border] rounded-xl flex items-center justify-center gap-2 text-[--color-ink-soft] hover:border-[--color-error] hover:text-[--color-error] transition-colors"
+										class="w-full py-3 border-2 border-dashed border-border rounded-xl flex items-center justify-center gap-2 text-ink-soft hover:border-error hover:text-error transition-colors"
 									>
 										<IconTrash class="h-4 w-4" />
 										<span class="text-sm font-semibold">Xóa nhóm</span>
@@ -354,7 +356,7 @@
 				<button
 					type="button"
 					onclick={addGroup}
-					class="w-full py-4 border-2 border-dashed border-[--color-border] rounded-xl flex items-center justify-center gap-2 text-[--color-primary] hover:bg-[--color-primary-soft]/30 transition-colors active:scale-98"
+					class="w-full py-4 border-2 border-dashed border-border rounded-xl flex items-center justify-center gap-2 text-primary hover:bg-primary-soft/30 transition-colors active:scale-98"
 				>
 					<IconCirclePlus class="h-5 w-5" />
 					<span class="font-semibold text-sm uppercase tracking-wider">Thêm nhóm</span>
@@ -364,17 +366,17 @@
 
 		<!-- Stats Grid (Bento Style) -->
 		<section class="grid grid-cols-2 gap-3 mb-6">
-			<div class="bg-white p-4 rounded-xl shadow-card border border-[--color-border] flex flex-col gap-2">
-				<IconBolt class="h-5 w-5 text-[--color-primary-soft-strong]" />
-				<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Cường độ</p>
-				<p class="font-[--font-display] font-semibold text-lg text-[--color-ink]">
+			<div class="bg-white p-4 rounded-xl shadow-card border border-border flex flex-col gap-2">
+				<IconBolt class="h-5 w-5 text-primary-soft-strong" />
+				<p class="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">Cường độ</p>
+				<p class="font-display! font-semibold text-lg text-ink">
 					{totalPlayers >= 8 ? 'Cao' : totalPlayers >= 4 ? 'Trung bình' : 'Thấp'}
 				</p>
 			</div>
-			<div class="bg-white p-4 rounded-xl shadow-card border border-[--color-border] flex flex-col gap-2">
-				<IconCash class="h-5 w-5 text-[--color-secondary]" />
-				<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Chia đều</p>
-				<p class="font-[--font-display] font-semibold text-lg text-[--color-ink]">
+			<div class="bg-white p-4 rounded-xl shadow-card border border-border flex flex-col gap-2">
+				<IconCash class="h-5 w-5 text-secondary" />
+				<p class="text-[10px] font-semibold text-ink-muted uppercase tracking-wider">Chia đều</p>
+				<p class="font-display! font-semibold text-lg text-ink">
 					{totalPlayers > 0 ? formatCurrency(Math.round(estimatedCost() / totalPlayers)) + '/ng' : '--'}
 				</p>
 			</div>
@@ -382,9 +384,9 @@
 	</main>
 
 	<!-- CTA Buttons -->
-	<div class="fixed bottom-16 left-0 w-full px-4 flex gap-3 bg-linear-to-t from-[--color-surface] via-[--color-surface] to-transparent pt-6 pb-4">
+	<div class="fixed bottom-16 left-0 w-full px-4 flex gap-3 bg-linear-to-t from-surface via-surface to-transparent pt-6 pb-4">
 		<button
-			class="flex-1 h-14 bg-white border-2 border-[--color-primary] text-[--color-primary] rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+			class="flex-1 h-14 bg-white border-2 border-primary text-primary rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
 		>
 			<IconShare class="h-5 w-5" />
 			Mời thêm
@@ -392,7 +394,7 @@
 		<button
 			onclick={handleSaveAndShare}
 			disabled={!isValid || saving}
-			class="flex-2 h-14 bg-[--color-primary] text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+			class="flex-2 h-14 bg-primary text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 		>
 			{saving ? 'Đang tạo...' : 'Sẵn sàng chơi'}
 			<IconArrowRight class="h-5 w-5" />
@@ -400,22 +402,22 @@
 	</div>
 
 	<!-- Bottom Navigation Bar -->
-	<nav class="fixed bottom-0 w-full z-50 border-t border-[--color-border] bg-white flex justify-around items-center h-16 px-2">
-		<a href="/" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+	<nav class="fixed bottom-0 w-full z-50 border-t border-border bg-white flex justify-around items-center h-16 px-2">
+		<a href="/" class="flex flex-col items-center justify-center text-ink-soft active:scale-98 transition-transform duration-150 gap-1">
 			<IconLayoutGrid class="h-6 w-6" />
-			<span class="font-[--font-display] font-medium text-[10px]">Home</span>
+			<span class="font-display! font-medium text-[10px]">Home</span>
 		</a>
-		<a href="/create" class="flex flex-col items-center justify-center text-[--color-primary] font-bold active:scale-98 transition-transform duration-150 gap-1">
+		<a href="/create" class="flex flex-col items-center justify-center text-primary font-bold active:scale-98 transition-transform duration-150 gap-1">
 			<IconCalendar class="h-6 w-6" />
-			<span class="font-[--font-display] font-medium text-[10px]">Lịch</span>
+			<span class="font-display! font-medium text-[10px]">Lịch</span>
 		</a>
-		<a href="/wallet" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+		<a href="/wallet" class="flex flex-col items-center justify-center text-ink-soft active:scale-98 transition-transform duration-150 gap-1">
 			<IconWallet class="h-6 w-6" />
-			<span class="font-[--font-display] font-medium text-[10px]">Ví</span>
+			<span class="font-display! font-medium text-[10px]">Ví</span>
 		</a>
-		<a href="/profile" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+		<a href="/profile" class="flex flex-col items-center justify-center text-ink-soft active:scale-98 transition-transform duration-150 gap-1">
 			<IconUser class="h-6 w-6" />
-			<span class="font-[--font-display] font-medium text-[10px]">Cá nhân</span>
+			<span class="font-display! font-medium text-[10px]">Cá nhân</span>
 		</a>
 	</nav>
 </div>
