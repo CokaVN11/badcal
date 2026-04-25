@@ -3,7 +3,27 @@
 	import { goto } from '$app/navigation';
 	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
-	import { IconPlus, IconTrash } from '@tabler/icons-svelte-runes';
+	import {
+		IconArrowLeft,
+		IconDotsVertical,
+		IconPingPong,
+		IconUsers,
+		IconStack2,
+		IconChevronDown,
+		IconChevronUp,
+		IconPencil,
+		IconCirclePlus,
+		IconShare,
+		IconArrowRight,
+		IconBolt,
+		IconCash,
+		IconLayoutGrid,
+		IconCalendar,
+		IconWallet,
+		IconUser,
+		IconTrash,
+		IconX
+	} from '@tabler/icons-svelte-runes';
 	import { toast } from 'svelte-sonner';
 	import { createOrReuseSession } from '$lib/api/sharing';
 	import type { CourtBlock, Group } from '$lib/types';
@@ -22,6 +42,7 @@
 			: [{ id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] }]
 	);
 
+	let expandedGroups = $state<Record<string, boolean>>({});
 	let saving = $state(false);
 
 	$effect(() => {
@@ -34,8 +55,32 @@
 		setReady(isValid);
 	});
 
+	// Computed stats
+	let totalPlayers = $derived(groups.reduce((sum, g) => sum + g.playerNames.length, 0));
+
+	let totalHours = $derived(() => {
+		if (!sessionStorage.courtBlocks?.length) return 0;
+		const first = sessionStorage.courtBlocks[0];
+		const start = parseInt(first.startTime.split(':')[0]);
+		const end = parseInt(first.endTime.split(':')[0]);
+		return end - start;
+	});
+
+	let estimatedCost = $derived(() => {
+		if (!sessionStorage.courtBlocks?.length) return 0;
+		const block = sessionStorage.courtBlocks[0];
+		const hours = parseInt(block.endTime.split(':')[0]) - parseInt(block.startTime.split(':')[0]);
+		return block.pricePerHour * hours;
+	});
+
+	function toggleGroup(id: string) {
+		expandedGroups = { ...expandedGroups, [id]: !expandedGroups[id] };
+	}
+
 	function addGroup() {
-		groups = [...groups, { id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] }];
+		const newGroup = { id: crypto.randomUUID(), startTime: '19:00', endTime: '21:00', playerNames: [] };
+		groups = [...groups, newGroup];
+		expandedGroups = { ...expandedGroups, [newGroup.id]: true };
 	}
 
 	function removeGroup(id: string) {
@@ -101,110 +146,276 @@
 			saving = false;
 		}
 	}
+
+	function formatTime(time: string): string {
+		const [h, m] = time.split(':');
+		return `${h}:${m}`;
+	}
+
+	function formatCurrency(amount: number): string {
+		return new Intl.NumberFormat('vi-VN').format(amount) + 'đ';
+	}
+
+	function formatDate(dateStr: string): string {
+		if (!dateStr) return '';
+		const date = new Date(dateStr);
+		return date.toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'numeric' });
+	}
 </script>
 
-<div class="pb-24">
-	<header class="sticky top-0 z-20 backdrop-blur-md border-b bg-white/90 border-border px-4 py-3">
-		<h1 class="text-lg font-semibold text-ink">{m.onboarding_step2_title()}</h1>
-		<p class="text-sm text-ink-muted">{m.onboarding_step2_desc()}</p>
+<div class="pb-32">
+	<!-- Sticky Header -->
+	<header class="sticky top-0 z-50 bg-white border-b border-[--color-border] shadow-xs flex items-center justify-between px-4 h-16 w-full">
+		<div class="flex items-center gap-3">
+			<button
+				onclick={() => goto('/create')}
+				class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[--color-neutral] transition-all active:scale-95"
+			>
+				<IconArrowLeft class="h-5 w-5 text-[--color-primary]" />
+			</button>
+			<h1 class="font-[--font-display] font-bold text-lg tracking-tight text-[--color-ink]">
+				{m.onboarding_step2_title()}
+			</h1>
+		</div>
+		<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-[--color-neutral] transition-all active:scale-95">
+			<IconDotsVertical class="h-5 w-5 text-[--color-ink-soft]" />
+		</button>
 	</header>
 
-	<form
-		id="details-form"
-		onsubmit={(e) => { e.preventDefault(); handleSaveAndShare(); }}
-		class="max-w-lg mx-auto px-4 py-4 space-y-4"
-	>
-		<!-- Groups -->
-		<section class="space-y-3">
-			<div class="flex items-center justify-between">
-				<h2 class="text-sm font-semibold text-ink">{m.grouped_players_heading()}</h2>
-				<button type="button" onclick={addGroup} class="btn btn-xs btn-outline">
-					<IconPlus class="h-3 w-3" /> Add group
+	<main class="max-w-md mx-auto px-4 pt-6">
+		<!-- Asset Overview Section -->
+		<section class="mb-6">
+			<div class="flex items-center justify-between mb-3">
+				<div class="flex items-center gap-3">
+					<div class="h-10 w-10 rounded-full bg-[--color-primary-soft] flex items-center justify-center">
+						<IconPingPong class="h-5 w-5 text-[--color-primary]" />
+					</div>
+					<div>
+						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">
+							{sessionStorage.title || 'Session'}
+						</p>
+						<p class="font-[--font-display] font-semibold text-base text-[--color-ink]">
+							{formatDate(sessionStorage.date)}
+						</p>
+					</div>
+				</div>
+				<span class="bg-[--color-secondary-soft] text-[--color-secondary] px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider">
+					ĐANG CHỜ
+				</span>
+			</div>
+
+			<!-- Cost Summary Card -->
+			<div class="bg-white rounded-xl p-4 shadow-card border border-[--color-border]">
+				<div class="flex justify-between items-center pb-4 border-b border-[--color-neutral] mb-4">
+					<div>
+						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Tổng thời gian</p>
+						<p class="font-[--font-display] font-bold text-2xl text-[--color-primary]">
+							{totalHours()} <span class="text-sm font-normal text-[--color-ink-muted]">giờ</span>
+						</p>
+					</div>
+					<div class="text-right">
+						<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Dự kiến chi phí</p>
+						<p class="font-[--font-display] font-bold text-2xl text-[--color-ink]">
+							{formatCurrency(estimatedCost())}
+						</p>
+					</div>
+				</div>
+				<div class="flex items-center gap-3">
+					<div class="flex -space-x-2">
+						{#if totalPlayers > 0}
+							{#each Array(Math.min(3, totalPlayers)) as _, i}
+								<div class="w-8 h-8 rounded-full border-2 border-white bg-[--color-primary-soft] flex items-center justify-center text-[10px] font-bold text-[--color-primary]">
+									{i + 1}
+								</div>
+							{/each}
+							{#if totalPlayers > 3}
+								<div class="w-8 h-8 rounded-full border-2 border-white bg-[--color-neutral] flex items-center justify-center text-[10px] font-bold text-[--color-ink-muted]">
+									+{totalPlayers - 3}
+								</div>
+							{/if}
+						{/if}
+					</div>
+					<p class="text-sm text-[--color-ink-muted]">{totalPlayers} người đã đăng ký</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Expanded Players Section -->
+		<section class="mb-6">
+			<div class="flex items-center justify-between mb-3">
+				<h2 class="font-[--font-display] font-semibold text-base text-[--color-ink]">Người chơi</h2>
+				<button class="text-[--color-primary] font-semibold text-xs flex items-center gap-1 active:scale-95 transition-all">
+					Chỉnh từng người
+					<IconPencil class="h-4 w-4" />
 				</button>
 			</div>
 
-			{#each groups as group, gi (group.id)}
-				<div class="rounded-2xl bg-white shadow-sm border border-border p-4 space-y-3">
-					<div class="flex items-center justify-between">
-						<span class="text-xs font-medium text-ink-muted">Group {gi + 1}</span>
-						{#if groups.length > 1}
-							<button type="button" onclick={() => removeGroup(group.id)} class="text-ink-muted hover:text-red-500">
-								<IconTrash class="h-4 w-4" />
-							</button>
+			<div class="space-y-3">
+				{#each groups as group, gi (group.id)}
+					{@const isExpanded = expandedGroups[group.id]}
+					{@const playerCount = group.playerNames.length}
+
+					<div class="bg-white rounded-xl overflow-hidden shadow-card border border-[--color-border] {isExpanded ? 'border-2 border-[--color-primary]' : ''}">
+						<!-- Group Header -->
+						<button
+							type="button"
+							onclick={() => toggleGroup(group.id)}
+							class="w-full p-4 flex items-center justify-between {isExpanded ? 'bg-[--color-primary-soft]/20 border-b border-[--color-neutral]' : ''}"
+						>
+							<div class="flex items-center gap-2">
+								{#if isExpanded}
+									<IconStack2 class="h-5 w-5 text-[--color-primary]" />
+								{:else}
+									<IconUsers class="h-5 w-5 text-[--color-ink-soft]" />
+								{/if}
+								<span class="font-semibold text-[--color-ink] {isExpanded ? 'font-bold' : ''}">
+									{isExpanded ? 'Nhóm ' + (gi + 1) + ' (Đã mở)' : 'Nhóm ' + (gi + 1)}
+								</span>
+								<span class="bg-[--color-neutral] px-2 py-0.5 rounded text-[10px] font-semibold text-[--color-ink-muted]">
+									{formatTime(group.startTime)} - {formatTime(group.endTime)}
+								</span>
+							</div>
+							<div class="flex items-center gap-2">
+								<span class="text-sm text-[--color-ink-muted] {isExpanded ? 'font-semibold text-[--color-primary]' : ''}">
+									{playerCount} người
+								</span>
+								{#if isExpanded}
+									<IconChevronUp class="h-5 w-5 text-[--color-primary]" />
+								{:else}
+									<IconChevronDown class="h-5 w-5 text-[--color-ink-soft]" />
+								{/if}
+							</div>
+						</button>
+
+						<!-- Expanded Content -->
+						{#if isExpanded}
+							<div class="p-4 space-y-4">
+								<!-- Player Tags -->
+								{#if playerCount > 0}
+									<div class="flex flex-wrap gap-2">
+										{#each group.playerNames as name, ni (ni)}
+											<span class="inline-flex items-center gap-1 bg-[--color-primary-soft] text-[--color-primary] px-3 py-1.5 rounded-full text-sm font-medium">
+												{name}
+												<button
+													type="button"
+													onclick={() => removePlayer(group.id, ni)}
+													class="hover:text-[--color-error] transition-colors"
+												>
+													<IconX class="h-3 w-3" />
+												</button>
+											</span>
+										{/each}
+									</div>
+								{/if}
+
+								<!-- Add Player Input -->
+								<div>
+									<input
+										type="text"
+										placeholder={m.player_name_placeholder()}
+										class="w-full h-11 px-4 rounded-xl border border-[--color-border] bg-white text-sm focus:outline-none focus:border-[--color-primary] focus:ring-2 focus:ring-[--color-primary-soft] transition-all"
+										onkeydown={(e) => {
+											if (e.key === 'Enter') {
+												e.preventDefault();
+												const input = e.target as HTMLInputElement;
+												addPlayerToGroup(group.id, input.value);
+												input.value = '';
+											}
+										}}
+									/>
+								</div>
+
+								<!-- Bulk Paste -->
+								<div>
+									<textarea
+										placeholder="Dán danh sách tên (phân cách bằng dấu phẩy hoặc xuống dòng)"
+										class="w-full h-16 px-4 py-3 rounded-xl border border-[--color-border] bg-white text-sm resize-none focus:outline-none focus:border-[--color-primary] focus:ring-2 focus:ring-[--color-primary-soft] transition-all"
+										onblur={(e) => handleBulkPaste(group.id, e)}
+									></textarea>
+								</div>
+
+								<!-- Delete Group -->
+								{#if groups.length > 1}
+									<button
+										type="button"
+										onclick={() => removeGroup(group.id)}
+										class="w-full py-3 border-2 border-dashed border-[--color-border] rounded-xl flex items-center justify-center gap-2 text-[--color-ink-soft] hover:border-[--color-error] hover:text-[--color-error] transition-colors"
+									>
+										<IconTrash class="h-4 w-4" />
+										<span class="text-sm font-semibold">Xóa nhóm</span>
+									</button>
+								{/if}
+							</div>
 						{/if}
 					</div>
+				{/each}
 
-					<!-- Time window -->
-					<div class="flex items-center gap-2">
-						<div class="flex-1">
-							<label class="text-xs text-ink-muted">Start</label>
-							<input
-								type="time"
-								bind:value={group.startTime}
-								class="input input-bordered w-full h-9 text-sm mt-1"
-							/>
-						</div>
-						<div class="flex-1">
-							<label class="text-xs text-ink-muted">End</label>
-							<input
-								type="time"
-								bind:value={group.endTime}
-								class="input input-bordered w-full h-9 text-sm mt-1"
-							/>
-						</div>
-					</div>
-
-					<!-- Players in group -->
-					<div>
-						<label class="text-xs text-ink-muted">Players</label>
-						<div class="flex flex-wrap gap-1 mt-1">
-							{#each group.playerNames as name, ni (ni)}
-								<span class="badge badge-outline gap-1">
-									{name}
-									<button type="button" onclick={() => removePlayer(group.id, ni)} class="text-ink-muted hover:text-red-500">×</button>
-								</span>
-							{/each}
-						</div>
-
-						<!-- Add player input -->
-						<div class="mt-2">
-							<input
-								type="text"
-								placeholder={m.player_name_placeholder()}
-								class="input input-bordered w-full h-9 text-sm"
-								onkeydown={(e) => {
-									if (e.key === 'Enter') {
-										e.preventDefault();
-										addPlayerToGroup(group.id, (e.target as HTMLInputElement).value);
-										(e.target as HTMLInputElement).value = '';
-									}
-								}}
-							/>
-						</div>
-
-						<!-- Bulk paste -->
-						<div class="mt-2">
-							<textarea
-								placeholder="Bulk paste names (comma or newline separated)"
-								class="textarea textarea-bordered w-full h-16 text-sm"
-								onblur={(e) => handleBulkPaste(group.id, e)}
-							></textarea>
-						</div>
-					</div>
-				</div>
-			{/each}
+				<!-- Add Group Button -->
+				<button
+					type="button"
+					onclick={addGroup}
+					class="w-full py-4 border-2 border-dashed border-[--color-border] rounded-xl flex items-center justify-center gap-2 text-[--color-primary] hover:bg-[--color-primary-soft]/30 transition-colors active:scale-98"
+				>
+					<IconCirclePlus class="h-5 w-5" />
+					<span class="font-semibold text-sm uppercase tracking-wider">Thêm nhóm</span>
+				</button>
+			</div>
 		</section>
-	</form>
 
-	<!-- Save & Share button (shown inline below form content as fallback) -->
-	<div class="max-w-lg mx-auto px-4">
+		<!-- Stats Grid (Bento Style) -->
+		<section class="grid grid-cols-2 gap-3 mb-6">
+			<div class="bg-white p-4 rounded-xl shadow-card border border-[--color-border] flex flex-col gap-2">
+				<IconBolt class="h-5 w-5 text-[--color-primary-soft-strong]" />
+				<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Cường độ</p>
+				<p class="font-[--font-display] font-semibold text-lg text-[--color-ink]">
+					{totalPlayers >= 8 ? 'Cao' : totalPlayers >= 4 ? 'Trung bình' : 'Thấp'}
+				</p>
+			</div>
+			<div class="bg-white p-4 rounded-xl shadow-card border border-[--color-border] flex flex-col gap-2">
+				<IconCash class="h-5 w-5 text-[--color-secondary]" />
+				<p class="text-[10px] font-semibold text-[--color-ink-muted] uppercase tracking-wider">Chia đều</p>
+				<p class="font-[--font-display] font-semibold text-lg text-[--color-ink]">
+					{totalPlayers > 0 ? formatCurrency(Math.round(estimatedCost() / totalPlayers)) + '/ng' : '--'}
+				</p>
+			</div>
+		</section>
+	</main>
+
+	<!-- CTA Buttons -->
+	<div class="fixed bottom-16 left-0 w-full px-4 flex gap-3 bg-linear-to-t from-[--color-surface] via-[--color-surface] to-transparent pt-6 pb-4">
 		<button
-			type="button"
+			class="flex-1 h-14 bg-white border-2 border-[--color-primary] text-[--color-primary] rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-sm"
+		>
+			<IconShare class="h-5 w-5" />
+			Mời thêm
+		</button>
+		<button
 			onclick={handleSaveAndShare}
 			disabled={!isValid || saving}
-			class="btn btn-primary w-full h-12"
+			class="flex-2 h-14 bg-[--color-primary] text-white rounded-xl font-bold flex items-center justify-center gap-2 transition-all active:scale-95 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
 		>
-			{saving ? 'Creating...' : m.share_btn()}
+			{saving ? 'Đang tạo...' : 'Sẵn sàng chơi'}
+			<IconArrowRight class="h-5 w-5" />
 		</button>
 	</div>
+
+	<!-- Bottom Navigation Bar -->
+	<nav class="fixed bottom-0 w-full z-50 border-t border-[--color-border] bg-white flex justify-around items-center h-16 px-2">
+		<a href="/" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+			<IconLayoutGrid class="h-6 w-6" />
+			<span class="font-[--font-display] font-medium text-[10px]">Home</span>
+		</a>
+		<a href="/create" class="flex flex-col items-center justify-center text-[--color-primary] font-bold active:scale-98 transition-transform duration-150 gap-1">
+			<IconCalendar class="h-6 w-6" />
+			<span class="font-[--font-display] font-medium text-[10px]">Lịch</span>
+		</a>
+		<a href="/wallet" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+			<IconWallet class="h-6 w-6" />
+			<span class="font-[--font-display] font-medium text-[10px]">Ví</span>
+		</a>
+		<a href="/profile" class="flex flex-col items-center justify-center text-[--color-ink-soft] active:scale-98 transition-transform duration-150 gap-1">
+			<IconUser class="h-6 w-6" />
+			<span class="font-[--font-display] font-medium text-[10px]">Cá nhân</span>
+		</a>
+	</nav>
 </div>
