@@ -11,12 +11,16 @@
 	// ready signal set by child pages via context
 	let ready = $state(false);
 
+	let saving = $state(false);
+
+	function setSaving(v: boolean) { saving = v; }
+
 	function setReady(value: boolean) {
 		ready = value;
 	}
 
 	// Provide layout context to child pages
-	setContext('layout', { setReady });
+	setContext('layout', { setReady, saving, setSaving });
 
 	const route = $derived($page.url.pathname);
 
@@ -59,7 +63,7 @@
 					href={ctaHref}
 					variant="default"
 					class="flex-1 h-12"
-					disabled={ctaDisabled}
+					disabled={ctaDisabled || saving}
 				>
 					{ctaLabel}
 				</Button>
@@ -69,7 +73,7 @@
 					form="details-form"
 					variant="default"
 					class="flex-1 h-12"
-					disabled={ctaDisabled}
+					disabled={ctaDisabled || saving}
 				>
 					{ctaLabel}
 				</Button>

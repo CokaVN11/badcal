@@ -51,6 +51,7 @@
 			variant="ghost"
 			aria-label="Go back"
 			class="p-2 -ml-2 rounded-full hover:bg-surface-container-high transition-colors"
+      onclick={() => history.back()}
 		>
 			<IconArrowLeft size={16} class="text-on-surface"/>
 		</Button>

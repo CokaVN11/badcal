@@ -26,10 +26,10 @@ export const POST: RequestHandler = async ({ request }) => {
 	const payload = body as HashablePayload;
 
 	// --- Validate required fields ---
-	if (!payload.sessionTitle || typeof payload.sessionTitle !== 'string') {
+	if (!payload.title || typeof payload.title !== 'string') {
 		return json({ error: 'Missing or invalid: sessionTitle' }, { status: 400 });
 	}
-	if (!payload.sessionDate || typeof payload.sessionDate !== 'string') {
+	if (!payload.date || typeof payload.date !== 'string') {
 		return json({ error: 'Missing or invalid: sessionDate' }, { status: 400 });
 	}
 	if (!Array.isArray(payload.courtBlocks)) {
@@ -47,8 +47,8 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// --- Build normalized payload for createOrReuseSession ---
 	const normalizedPayload = {
-		sessionTitle: payload.sessionTitle,
-		sessionDate: payload.sessionDate,
+		sessionTitle: payload.title,
+		sessionDate: payload.date,
 		courtBlocks: payload.courtBlocks.map((cb) => ({
 			courtCount: cb.courtCount,
 			startTime: cb.startTime,

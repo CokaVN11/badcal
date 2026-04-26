@@ -47,8 +47,8 @@ export interface HashableCourtBlock {
 }
 
 export interface HashablePayload {
-	sessionTitle: string;
-	sessionDate: string;
+	title: string;
+	date: string;
 	courtBlocks: HashableCourtBlock[];
 	extraCosts: HashableExtraCost[];
 	groups: HasableGroup[];

@@ -3,7 +3,7 @@
 	import { untrack } from 'svelte';
 	import type { PageData } from './$types';
 	import { togglePaid } from '$lib/api/sharing';
-	import { sessionStore } from '$lib/stores/storage.svelte';
+	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
 
 	let { data }: { data: PageData } = $props();
@@ -25,11 +25,11 @@
 
 	function handleFork() {
 		// Populate session store from DB session data and navigate to /create
-		sessionStore.sessionTitle = data.session.sessionTitle;
-		sessionStore.sessionDate = data.session.sessionDate;
-		sessionStore.courtBlocks = data.session.courtBlocks;
-		sessionStore.groups = data.session.groups;
-		sessionStore.extraCosts = data.session.extraCosts;
+		sessionStorage.title = data.session.sessionTitle;
+		sessionStorage.date = data.session.sessionDate;
+		sessionStorage.courtBlocks = data.session.courtBlocks;
+		sessionStorage.groups = data.session.groups;
+		sessionStorage.extraCosts = data.session.extraCosts;
 		goto('/create');
 	}
 
@@ -78,8 +78,8 @@
 				<h2 class="font-semibold text-ink">{data.session.sessionTitle}</h2>
 				<p class="text-sm text-ink-muted">{data.session.sessionDate}</p>
 				<div class="mt-2 flex flex-wrap gap-1">
-					{#each data.session.groups as group}
-						{#each group.playerNames as name}
+					{#each data.session.groups as group (group.id)}
+						{#each group.playerNames as name (name)}
 							<span
 								class="badge badge-sm"
 								class:badge-success={localPaidIdxs.has(allPlayers.indexOf(name))}
@@ -109,7 +109,7 @@
 						aria-label="Select your name"
 					>
 						<option value={null}>— Choose —</option>
-						{#each allPlayers as name, i}
+						{#each allPlayers as name, i (name)}
 							<option value={i}>{name}</option>
 						{/each}
 					</select>

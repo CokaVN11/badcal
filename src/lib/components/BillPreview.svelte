@@ -10,7 +10,6 @@
 	import { fade } from 'svelte/transition';
 	import { browser } from '$lib/env';
 	import { appStorage } from '$lib/stores/storage.svelte';
-	import type { BillTheme } from '$lib/utils/bill-share';
 	import {
 		IconLoader2,
 		IconShare,
