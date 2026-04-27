@@ -161,5 +161,9 @@
 	"quick_cost_shuttlecock": "Cầu",
 	"quick_cost_iced_tea": "Trà đá",
 	"quick_cost_drinks": "Nước uống",
-	"quick_cost_parking": "Gửi xe"
+	"quick_cost_parking": "Gửi xe",
+	"summary_tab": "Tóm tắt",
+	"by_person_tab": "Theo người",
+	"following_tab": "Theo dõi",
+	"share_link": "Chia sẻ liên kết"
 }

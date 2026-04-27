@@ -28,7 +28,6 @@
 	const ctaLabel = $derived.by(() => {
 		if (route === '/create') return m.onboarding_next();
 		if (route === '/details') return m.onboarding_next();
-		if (route.startsWith('/s/') && route.endsWith('/share')) return m.status_done();
 		if (route.startsWith('/s/')) return m.share_btn();
 		return m.onboarding_next();
 	});
@@ -44,11 +43,11 @@
 	const ctaHref = $derived.by(() => {
 		if (route === '/create') return '/details';
 		if (route === '/details') return undefined; // triggers form submit via button
-		if (sessionId) return `/s/${sessionId}/share`;
+		if (sessionId) return `/s/${sessionId}`;
 		return undefined;
 	});
 
-	const showFooter = $derived(!route.endsWith('/share'));
+	const showFooter = $derived(!route.startsWith('/s/'));
 </script>
 
 <div class="min-h-dvh flex flex-col bg-surface-container-high">

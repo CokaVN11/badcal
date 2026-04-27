@@ -161,5 +161,9 @@
 	"quick_cost_shuttlecock": "Shuttlecock",
 	"quick_cost_iced_tea": "Iced tea",
 	"quick_cost_drinks": "Drinks",
-	"quick_cost_parking": "Parking"
+	"quick_cost_parking": "Parking",
+	"summary_tab": "Summary",
+	"by_person_tab": "By Person",
+	"following_tab": "Following",
+	"share_link": "Share link"
 }
