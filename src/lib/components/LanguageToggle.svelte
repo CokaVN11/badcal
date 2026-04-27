@@ -51,7 +51,7 @@
 
 	<DropdownMenu.Portal>
 		<DropdownMenu.Content
-			class="min-w-40 rounded-2xl border border-(--border) bg-white/96 py-1 shadow-xl backdrop-blur-md z-50 animate-fade-in outline-none"
+			class="min-w-40 rounded-2xl border border-border bg-white/96 py-1 shadow-xl backdrop-blur-md z-50 animate-fade-in outline-none"
 			sideOffset={4}
 			align="end"
 		>
@@ -59,14 +59,14 @@
 				{#each languages as lang (lang.code)}
 					<DropdownMenu.RadioItem
 						value={lang.code}
-						class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-(--ink-soft) outline-none transition-colors data-highlighted:bg-(--surface-muted) data-[state=checked]:bg-(--primary-soft) data-[state=checked]:text-(--primary)"
+						class="flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-ink-soft outline-none transition-colors data-highlighted:bg-surface-muted data-[state=checked]:bg-primary-soft data-[state=checked]:text-primary"
 					>
 						{#snippet children({ checked })}
 							<span class="text-base">{lang.flag}</span>
 							<span class="flex-1">{lang.label}</span>
 							{#if checked}
 								<svg
-									class="w-4 h-4 text-(--primary)"
+									class="w-4 h-4 text-primary"
 									fill="none"
 									stroke="currentColor"
 									viewBox="0 0 24 24"

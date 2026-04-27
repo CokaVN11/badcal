@@ -114,14 +114,14 @@
 		{#each [[totalCost, m.total_cost(), 0], [playerShares.length, m.players_count(), 1], [totalHours, m.total_hours(), 2]] as [value, label, idx], i (i)}
 			{@const style = STAT_STYLES[idx as number]}
 			<div
-				class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-(--border) hover:border-transparent hover:shadow-lg transition-all duration-200"
+				class="stat-card group relative overflow-hidden rounded-xl p-3 bg-white border border-border hover:border-transparent hover:shadow-lg transition-all duration-200"
 				style="animation: fadeUp 0.3s ease-out backwards; animation-delay: {i * 0.05}s;"
 			>
 				<div
 					class="stat-icon absolute -right-2 -top-2 w-14 h-14 rounded-xl bg-linear-to-br {style.gradient} opacity-10 group-hover:opacity-20 transition-opacity"
 				></div>
 				<div class="relative">
-					<div class="stat-value text-lg font-bold text-(--ink) leading-tight">
+					<div class="stat-value text-lg font-bold text-ink leading-tight">
 						{#if idx === 0}
 							<AnimatedNumber value={value as number} format="compact" />
 						{:else}
@@ -129,7 +129,7 @@
 						{/if}
 					</div>
 					<div
-						class="stat-label text-[10px] font-semibold uppercase tracking-wider text-(--ink-muted) mt-0.5"
+						class="stat-label text-[10px] font-semibold uppercase tracking-wider text-ink-muted mt-0.5"
 					>
 						{label}
 					</div>
@@ -140,15 +140,15 @@
 
 	<!-- Share link section -->
 	{#if shareUrl || isGeneratingShare}
-		<div class="share-link-bar flex items-center gap-3 rounded-xl bg-white border border-(--border) px-4 py-3">
+		<div class="share-link-bar flex items-center gap-3 rounded-xl bg-white border border-border px-4 py-3">
 			{#if isGeneratingShare}
-				<div class="h-4 w-4 animate-spin rounded-full border-2 border-(--primary) border-t-transparent"></div>
-				<span class="text-sm text-(--ink-soft)">Generating link…</span>
+				<div class="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent"></div>
+				<span class="text-sm text-ink-soft">Generating link…</span>
 			{:else if shareUrl}
-				<span class="text-xs font-mono text-(--ink-muted) truncate flex-1">{shareUrl}</span>
+				<span class="text-xs font-mono text-ink-muted truncate flex-1">{shareUrl}</span>
 				<button
 					type="button"
-					class="flex items-center gap-1.5 rounded-lg bg-(--primary) px-3 py-1.5 text-xs font-semibold text-white hover:opacity-80 transition-opacity"
+					class="flex items-center gap-1.5 rounded-lg bg-primary px-3 py-1.5 text-xs font-semibold text-white hover:opacity-80 transition-opacity"
 					onclick={() => copyShareLink()}
 				>
 					<IconCopy size={12} />
@@ -178,10 +178,10 @@
 
 						<div class="flex-1 text-left min-w-0">
 							<div class="flex items-center gap-2">
-								<span class="text-base font-bold text-(--ink)">
+								<span class="text-base font-bold text-ink">
 									{players.length}
 								</span>
-								<span class="text-sm text-(--ink-soft)">
+								<span class="text-sm text-ink-soft">
 									{players.length === 1 ? m.player() : m.players_count()}
 								</span>
 								<span
@@ -199,8 +199,8 @@
 						</div>
 
 						<div
-							class="chevron w-7 h-7 rounded-lg flex items-center justify-center text-(--ink-muted) transition-all duration-300 {isExpanded
-								? 'rotate-180 bg-(--slate-100)'
+							class="chevron w-7 h-7 rounded-lg flex items-center justify-center text-ink-muted transition-all duration-300 {isExpanded
+								? 'rotate-180 bg-slate-100'
 								: ''}"
 						>
 							<IconChevronDown size={18} stroke={2} />
@@ -208,12 +208,12 @@
 					</button>
 
 					{#if isExpanded}
-						<div class="group-content border-t border-(--border) bg-(--slate-50)/50 p-2 space-y-1">
+						<div class="group-content border-t border-border bg-slate-50/50 p-2 space-y-1">
 							{#each players as player, playerIndex (player.id)}
 								{@const globalIndex = getGlobalIndex(player)}
 								{@const displayName = getPlayerDisplayName(player, globalIndex)}
 								<div
-									class="player-row flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-(--border) hover:shadow-sm transition-all duration-150"
+									class="player-row flex items-center gap-2.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-border hover:shadow-sm transition-all duration-150"
 									style="animation: slideUp 0.2s ease-out backwards; animation-delay: {playerIndex *
 										0.03}s;"
 								>
@@ -226,7 +226,7 @@
 									</div>
 
 									<div class="flex-1 min-w-0">
-										<div class="text-sm font-semibold text-(--ink) truncate">
+										<div class="text-sm font-semibold text-ink truncate">
 											{displayName}
 										</div>
 										<div class="flex items-center gap-2 mt-0.5">

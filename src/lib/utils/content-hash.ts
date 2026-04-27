@@ -15,49 +15,52 @@
  *   - paid status (mutable, not content-identity)
  *
  * Normalization rules:
- *   additionalCosts: sort by (label asc, amount asc, originalIndex asc)
+ *   additionalCosts: sort by (label asc, amount asc, originalId asc)
  *   players:        sort by (id asc, name asc, hours asc,
- *                    arrivalOffsetMinutes asc, originalIndex asc)
+ *                    arrivalOffsetMinutes asc, originalId asc)
  *
- * For both arrays, an `originalIndex` field is expected when present
+ * For both arrays, an `originalId` field is expected when present
  * and is used as a stable tiebreaker for equal sort keys.
  */
 
-export interface HashableAdditionalCost {
+export interface HashableExtraCost {
 	label: string;
 	amount: number;
-	originalIndex?: number;
+	originalId?: number;
 }
 
-export interface HashablePlayer {
+export interface HashableGroup {
 	id: number;
-	name: string;
-	hours: number;
-	arrivalOffsetMinutes: number;
-	originalIndex?: number;
+	startTime: string;
+	endTime: string;
+	playerNames: string[];
+	originalId?: number;
+}
+
+export interface HashableCourtBlock {
+	id: string;
+	courtCount: number;
+	startTime: string;
+	endTime: string;
+	pricePerHour: number;
+	originalId?: number;
 }
 
 export interface HashablePayload {
-	sessionTitle: string;
-	sessionDate: string;
-	startTime: string;
-	courtHours: number;
-	courtPrice: number;
-	shuttlecockPrice: number;
-	shuttlecockCount: number;
-	additionalCosts: HashableAdditionalCost[];
-	players: HashablePlayer[];
+	title: string;
+	date: string;
+	courtBlocks: HashableCourtBlock[];
+	extraCosts: HashableExtraCost[];
+	groups: HashableGroup[];
 }
 
 /** Stable tiebreaker field — prefer explicit index, fall back to array position */
-function stableIndex(item: { originalIndex?: number }, fallback: number): number {
-	return item.originalIndex ?? fallback;
+function stableIndex(item: { originalId?: number }, fallback: number): number {
+	return item.originalId ?? fallback;
 }
 
-/** Sort a copy of additionalCosts by (label, amount, originalIndex) */
-function normalizeAdditionalCosts(
-	costs: HashableAdditionalCost[]
-): HashableAdditionalCost[] {
+/** Sort a copy of additionalCosts by (label, amount, originalId) */
+function normalizeExtraCosts(costs: HashableExtraCost[]): HashableExtraCost[] {
 	return [...costs]
 		.map((c, i) => ({ ...c, _idx: stableIndex(c, i) }))
 		.sort((a, b) => {
@@ -65,21 +68,23 @@ function normalizeAdditionalCosts(
 			if (a.amount !== b.amount) return a.amount - b.amount;
 			return a._idx - b._idx;
 		})
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		.map(({ _idx: _idx, ...rest }) => rest);
 }
 
-/** Sort a copy of players by (id, name, hours, arrivalOffsetMinutes, originalIndex) */
-function normalizePlayers(players: HashablePlayer[]): HashablePlayer[] {
-	return [...players]
+/** Sort a copy of groups by (id, playerNames, startTime, endTime, originalId) */
+function normalizeGroups(groups: HashableGroup[]): HashableGroup[] {
+	return [...groups]
 		.map((p, i) => ({ ...p, _idx: stableIndex(p, i) }))
 		.sort((a, b) => {
 			if (a.id !== b.id) return a.id - b.id;
-			if (a.name !== b.name) return a.name.localeCompare(b.name);
-			if (a.hours !== b.hours) return a.hours - b.hours;
-			if (a.arrivalOffsetMinutes !== b.arrivalOffsetMinutes)
-				return a.arrivalOffsetMinutes - b.arrivalOffsetMinutes;
+			if (a.playerNames.join(',') !== b.playerNames.join(','))
+				return a.playerNames.join(',').localeCompare(b.playerNames.join(','));
+			if (a.startTime !== b.startTime) return a.startTime.localeCompare(b.startTime);
+			if (a.endTime !== b.endTime) return a.endTime.localeCompare(b.endTime);
 			return a._idx - b._idx;
 		})
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
 		.map(({ _idx: _idx, ...rest }) => rest);
 }
 
@@ -87,8 +92,8 @@ function normalizePlayers(players: HashablePlayer[]): HashablePlayer[] {
 export async function computeContentHash(payload: HashablePayload): Promise<string> {
 	const normalized: HashablePayload = {
 		...payload,
-		additionalCosts: normalizeAdditionalCosts(payload.additionalCosts),
-		players: normalizePlayers(payload.players),
+		extraCosts: normalizeExtraCosts(payload.extraCosts),
+		groups: normalizeGroups(payload.groups)
 	};
 
 	// Use the Web Crypto API (available in Node 18+ and browsers)

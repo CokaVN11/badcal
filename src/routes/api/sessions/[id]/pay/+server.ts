@@ -47,10 +47,8 @@ export const POST: RequestHandler = async ({ params, request }) => {
 	}
 
 	// --- Verify playerId exists in stored snapshot ---
-	// session.data is Record<string, unknown>; players lives at data.players
-	const data = session.data as { players?: Array<{ id: number }> };
-	const players = data.players ?? [];
-	if (!players.some((p) => p.id === playerId)) {
+	const allPlayerNames = session.groups.flatMap((g) => g.playerNames);
+	if (playerId < 0 || playerId >= allPlayerNames.length) {
 		return json({ error: 'Player not found in this session' }, { status: 404 });
 	}
 

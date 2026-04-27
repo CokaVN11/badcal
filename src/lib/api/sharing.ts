@@ -5,32 +5,39 @@
  * no $lib/server code may be imported here.
  */
 
-export interface SessionPayload {
-	sessionTitle: string;
-	sessionDate: string;
+export interface CourtBlockPayload {
+	courtCount: number;
 	startTime: string;
-	courtHours: number;
-	courtPrice: number;
-	shuttlecockPrice: number;
-	shuttlecockCount: number;
-	additionalCosts: Array<{ label: string; amount: number }>;
-	players: Array<{
-		id: number;
-		name: string;
-		hours: number;
-		arrivalOffsetMinutes: number;
-	}>;
+	endTime: string;
+	pricePerHour: number;
+}
+
+export interface GroupPayload {
+	startTime: string;
+	endTime: string;
+	playerNames: string[];
+}
+
+export interface ExtraCostPayload {
+	label: string;
+	amount: number;
+}
+
+export interface CreateSessionPayload {
+	title: string;
+	date: string;
+	courtBlocks: CourtBlockPayload[];
+	groups: GroupPayload[];
+	extraCosts: ExtraCostPayload[];
 }
 
 export interface CreateSessionResult {
 	id: string;
 }
 
-export interface PayToggleResult {}
-
 /** Create a sharing session or reuse an existing one for identical content. */
 export async function createOrReuseSession(
-	payload: SessionPayload
+	payload: CreateSessionPayload
 ): Promise<CreateSessionResult> {
 	const res = await fetch('/api/sessions', {
 		method: 'POST',
@@ -51,7 +58,7 @@ export async function togglePaid(
 	sessionId: string,
 	playerId: number,
 	paid: boolean
-): Promise<PayToggleResult> {
+): Promise<{ success: boolean }> {
 	const res = await fetch(`/api/sessions/${sessionId}/pay`, {
 		method: 'POST',
 		headers: { 'Content-Type': 'application/json' },
@@ -63,5 +70,5 @@ export async function togglePaid(
 		throw new Error((err as { error: string }).error ?? 'Failed to toggle paid status');
 	}
 
-	return res.json() as Promise<PayToggleResult>;
+	return res.json() as Promise<{ success: boolean }>;
 }

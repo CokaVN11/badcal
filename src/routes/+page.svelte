@@ -1,218 +1,127 @@
 <script lang="ts">
-	// ABOUTME: Root component - Main app with editor/preview views
-	// ABOUTME: Handles locale-based meta tag updates for client-side SPA
-
-	import { onMount } from 'svelte';
-	import { SvelteMap } from 'svelte/reactivity';
+	import { goto } from '$app/navigation';
+	import { IconPingPong, IconPlus } from '@tabler/icons-svelte-runes';
+	import { Button } from '$lib/components/ui/button';
+	import { Input } from '$lib/components/ui/input';
+	import * as Form from '$lib/components/ui/form';
 	import * as m from '$lib/paraglide/messages';
-	import { getLocale } from '$lib/paraglide/runtime';
-	import { browser } from '$lib/env';
+	import { superForm } from 'sveltekit-superforms';
+	import { zod4Client } from 'sveltekit-superforms/adapters';
+	import { sessionFormSchema } from '$lib/schemas/+page.schema';
+	import { sessionStorage } from '$lib/stores/storage.svelte';
+	import { formatDate, type SessionState } from '$lib';
 
-	import BillPreview from '$lib/components/BillPreview.svelte';
-	import ProgressiveEditorView from '$lib/components/ProgressiveEditorView.svelte';
-	import type { Player, AdditionalCost } from '$lib/types';
-	import { saveSession, loadSession, clearSession } from '$lib/utils';
-	import { toast } from 'svelte-sonner';
-	import { computeContentHash } from '$lib/utils/content-hash';
-	import { createOrReuseSession } from '$lib/api/sharing';
-
-	let currentView = $state<'editor' | 'preview'>('editor');
-	let isHydrated = $state(false);
-	let shareUrl = $state('');
-	let isGeneratingShare = $state(false);
-	let lastContentHash = $state('');
-
-	let sessionTitle = $state('');
-	let sessionDate = $state(new Date().toISOString().split('T')[0]);
-	let startTime = $state<string | null>(null);
-	let courtHours = $state(2);
-	let courtPrice = $state(0);
-	let shuttlecockPrice = $state(0);
-	let shuttlecockCount = $state(1);
-	let additionalCosts = $state<AdditionalCost[]>([]);
-	let players = $state<Player[]>([]);
-
-	onMount(() => {
-		const saved = loadSession();
-		if (saved) {
-			sessionTitle = saved.sessionTitle;
-			sessionDate = saved.sessionDate;
-			startTime = saved.startTime;
-			courtHours = saved.courtHours;
-			courtPrice = saved.courtPrice;
-			shuttlecockPrice = saved.shuttlecockPrice;
-			shuttlecockCount = saved.shuttlecockCount;
-			additionalCosts = saved.additionalCosts;
-			players = saved.players;
-		}
-		isHydrated = true;
-	});
-
-	$effect(() => {
-		if (!isHydrated) return;
-		saveSession({
-			sessionTitle,
-			sessionDate,
-			startTime,
-			courtHours,
-			courtPrice,
-			shuttlecockPrice,
-			shuttlecockCount,
-			additionalCosts,
-			players
-		});
-	});
-
-	function handleClearSession() {
-		clearSession();
-		sessionTitle = '';
-		sessionDate = new Date().toISOString().split('T')[0];
-		courtHours = 2;
-		courtPrice = 0;
-		shuttlecockPrice = 0;
-		shuttlecockCount = 1;
-		additionalCosts = [];
-		players = [];
-		toast.success('Session cleared');
-	}
-
-	// Derived calculations
-	let totalCost = $derived.by(() => {
-		const court = courtPrice;
-		const shuttles = shuttlecockPrice * shuttlecockCount;
-		const extras = additionalCosts.reduce((sum, c) => sum + (c.amount || 0), 0);
-		return court + shuttles + extras;
-	});
-
-	let totalHours = $derived.by(() => {
-		return players.reduce((sum, p) => sum + (p.hours || 0), 0);
-	});
-
-	const UNIT = 500;
-	// Calculate each player's share based on hours played (Largest Remainder Method)
-	// Rounds to 500đ units for practical Vietnamese currency handling
-	let playerShares = $derived.by(() => {
-		const hours = totalHours;
-		if (hours === 0 || players.length === 0) return [];
-
-		const roundedTotal = Math.ceil(totalCost / UNIT) * UNIT;
-		const totalUnits = roundedTotal / UNIT; // integer
-
-		const withExact = players.map((p) => {
-			const ratio = (p.hours || 0) / hours;
-			const exactUnits = ratio * totalUnits;
-			const floorUnits = Math.floor(exactUnits);
-			return { ...p, ratio, exactUnits, floorUnits, rem: exactUnits - floorUnits };
-		});
-
-		let unitsLeft = totalUnits - withExact.reduce((sum, p) => sum + p.floorUnits, 0);
-		const sortedByRemainder = [...withExact].sort((a, b) => b.rem - a.rem || a.id - b.id);
-
-		const shares = new SvelteMap<number, number>();
-		sortedByRemainder.forEach((p, index) => {
-			const addOne = index < unitsLeft ? 1 : 0;
-			shares.set(p.id, (p.floorUnits + addOne) * UNIT);
-		});
-
-		return withExact.map((p) => ({
-			...p,
-			share: shares.get(p.id)!
-		}));
-	});
-
-	function switchToPreview() {
-		currentView = 'preview';
-	}
-
-	function switchToEditor() {
-		currentView = 'editor';
-	}
-
-	// Reactive locale for meta tags (client-side SPA)
-	let currentLocale = $derived.by(() => getLocale());
-
-	// Update meta when locale changes
-	$effect(() => {
-		if (browser && currentLocale) {
-			document.documentElement.lang = currentLocale;
-			document.title = m.app_title();
-			document
-				.querySelector('meta[name="description"]')
-				?.setAttribute('content', m.web_description());
-		}
-	});
-
-	// Generate share link when summary becomes available and content changes
-	async function generateShareUrl() {
-		const payload = {
-			sessionTitle,
-			sessionDate,
-			startTime: startTime ?? '',
-			courtHours,
-			courtPrice,
-			shuttlecockPrice,
-			shuttlecockCount,
-			additionalCosts,
-			players
+	let {
+		data
+	}: {
+		data: {
+			form: SessionState;
+			recentSessions: { id: string; sessionTitle: string; sessionDate: string }[];
 		};
-		const hash = await computeContentHash(payload);
-		if (hash === lastContentHash) return; // unchanged
-		lastContentHash = hash;
-		isGeneratingShare = true;
-		try {
-			const result = await createOrReuseSession(payload);
-			shareUrl = `${window.location.origin}/s/${result.id}`;
-		} catch {
-			shareUrl = '';
-		} finally {
-			isGeneratingShare = false;
-		}
-	}
+	} = $props();
 
-	$effect(() => {
-		if (canShare && !isGeneratingShare) {
-			generateShareUrl();
-		} else if (!canShare) {
-			shareUrl = '';
-			lastContentHash = '';
+	const form = superForm(data.form, {
+		validators: zod4Client(sessionFormSchema),
+		onSubmit: ({ cancel }) => {
+			sessionStorage.title = $formData.title;
+			sessionStorage.date = $formData.date;
+			goto('/create');
+			cancel();
 		}
 	});
-
-	let canShare = $derived(totalCost > 0 && players.length > 0 && totalHours > 0);
+	const { form: formData, enhance } = form;
 </script>
 
-<div class="app-shell">
-	{#if currentView === 'editor'}
-		<ProgressiveEditorView
-			bind:sessionTitle
-			bind:sessionDate
-			bind:startTime
-			bind:courtHours
-			bind:courtPrice
-			bind:shuttlecockPrice
-			bind:shuttlecockCount
-			bind:additionalCosts
-			bind:players
-			{totalCost}
-			{totalHours}
-			{playerShares}
-			onShare={switchToPreview}
-			onClear={handleClearSession}
-			{shareUrl}
-			{isGeneratingShare}
-		/>
-	{:else}
-		<BillPreview
-			{sessionTitle}
-			{sessionDate}
-			{startTime}
-			{courtPrice}
-			{shuttlecockPrice}
-			{shuttlecockCount}
-			{additionalCosts}
-			{playerShares}
-			{totalCost}
-			onBack={switchToEditor}
-		/>
-	{/if}
+<div class="min-h-dvh flex flex-col bg-neutral">
+	<!-- Sticky Header -->
+	<header class="sticky top-0 z-20 backdrop-blur-md border-b bg-white/85 border-border">
+		<div class="max-w-lg mx-auto flex items-center gap-3 px-4 py-3">
+			<div class="flex-1 flex items-center gap-2">
+				<div
+					class="w-8 h-8 rounded-xl bg-linear-to-br from-primary to-primary-hover flex items-center justify-center shadow-sm"
+				>
+					<IconPingPong class="w-4 h-4 text-white" />
+				</div>
+				<span class="font-bold text-ink tracking-tight">BadCal</span>
+			</div>
+		</div>
+	</header>
+
+	<!-- Bootstrap form -->
+	<section class="px-4 py-6 max-w-lg mx-auto w-full">
+		<form method="POST" use:enhance class="px-6 py-4 space-y-4 w-full bg-surface rounded-lg">
+			<div class="space-y-1 animate-fade-in-up">
+				<h2 class="text-2xl font-bold text-ink">
+					{m.home_heading()}
+				</h2>
+				<p class="text-ink-muted">
+					{m.home_heading_desc()}
+				</p>
+			</div>
+
+			<Form.Field {form} name="title">
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label for="session-title" class="text-sm font-medium text-ink"
+							>{m.session_title_label()}</Form.Label
+						>
+						<Input
+							type="text"
+							{...props}
+							bind:value={$formData.title}
+							placeholder="Friday night ping pong"
+						/>
+					{/snippet}
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+
+			<Form.Field {form} name="date">
+				<Form.Control>
+					{#snippet children({ props })}
+						<Form.Label for="session-date" class="text-sm font-medium text-ink"
+							>{m.session_date_label()}</Form.Label
+						>
+						<Input type="datetime-local" {...props} bind:value={$formData.date} />
+					{/snippet}
+				</Form.Control>
+				<Form.FieldErrors />
+			</Form.Field>
+
+			<Form.Button class="w-full">
+				<IconPlus />
+				{m.home_cta()}
+			</Form.Button>
+		</form>
+	</section>
+
+	<!-- Recent -->
+	<section class="px-4 pb-10 max-w-lg mx-auto w-full">
+		<p
+			class="text-xs font-bold text-ink-muted uppercase tracking-widest mb-3 animate-fade-in-up delay-5"
+		>
+			{m.recent()}
+		</p>
+		{#if data.recentSessions.length === 0}
+			<p class="text-sm text-muted-foreground">{m.no_recent_sessions()}</p>
+		{:else}
+			<div class="grid gap-3 animate-fade-in-up delay-5">
+				{#each data.recentSessions as session, i (session.id)}
+					<Button
+						href="/s/{session.id}"
+						variant="ghost"
+						class="w-full justify-start p-4 h-auto rounded-2xl border border-border bg-white hover:border-primary-soft-strong hover:shadow-sm active:scale-[0.99] transition-all animate-fade-in-up"
+						style="animation-delay: {(i + 5) * 50}ms"
+					>
+						<div class="flex items-center justify-between w-full">
+							<div>
+								<p class="font-semibold text-ink text-sm text-left">{session.sessionTitle}</p>
+								<p class="text-xs text-muted-foreground mt-0.5">{formatDate(session.sessionDate)}</p>
+							</div>
+						</div>
+					</Button>
+				{/each}
+			</div>
+		{/if}
+	</section>
 </div>

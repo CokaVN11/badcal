@@ -154,10 +154,10 @@
 
 						<div class="flex-1 text-left min-w-0">
 							<div class="flex items-center gap-2">
-								<span class="text-base font-bold text-(--ink)">
+								<span class="text-base font-bold text-ink">
 									{groupPlayers.length}
 								</span>
-								<span class="text-sm text-(--ink-soft)">
+								<span class="text-sm text-ink-soft">
 									{groupPlayers.length === 1 ? m.player() : m.players_count()}
 								</span>
 							</div>
@@ -166,7 +166,7 @@
 								<div class="flex items-center gap-1 mt-1.5">
 									<AvatarStack items={getAvatarItems(groupPlayers)} size="sm" />
 									{#if groupPlayers.some((p) => p.name?.trim())}
-										<span class="text-xs text-(--ink-muted) truncate ml-2">
+										<span class="text-xs text-ink-muted truncate ml-2">
 											{groupPlayers
 												.filter((p) => p.name?.trim())
 												.map((p) => p.name)
@@ -179,7 +179,7 @@
 						</div>
 
 						<div
-							class="chevron-icon w-8 h-8 rounded-lg flex items-center justify-center text-(--ink-muted) transition-all duration-300 {isExpanded
+							class="chevron-icon w-8 h-8 rounded-lg flex items-center justify-center text-ink-muted transition-all duration-300 {isExpanded
 								? 'rotate-180 bg-white/50'
 								: ''}"
 						>
@@ -193,7 +193,7 @@
 								type="button"
 								class="h-11 px-4 rounded-lg text-sm font-bold transition-colors {chip === hours
 									? `${colorScheme.light} ${colorScheme.text}`
-									: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
+									: 'bg-slate-100 text-ink-muted hover:bg-slate-200'}"
 								onclick={() =>
 									actions.setGroupHours(
 										chip,
@@ -206,7 +206,7 @@
 					</div>
 
 					{#if isExpanded}
-						<div class="group-content border-t border-(--border)">
+						<div class="group-content border-t border-border">
 							<div class="p-2 space-y-1">
 								{#each groupPlayers as player, playerIndex (player.id)}
 									<PlayerRow

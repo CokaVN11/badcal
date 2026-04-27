@@ -86,31 +86,31 @@
 	</div>
 
 	<div
-		class="fixed z-50 w-72 p-4 bg-white rounded-xl shadow-xl border border-(--border)"
+		class="fixed z-50 w-72 p-4 bg-white rounded-xl shadow-xl border border-border"
 		style={tooltipStyle}
 		transition:fly={{ y: 10, duration: 200 }}
 	>
 		<button
-			class="absolute top-2 right-2 p-1 text-(--ink-muted) hover:text-(--ink) rounded-full hover:bg-(--slate-100) transition-colors"
+			class="absolute top-2 right-2 p-1 text-ink-muted hover:text-ink rounded-full hover:bg-slate-100 transition-colors"
 			onclick={onSkip}
 			aria-label={m.onboarding_skip_tour()}
 		>
 			<IconX size={16} />
 		</button>
 
-		<div class="text-xs font-medium text-(--ink-muted) mb-1">{step} / {totalSteps}</div>
-		<h3 class="text-base font-bold text-(--ink) mb-1">{title}</h3>
-		<p class="text-sm text-(--ink-soft) mb-4">{description}</p>
+		<div class="text-xs font-medium text-ink-muted mb-1">{step} / {totalSteps}</div>
+		<h3 class="text-base font-bold text-ink mb-1">{title}</h3>
+		<p class="text-sm text-ink-soft mb-4">{description}</p>
 
 		<div class="flex justify-between items-center gap-2">
 			<button
-				class="px-3 py-1.5 text-sm text-(--ink-muted) hover:text-(--ink) transition-colors"
+				class="px-3 py-1.5 text-sm text-ink-muted hover:text-ink transition-colors"
 				onclick={onSkip}
 			>
 				{m.onboarding_skip()}
 			</button>
 			<button
-				class="px-4 py-2 text-sm font-semibold text-white bg-(--zp-blue-500) hover:bg-(--zp-blue-600) rounded-lg transition-colors"
+				class="px-4 py-2 text-sm font-semibold text-white bg-zp-blue-500 hover:bg-zp-blue-600 rounded-lg transition-colors"
 				onclick={onNext}
 			>
 				{step === totalSteps ? m.onboarding_got_it() : m.onboarding_next()}

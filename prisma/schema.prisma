@@ -11,14 +11,63 @@ datasource db {
 }
 
 model Session {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  contentHash String       @unique @map("content_hash")
-  data        Json
-  createdAt   DateTime     @default(now()) @map("created_at")
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  contentHash  String       @unique @map("content_hash")
+  sessionTitle String       @map("session_title")
+  sessionDate  String       @map("session_date")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  courtBlocks  CourtBlock[]
+  extraCosts   ExtraCost[]
+  groups       Group[]
   paidStatuses PaidStatus[]
 
-  @@map("sessions")
   @@index([contentHash], name: "idx_sessions_content_hash")
+  @@map("sessions")
+}
+
+model CourtBlock {
+  id           String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId    String  @map("session_id") @db.Uuid
+  courtCount   Int     @map("court_count")
+  startTime    String  @map("start_time")
+  endTime      String  @map("end_time")
+  pricePerHour Int     @map("price_per_hour")
+  session      Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_court_blocks_session")
+  @@map("court_blocks")
+}
+
+model ExtraCost {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId String  @map("session_id") @db.Uuid
+  label     String  @map("label")
+  amount    Int     @map("amount")
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_extra_costs_session")
+  @@map("extra_costs")
+}
+
+model Group {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sessionId   String   @map("session_id") @db.Uuid
+  playerNames String[] @map("player_names")
+  startTime   String   @map("start_time")
+  endTime     String   @map("end_time")
+  session     Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@index([sessionId], name: "idx_groups_session")
+  @@map("groups")
+}
+
+model SavedLineup {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name        String   @map("name")
+  playerNames String[] @map("player_names")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("saved_lineups")
 }
 
 model PaidStatus {
@@ -28,6 +77,6 @@ model PaidStatus {
   session   Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@id([sessionId, playerId])
-  @@map("paid_status")
   @@index([sessionId], name: "idx_paid_status_session")
+  @@map("paid_status")
 }

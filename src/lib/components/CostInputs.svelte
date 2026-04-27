@@ -2,64 +2,65 @@
 	// ABOUTME: Cost inputs section - court fees, shuttlecocks, and additional costs
 	// ABOUTME: Allows dynamic addition of extra costs like drinks/parking
 
-	import { createForm } from '@tanstack/svelte-form';
 	import { m } from '$lib/paraglide/messages.js';
-	import { costInputSchema, additionalCostSchema } from '$lib/schemas';
-	import { zodFieldValidator } from '$lib/form-helpers';
+	import { costInputsSchema } from '$lib/schemas/cost-inputs.schema';
 	import { formatCurrency, parseVietnameseNumber, formatCompactNumber } from '$lib/utils';
-	import type { AdditionalCost } from '$lib/types';
+	import type { ExtraCost } from '$lib/types';
+	import * as Form from '$lib/components/ui/form';
+	import {
+		type SuperValidated,
+		type Infer,
+		superForm
+	} from 'sveltekit-superforms';
+	import { zodClient } from 'sveltekit-superforms/adapters';
 
 	let {
+		form: externalForm,
 		courtHours = $bindable(),
 		courtPrice = $bindable(),
 		shuttlecockPrice = $bindable(),
 		shuttlecockCount = $bindable(),
 		additionalCosts = $bindable()
 	}: {
+		form?: SuperValidated<Infer<typeof costInputsSchema>>;
 		courtHours: number;
 		courtPrice: number;
 		shuttlecockPrice: number;
 		shuttlecockCount: number;
-		additionalCosts: AdditionalCost[];
+		additionalCosts: ExtraCost[];
 	} = $props();
 
-	// Create reactive schema with Paraglide messages
-	// $derived ensures schema updates when language changes
-	const schema = $derived(costInputSchema());
+	// Create internal form if none provided
+	const form = externalForm
+		? superForm(externalForm, { validators: zodClient(costInputsSchema) })
+		: superForm(
+				{
+					courtHours,
+					courtPrice,
+					shuttlecockPrice,
+					shuttlecockCount
+				},
+				{ validators: zodClient(costInputsSchema) }
+			);
 
-	// Initialize TanStack Form (Standard Schema approach)
-	// No validatorAdapter needed - Zod v3.23+ implements Standard Schema natively
-	const form = createForm(() => ({
-		defaultValues: {
-			courtHours,
-			courtPrice,
-			shuttlecockPrice,
-			shuttlecockCount
-		}
-	}));
-
-	// TanStack Form state is reactive via its internal store; `form.state` is not.
-	const valuesStore = form.useStore((state) => state.values);
+	const { form: formData, enhance } = form;
 
 	// Sync form state back to parent bindables
 	$effect(() => {
-		const values = valuesStore.current;
-		courtHours = values.courtHours;
-		courtPrice = values.courtPrice;
-		shuttlecockPrice = values.shuttlecockPrice;
-		shuttlecockCount = values.shuttlecockCount;
+		courtHours = $formData.courtHours;
+		courtPrice = $formData.courtPrice;
+		shuttlecockPrice = $formData.shuttlecockPrice;
+		shuttlecockCount = $formData.shuttlecockCount;
 	});
 
 	// Display values for price inputs (supports "14k" shorthand)
 	let courtPriceDisplay = $state(courtPrice > 0 ? formatCompactNumber(courtPrice) : '');
-	let shuttlePriceDisplay = $state(
-		shuttlecockPrice > 0 ? formatCompactNumber(shuttlecockPrice) : ''
-	);
+	let shuttlePriceDisplay = $state(shuttlecockPrice > 0 ? formatCompactNumber(shuttlecockPrice) : '');
 
 	// Parse and update price with Vietnamese shorthand support
-	function handlePriceInput(displayValue: string, handleChange: (value: number) => void): string {
+	function handlePriceInput(displayValue: string, setter: (value: number) => void): string {
 		const parsed = parseVietnameseNumber(displayValue);
-		handleChange(parsed);
+		setter(parsed);
 		return displayValue;
 	}
 
@@ -69,329 +70,219 @@
 		return courtPrice / courtHours;
 	});
 
-	// Additional costs management (not in main form - stays simple)
-	// We'll validate these individually per field
+	// Additional costs management
 	function addCost() {
-		additionalCosts = [...additionalCosts, { id: Date.now(), label: '', amount: 0 }];
+		additionalCosts = [...additionalCosts, { id: crypto.randomUUID(), label: '', amount: 0 }];
 	}
 
-	function removeCost(id: number) {
+	function removeCost(id: string) {
 		additionalCosts = additionalCosts.filter((c) => c.id !== id);
 	}
 
-	// Helper to validate additional cost fields on the fly
-	function validateAdditionalCostField(
-		field: 'label' | 'amount',
-		value: string | number
-	): string | null {
-		try {
-			const costSchema = additionalCostSchema();
-			// Validate just this field
-			if (field === 'label') {
-				costSchema.shape.label.parse(value);
-			} else {
-				costSchema.shape.amount.parse(value);
-			}
-			return null; // No error
-		} catch (err: unknown) {
-			if (err && typeof err === 'object' && 'issues' in err) {
-				const { issues } = err as { issues?: Array<{ message?: string }> };
-				return issues?.[0]?.message || 'Invalid value';
-			}
-			if (err instanceof Error) return err.message;
-			return 'Invalid value';
-		}
-	}
-
-	// Track validation errors for additional costs
-	let additionalCostErrors = $state<Record<number, { label?: string; amount?: string }>>({});
-
 	// Track display values for additional cost amounts (prevents cursor jumps)
-	let additionalCostDisplays = $state<Record<number, string>>({});
+	let additionalCostDisplays = $state<Record<string, string>>({});
 
-	function updateCostWithValidation(
-		id: number,
-		field: keyof Omit<AdditionalCost, 'id'>,
-		value: string | number
-	) {
-		// Update the value
+	function updateCostWithValidation(id: string, field: keyof Omit<ExtraCost, 'id'>, value: string | number) {
 		additionalCosts = additionalCosts.map((c) => (c.id === id ? { ...c, [field]: value } : c));
-
-		// Validate and track errors
-		const error = validateAdditionalCostField(field as 'label' | 'amount', value);
-		additionalCostErrors = {
-			...additionalCostErrors,
-			[id]: {
-				...additionalCostErrors[id],
-				[field]: error || undefined
-			}
-		};
 	}
 </script>
 
-<!-- TanStack Form Svelte API uses form instance directly -->
 <div class="space-y-5">
 	<!-- Court Info -->
-	<div class="grid grid-cols-2 gap-3">
-		<!-- Field-level validation with Zod via helper function -->
-		<!-- zodFieldValidator converts Zod schema to validator function -->
-		<form.Field
-			name="courtHours"
-			validators={{
-				onChange: zodFieldValidator(schema.shape.courtHours)
-			}}
-		>
-			{#snippet children({ state, handleChange, handleBlur })}
-				<div>
-					<label for="court-hours" class="form-label !mb-2 text-xs">
-						{m.court_hours()}
-					</label>
-					<div class="relative">
-						<input
-							id="court-hours"
-							type="number"
-							value={state.value}
-							oninput={(e) => {
-								const val = parseFloat((e.target as HTMLInputElement).value);
-								handleChange(isNaN(val) ? 0 : val);
-							}}
-							onblur={handleBlur}
-							min="0"
-							step="0.5"
-							class="form-input form-input-number pr-5!"
-							class:border-red-500={state.meta.errors.length > 0}
-						/>
-						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
-						>
-							h
-						</span>
+	<form method="POST" use:enhance class="grid grid-cols-2 gap-3">
+		<Form.Field {form} name="courtHours">
+			<Form.Control>
+				{#snippet children({ props })}
+					<div>
+						<label for="court-hours" class="form-label !mb-2 text-xs">
+							{m.court_hours()}
+						</label>
+						<div class="relative">
+							<input
+								id="court-hours"
+								type="number"
+								{...props}
+								bind:value={$formData.courtHours}
+								min="0"
+								step="0.5"
+								class="form-input form-input-number pr-5!"
+							/>
+							<span
+								class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
+							>
+								h
+							</span>
+						</div>
+						<Form.FieldErrors />
 					</div>
-					{#if state.meta.errors.length > 0}
-						<p class="text-xs text-red-500 mt-1">{state.meta.errors[0]}</p>
-					{/if}
-				</div>
-			{/snippet}
-		</form.Field>
+				{/snippet}
+			</Form.Control>
+		</Form.Field>
 
-		<form.Field
-			name="courtPrice"
-			validators={{
-				onChange: zodFieldValidator(schema.shape.courtPrice)
-			}}
-		>
-			{#snippet children({ state, handleChange, handleBlur })}
-				<div>
-					<label for="court-price" class="form-label !mb-2 text-xs">
-						{m.court_price()}
-					</label>
-					<div class="relative">
-						<input
-							id="court-price"
-							type="text"
-							inputmode="decimal"
-							value={courtPriceDisplay}
-							oninput={(e) => {
-								courtPriceDisplay = handlePriceInput(
-									(e.target as HTMLInputElement).value,
-									handleChange
-								);
-							}}
-							onblur={() => {
-								handleBlur();
-								if (state.value > 0 && courtPriceDisplay === '') {
-									courtPriceDisplay = formatCompactNumber(state.value);
-								}
-							}}
-							placeholder={m.court_price_placeholder()}
-							class="form-input form-input-number pr-5!"
-							class:border-red-500={state.meta.errors.length > 0}
-						/>
-						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
-						>
-							{m.currency()}
-						</span>
+		<Form.Field {form} name="courtPrice">
+			<Form.Control>
+				{#snippet children({ props })}
+					<div>
+						<label for="court-price" class="form-label !mb-2 text-xs">
+							{m.court_price()}
+						</label>
+						<div class="relative">
+							<input
+								id="court-price"
+								type="text"
+								inputmode="decimal"
+								value={courtPriceDisplay}
+								oninput={(e) => {
+									courtPriceDisplay = handlePriceInput(
+										(e.target as HTMLInputElement).value,
+										(v) => ($formData.courtPrice = v)
+									);
+								}}
+								onblur={() => {
+									if ($formData.courtPrice > 0 && courtPriceDisplay === '') {
+										courtPriceDisplay = formatCompactNumber($formData.courtPrice);
+									}
+								}}
+								placeholder={m.court_price_placeholder()}
+								class="form-input form-input-number pr-5!"
+							/>
+							<span
+								class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
+							>
+								{m.currency()}
+							</span>
+						</div>
+						<p class="text-xs text-slate-500 mt-1">{m.court_total_hint()}</p>
+						{#if courtPerHour > 0}
+							<p class="text-xs text-slate-500">
+								{m.court_per_hour_hint({ amount: formatCurrency(courtPerHour) })}
+							</p>
+						{/if}
+						<Form.FieldErrors />
 					</div>
-					<p class="text-xs text-(--slate-500) mt-1">{m.court_total_hint()}</p>
-					{#if courtPerHour > 0}
-						<p class="text-xs text-(--slate-500)">
-							{m.court_per_hour_hint({ amount: formatCurrency(courtPerHour) })}
-						</p>
-					{/if}
-					{#if state.meta.errors.length > 0}
-						<p class="text-xs text-red-500 mt-1">{state.meta.errors[0]}</p>
-					{/if}
-				</div>
-			{/snippet}
-		</form.Field>
-	</div>
+				{/snippet}
+			</Form.Control>
+		</Form.Field>
+	</form>
 
 	<!-- Shuttlecocks -->
 	<div class="grid grid-cols-2 gap-3">
-		<form.Field
-			name="shuttlecockPrice"
-			validators={{
-				onChange: zodFieldValidator(schema.shape.shuttlecockPrice)
-			}}
-		>
-			{#snippet children({ state, handleChange, handleBlur })}
-				<div>
-					<label for="shuttle-price" class="form-label !mb-2 text-xs">
-						{m.shuttlecock_price()}
-					</label>
-					<div class="relative">
-						<input
-							id="shuttle-price"
-							type="text"
-							inputmode="decimal"
-							value={shuttlePriceDisplay}
-							oninput={(e) => {
-								shuttlePriceDisplay = handlePriceInput(
-									(e.target as HTMLInputElement).value,
-									handleChange
-								);
-							}}
-							onblur={() => {
-								handleBlur();
-								if (state.value > 0 && shuttlePriceDisplay === '') {
-									shuttlePriceDisplay = formatCompactNumber(state.value);
-								}
-							}}
-							placeholder={m.shuttle_price_placeholder()}
-							class="form-input form-input-number pr-5!"
-							class:border-red-500={state.meta.errors.length > 0}
-						/>
-						<span
-							class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-(--slate-400) pointer-events-none"
-						>
-							{m.currency()}
-						</span>
+		<Form.Field {form} name="shuttlecockPrice">
+			<Form.Control>
+				{#snippet children({ props })}
+					<div>
+						<label for="shuttle-price" class="form-label !mb-2 text-xs">
+							{m.shuttlecock_price()}
+						</label>
+						<div class="relative">
+							<input
+								id="shuttle-price"
+								type="text"
+								inputmode="decimal"
+								value={shuttlePriceDisplay}
+								oninput={(e) => {
+									shuttlePriceDisplay = handlePriceInput(
+										(e.target as HTMLInputElement).value,
+										(v) => ($formData.shuttlecockPrice = v)
+									);
+								}}
+								onblur={() => {
+									if ($formData.shuttlecockPrice > 0 && shuttlePriceDisplay === '') {
+										shuttlePriceDisplay = formatCompactNumber($formData.shuttlecockPrice);
+									}
+								}}
+								placeholder={m.shuttle_price_placeholder()}
+								class="form-input form-input-number pr-5!"
+							/>
+							<span
+								class="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none"
+							>
+								{m.currency()}
+							</span>
+						</div>
+						<Form.FieldErrors />
 					</div>
-					{#if state.meta.errors.length > 0}
-						<p class="text-xs text-red-500 mt-1">{state.meta.errors[0]}</p>
-					{/if}
-				</div>
-			{/snippet}
-		</form.Field>
+				{/snippet}
+			</Form.Control>
+		</Form.Field>
 
-		<form.Field
-			name="shuttlecockCount"
-			validators={{
-				onChange: zodFieldValidator(schema.shape.shuttlecockCount)
-			}}
-		>
-			{#snippet children({ state, handleChange, handleBlur })}
-				<div>
-					<label for="shuttle-count" class="form-label !mb-2 text-xs">
-						{m.shuttlecock_count()}
-					</label>
-					<input
-						id="shuttle-count"
-						type="number"
-						value={state.value}
-						oninput={(e) => {
-							const val = parseFloat((e.target as HTMLInputElement).value);
-							handleChange(isNaN(val) ? 0 : val);
-						}}
-						onblur={handleBlur}
-						min="0"
-						step="1"
-						class="form-input form-input-number"
-						class:border-red-500={state.meta.errors.length > 0}
-					/>
-					{#if state.meta.errors.length > 0}
-						<p class="text-xs text-red-500 mt-1">{state.meta.errors[0]}</p>
-					{/if}
-				</div>
-			{/snippet}
-		</form.Field>
+		<Form.Field {form} name="shuttlecockCount">
+			<Form.Control>
+				{#snippet children({ props })}
+					<div>
+						<label for="shuttle-count" class="form-label !mb-2 text-xs">
+							{m.shuttlecock_count()}
+						</label>
+						<input
+							id="shuttle-count"
+							type="number"
+							{...props}
+							bind:value={$formData.shuttlecockCount}
+							min="0"
+							step="1"
+							class="form-input form-input-number"
+						/>
+						<Form.FieldErrors />
+					</div>
+				{/snippet}
+			</Form.Control>
+		</Form.Field>
 	</div>
 
-	<!-- Additional Costs with manual Zod validation -->
-	<!-- Array items managed outside TanStack Form for simplicity -->
+	<!-- Additional Costs -->
 	<div class="pt-2">
 		<div class="flex items-center justify-between mb-3">
-			<span class="text-xs text-(--slate-500)">{m.additional_costs()}</span>
+			<span class="text-xs text-slate-500">{m.additional_costs()}</span>
 			<button type="button" class="btn-secondary h-8 text-sm rounded-sm!" onclick={addCost}>
 				<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M12 4v16m8-8H4"
-					/>
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
 				</svg>
-				<span>
-					{m.add_cost_btn()}
-				</span>
+				<span>{m.add_cost_btn()}</span>
 			</button>
 		</div>
 
 		{#if additionalCosts.length > 0}
 			<div class="space-y-2">
-				{#each additionalCosts as cost, i (cost.id ?? i)}
-					<div
-						class="flex items-center gap-2 animate-slide-in"
-						style="animation-fill-mode: backwards;"
-					>
+				{#each additionalCosts as cost (cost.id)}
+					<div class="flex items-center gap-2 animate-slide-in" style="animation-fill-mode: backwards;">
 						<div class="flex-1">
 							<input
 								type="text"
 								value={cost.label}
-								oninput={(e) =>
-									updateCostWithValidation(cost.id ?? i, 'label', (e.target as HTMLInputElement).value)}
+								oninput={(e) => updateCostWithValidation(cost.id, 'label', (e.target as HTMLInputElement).value)}
 								placeholder={m.cost_label_placeholder()}
 								class="form-input text-sm w-full"
-								class:border-red-500={additionalCostErrors[cost.id ?? i]?.label}
 							/>
-							{#if additionalCostErrors[cost.id ?? i]?.label}
-								<p class="text-xs text-red-500 mt-1">
-									{additionalCostErrors[cost.id ?? i].label}
-								</p>
-							{/if}
 						</div>
 						<div class="w-28">
 							<div class="relative">
 								<input
 									type="text"
 									inputmode="decimal"
-									value={additionalCostDisplays[cost.id ?? i] ??
-										(cost.amount > 0 ? formatCompactNumber(cost.amount) : '')}
+									value={additionalCostDisplays[cost.id] ?? (cost.amount > 0 ? formatCompactNumber(cost.amount) : '')}
 									oninput={(e) => {
 										const raw = (e.target as HTMLInputElement).value;
-										additionalCostDisplays[cost.id ?? i] = raw;
-										updateCostWithValidation(cost.id ?? i, 'amount', parseVietnameseNumber(raw));
+										additionalCostDisplays[cost.id] = raw;
+										updateCostWithValidation(cost.id, 'amount', parseVietnameseNumber(raw));
 									}}
 									placeholder={m.amount_placeholder()}
 									class="form-input form-input-number text-sm w-full pr-6"
-									class:border-red-500={additionalCostErrors[cost.id ?? i]?.amount}
 								/>
 								<span
-									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-(--slate-400) pointer-events-none"
+									class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-slate-400 pointer-events-none"
 								>
 									{m.currency()}
 								</span>
 							</div>
-							{#if additionalCostErrors[cost.id ?? i]?.amount}
-								<p class="text-xs text-red-500 mt-1">
-									{additionalCostErrors[cost.id ?? i].amount}
-								</p>
-							{/if}
 						</div>
 						<button
 							type="button"
 							class="btn-icon btn-icon-danger"
-							onclick={() => removeCost(cost.id ?? i)}
+							onclick={() => removeCost(cost.id)}
 							aria-label={m.remove()}
 						>
 							<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-								<path
-									stroke-linecap="round"
-									stroke-linejoin="round"
-									stroke-width="2"
-									d="M6 18L18 6M6 6l12 12"
-								/>
+								<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
 							</svg>
 						</button>
 					</div>

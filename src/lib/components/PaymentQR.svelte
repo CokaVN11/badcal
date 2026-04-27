@@ -15,6 +15,9 @@
 		type PaymentInfo
 	} from '$lib/utils/vietqr';
 	import { IconQrcode, IconChevronDown, IconCheck, IconX } from '@tabler/icons-svelte-runes';
+	import { Input } from '$lib/components/ui/input';
+	import { Button } from '$lib/components/ui/button';
+	import { Spinner } from '$lib/components/ui/spinner';
 
 	let isConfiguring = $state(false);
 	let selectedProvider = $state<ProviderKey | ''>('');
@@ -122,11 +125,10 @@
 
 			<div class="form-row">
 				<span class="form-label">{m.qr_account_name()}</span>
-				<input
+				<Input
 					type="text"
 					bind:value={accountName}
 					placeholder={m.qr_name_placeholder()}
-					class="form-input"
 				/>
 			</div>
 
@@ -136,24 +138,24 @@
 
 			<div class="form-actions">
 				{#if hasConfig}
-					<button type="button" class="btn-thermal" onclick={cancelConfiguring}>
+					<Button type="button" variant="outline" onclick={cancelConfiguring}>
 						<IconX class="btn-icon" />
 						{m.cancel()}
-					</button>
+					</Button>
 				{/if}
-				<button
+				<Button
 					type="button"
-					class="btn-thermal primary"
+					variant="default"
 					onclick={handleGenerateClick}
 					disabled={!isValidConfig || isGenerating}
 				>
 					{#if isGenerating}
-						<span class="spinner"></span>
+						<Spinner />
 					{:else}
 						<IconCheck class="btn-icon" />
 					{/if}
 					{m.qr_generate()}
-				</button>
+				</Button>
 			</div>
 		</div>
 	{:else if qrDataUrl && hasConfig}

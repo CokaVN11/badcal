@@ -39,16 +39,16 @@
 		<Dialog.Content
 			class="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-white rounded-2xl shadow-xl outline-none data-[state=open]:animate-fade-in"
 		>
-			<div class="p-4 border-b border-(--slate-200)">
+			<div class="p-4 border-b border-slate-200">
 				<div class="flex items-center justify-between">
-					<Dialog.Title class="text-lg font-semibold text-(--slate-800)">
+					<Dialog.Title class="text-lg font-semibold text-slate-800">
 						{m.import_players_title()}
 					</Dialog.Title>
 					<Dialog.Close class="btn-icon" type="button" aria-label={m.cancel()}>
 						<IconX stroke={2} />
 					</Dialog.Close>
 				</div>
-				<Dialog.Description class="text-sm text-(--slate-500) mt-1">
+				<Dialog.Description class="text-sm text-slate-500 mt-1">
 					{m.import_players_hint()}
 				</Dialog.Description>
 			</div>
@@ -63,7 +63,7 @@
 				></textarea>
 			</div>
 
-			<div class="p-4 border-t border-(--slate-200) flex gap-3">
+			<div class="p-4 border-t border-slate-200 flex gap-3">
 				<Dialog.Close class="btn-secondary flex-1" type="button">{m.cancel()}</Dialog.Close>
 
 				<button class="btn-primary flex-1" type="button" onclick={submit} disabled={!canSubmit}>

@@ -4,8 +4,13 @@
  * No business logic lives here; routes call these for data access.
  */
 import { getPrisma } from '../db/prisma.server.js';
-import type { Session, PaidStatus } from '../../../../generated/prisma/client.js';
-import type { Prisma } from '../../../../generated/prisma/client.js';
+import type {
+	CourtBlock,
+	Group,
+	ExtraCost,
+	PaidStatus
+} from '../../../../generated/prisma/client.js';
+import { PrismaClientKnownRequestError } from '../../../../generated/prisma/internal/prismaNamespace.js';
 
 export interface SessionPayload {
 	sessionTitle: string;
@@ -24,14 +29,27 @@ export interface SessionPayload {
 	}>;
 }
 
-/** Load a session by its UUID. Returns null if not found. */
-export async function findSessionById(id: string): Promise<Session | null> {
-	return getPrisma().session.findUnique({ where: { id } });
+/** Load a session by its UUID with all relations. */
+export async function findSessionById(id: string) {
+	return getPrisma().session.findUnique({
+		where: { id },
+		include: { courtBlocks: true, groups: true, extraCosts: true }
+	});
 }
 
-/** Load a session by its canonical content hash. Returns null if not found. */
-export async function findSessionByContentHash(hash: string): Promise<Session | null> {
-	return getPrisma().session.findUnique({ where: { contentHash: hash } });
+export async function findSessionWithRelations(id: string) {
+	return getPrisma().session.findUnique({
+		where: { id },
+		include: { courtBlocks: true, groups: true, extraCosts: true, paidStatuses: true }
+	});
+}
+
+/** Load a session by its canonical content hash with all relations. */
+export async function findSessionByContentHash(hash: string) {
+	return getPrisma().session.findUnique({
+		where: { contentHash: hash },
+		include: { courtBlocks: true, groups: true, extraCosts: true }
+	});
 }
 
 /**
@@ -40,20 +58,72 @@ export async function findSessionByContentHash(hash: string): Promise<Session | 
  */
 export async function createOrReuseSession(
 	hash: string,
-	payload: SessionPayload
-): Promise<Session> {
+	payload: {
+		sessionTitle: string;
+		sessionDate: string;
+		courtBlocks: Omit<CourtBlock, 'id' | 'sessionId'>[];
+		groups: Omit<Group, 'id' | 'sessionId'>[];
+		extraCosts: Omit<ExtraCost, 'id' | 'sessionId'>[];
+	}
+) {
 	const prisma = getPrisma();
+	try {
+		const session = await prisma.$transaction(async (tx) => {
+			const session = await tx.session.create({
+				data: {
+					contentHash: hash,
+					sessionTitle: payload.sessionTitle,
+					sessionDate: payload.sessionDate
+				}
+			});
+			await tx.courtBlock.createMany({
+				data: payload.courtBlocks.map((cb) => ({ ...cb, sessionId: session.id }))
+			});
+			await tx.group.createMany({
+				data: payload.groups.map((g) => ({ ...g, sessionId: session.id }))
+			});
+			await tx.extraCost.createMany({
+				data: payload.extraCosts.map((ec) => ({ ...ec, sessionId: session.id }))
+			});
+			return session;
+		});
+		return session;
+	} catch (e: unknown) {
+		if (e instanceof PrismaClientKnownRequestError && e.code === 'P2002') {
+			return prisma.session.findUnique({ where: { contentHash: hash } });
+		}
+		throw e;
+	}
+}
 
-	const existing = await prisma.session.findUnique({ where: { contentHash: hash } });
-	if (existing) return existing;
-
-	return prisma.session.create({ data: { contentHash: hash, data: payload as unknown as Prisma.InputJsonValue } });
+export async function getRecentSessions(limit: number = 5) {
+	return getPrisma().session.findMany({
+		orderBy: { createdAt: 'desc' },
+		take: limit,
+		include: { courtBlocks: true, groups: true, extraCosts: true }
+	});
 }
 
 /** List paid player IDs for a session. Returns empty array if none. */
 export async function listPaidPlayerIds(sessionId: string): Promise<number[]> {
 	const rows = await getPrisma().paidStatus.findMany({ where: { sessionId } });
 	return rows.map((r: PaidStatus) => r.playerId);
+}
+
+/** List paid player names for a session. Returns empty array if none. */
+export async function listPaidPlayerNames(sessionId: string): Promise<string[]> {
+	const session = await getPrisma().session.findUnique({
+		where: { id: sessionId },
+		include: { groups: true, paidStatuses: true }
+	});
+	if (!session) return [];
+	const allNames: string[] = [];
+	session.groups.forEach(g => {
+		if (g.playerNames && Array.isArray(g.playerNames)) {
+			allNames.push(...g.playerNames);
+		}
+	});
+	return session.paidStatuses.map(r => allNames[r.playerId]).filter(Boolean);
 }
 
 /**
@@ -64,13 +134,13 @@ export async function markPaid(sessionId: string, playerId: number): Promise<voi
 	await getPrisma().paidStatus.upsert({
 		where: { sessionId_playerId: { sessionId, playerId } },
 		create: { sessionId, playerId, paidAt: new Date() },
-		update: { paidAt: new Date() },
+		update: { paidAt: new Date() }
 	});
 }
 
 /** Remove a player's paid status for a session. */
 export async function unmarkPaid(sessionId: string, playerId: number): Promise<void> {
 	await getPrisma().paidStatus.delete({
-		where: { sessionId_playerId: { sessionId, playerId } },
+		where: { sessionId_playerId: { sessionId, playerId } }
 	});
 }

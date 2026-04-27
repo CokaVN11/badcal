@@ -39,7 +39,7 @@
 </script>
 
 <div
-	class="player-row flex flex-col gap-1.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-(--border) hover:shadow-sm transition-all duration-150"
+	class="player-row flex flex-col gap-1.5 p-2.5 bg-white rounded-xl border border-transparent hover:border-border hover:shadow-sm transition-all duration-150"
 	style="animation: slideUp 0.25s ease-out backwards; animation-delay: {playerIndex * 0.04}s;"
 >
 	<div class="flex items-center gap-2.5">
@@ -53,7 +53,7 @@
 				value={player.name}
 				oninput={(e) => onUpdateName((e.target as HTMLInputElement).value)}
 				placeholder={displayName}
-				class="w-full bg-transparent border-none p-0 text-sm font-semibold text-(--ink) focus:outline-none placeholder:text-(--slate-400) placeholder:font-normal"
+				class="w-full bg-transparent border-none p-0 text-sm font-semibold text-ink focus:outline-none placeholder:text-slate-400 placeholder:font-normal"
 			/>
 			{#if player.arrivalOffsetMinutes > 0}
 				<span class="shrink-0 text-[8px] font-medium text-amber-600 rounded-full leading-none">
@@ -65,7 +65,7 @@
 		<div class="flex items-center gap-0.5">
 			<button
 				type="button"
-				class="stepper-btn w-11 h-11 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
+				class="stepper-btn w-11 h-11 rounded-lg bg-slate-100 hover:bg-slate-200 text-ink-soft hover:text-ink flex items-center justify-center transition-colors"
 				onclick={() => onAddHours(-hourStep)}
 				aria-label={m.decrease_hours()}
 			>
@@ -78,7 +78,7 @@
 			</div>
 			<button
 				type="button"
-				class="stepper-btn w-11 h-11 rounded-lg bg-(--slate-100) hover:bg-(--slate-200) text-(--ink-soft) hover:text-(--ink) flex items-center justify-center transition-colors"
+				class="stepper-btn w-11 h-11 rounded-lg bg-slate-100 hover:bg-slate-200 text-ink-soft hover:text-ink flex items-center justify-center transition-colors"
 				onclick={() => onAddHours(hourStep)}
 				aria-label={m.increase_hours()}
 			>
@@ -86,7 +86,7 @@
 			</button>
 			<button
 				type="button"
-				class="delete-btn w-11 h-11 rounded-lg text-(--slate-400) hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
+				class="delete-btn w-11 h-11 rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors ml-1"
 				onclick={onRemove}
 				aria-label={m.remove()}
 			>
@@ -101,7 +101,7 @@
 				type="button"
 				class="h-11 px-3 rounded-md text-sm font-medium transition-colors {player.arrivalOffsetMinutes === offset
 					? `${colorScheme.light} ${colorScheme.text}`
-					: 'bg-(--slate-100) text-(--ink-muted) hover:bg-(--slate-200)'}"
+					: 'bg-slate-100 text-ink-muted hover:bg-slate-200'}"
 				onclick={() => onSetArrivalOffset(offset)}
 			>
 				{offset === 0 ? 'On time' : `+${offset}m`}
