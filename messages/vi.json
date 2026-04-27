@@ -164,6 +164,9 @@
 	"quick_cost_parking": "Gửi xe",
 	"summary_tab": "Tóm tắt",
 	"by_person_tab": "Theo người",
-	"following_tab": "Theo dõi",
-	"share_link": "Chia sẻ liên kết"
+	"following_tab": "Chuyển tiếp",
+	"share_link": "Chia sẻ liên kết",
+  "paid": "Đã trả",
+  "unpaid": "Chưa trả",
+  "minutes_unit": "phút"
 }

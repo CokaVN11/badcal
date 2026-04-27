@@ -165,5 +165,8 @@
 	"summary_tab": "Summary",
 	"by_person_tab": "By Person",
 	"following_tab": "Following",
-	"share_link": "Share link"
+	"share_link": "Share link",
+  "paid": "Paid",
+  "unpaid": "Unpaid",
+  "minutes_unit": "min"
 }

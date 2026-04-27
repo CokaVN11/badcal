@@ -3,27 +3,28 @@
 	import { parseTime } from '$lib/utils/share-calc';
 	import * as m from '$lib/paraglide/messages';
 	import { formatCurrency } from '$lib/utils/format';
+	import type { CourtBlock } from '$lib/types';
 
 	let {
-		startTime = $bindable(''),
-		endTime = $bindable(''),
-		courtCount = $bindable(1),
-		feePerHour = $bindable(0)
+		block,
+		onUpdate
 	}: {
-		startTime: string;
-		endTime: string;
-		courtCount: number;
-		feePerHour: number;
+		block: CourtBlock;
+		onUpdate: (updated: CourtBlock) => void;
 	} = $props();
 
-	const durationMinutes = $derived(Math.max(0, parseTime(endTime) - parseTime(startTime)));
+	function update(partial: Partial<CourtBlock>) {
+		onUpdate({ ...block, ...partial });
+	}
+
+	const durationMinutes = $derived(Math.max(0, parseTime(block.endTime) - parseTime(block.startTime)));
 	const hours = $derived(durationMinutes / 60);
 	const durationLabel = $derived(
 		durationMinutes >= 60
 			? `${Math.floor(durationMinutes / 60)}h${durationMinutes % 60 > 0 ? ` ${durationMinutes % 60}p` : ''}`
 			: `${durationMinutes} phút`
 	);
-	const totalFee = $derived(hours * courtCount * feePerHour);
+	const totalFee = $derived(hours * block.courtCount * block.pricePerHour);
 </script>
 
 <div class="flex flex-col space-y-1 border border-surface-container rounded-xl p-4">
@@ -35,7 +36,8 @@
 			>
 			<Input
 				type="time"
-				bind:value={startTime}
+				value={block.startTime}
+				oninput={(e) => update({ startTime: e.currentTarget.value })}
 				class="font-bold text-2xl p-0 text-on-background bg-transparent border-none focus:outline-none w-full text-left no-clock"
 			/>
 		</div>
@@ -52,7 +54,8 @@
 			>
 			<Input
 				type="time"
-				bind:value={endTime}
+				value={block.endTime}
+				oninput={(e) => update({ endTime: e.currentTarget.value })}
 				class="font-bold text-2xl p-0 text-on-background bg-transparent border-none focus:outline-none w-full text-right no-clock"
 			/>
 		</div>
@@ -68,7 +71,8 @@
 				<Input
 					type="number"
 					min="0"
-					bind:value={feePerHour}
+					value={block.pricePerHour}
+					oninput={(e) => update({ pricePerHour: Number(e.currentTarget.value) })}
 					class="w-24 h-9 text-sm font-semibold text-on-background bg-surface-container border border-surface-container rounded-md px-3 py-1 text-right"
 				/>
 				<span class="text-sm text-outline font-semibold">/{m.hours_unit()}</span>

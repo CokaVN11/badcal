@@ -19,6 +19,11 @@ export type SessionState = {
 	courtBlocks: CourtBlock[];
 	groups: Group[];
 	extraCosts: ExtraCost[];
+	// Cached computed totals (invalidated via version when source arrays change)
+	_courtBlocksCacheKey: number;
+	_extraCostsCacheKey: number;
+	courtTotal: number | null;
+	extraTotal: number | null;
 };
 
 export type SavedLineup = {

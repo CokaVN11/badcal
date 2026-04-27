@@ -107,6 +107,22 @@ export async function listPaidPlayerIds(sessionId: string): Promise<number[]> {
 	return rows.map((r: PaidStatus) => r.playerId);
 }
 
+/** List paid player names for a session. Returns empty array if none. */
+export async function listPaidPlayerNames(sessionId: string): Promise<string[]> {
+	const session = await getPrisma().session.findUnique({
+		where: { id: sessionId },
+		include: { groups: true, paidStatuses: true }
+	});
+	if (!session) return [];
+	const allNames: string[] = [];
+	session.groups.forEach(g => {
+		if (g.playerNames && Array.isArray(g.playerNames)) {
+			allNames.push(...g.playerNames);
+		}
+	});
+	return session.paidStatuses.map(r => allNames[r.playerId]).filter(Boolean);
+}
+
 /**
  * Mark a player as paid for a session.
  * Idempotent — upsert handles the same (sessionId, playerId) pair safely.

@@ -15,6 +15,7 @@ type JSONValue =
 interface ReactiveStorageConfig {
     prefix: string;
     storage: 'local' | 'session';
+    onSet?: (key: string, newValue: JSONValue) => void;
 }
 
 interface ReactiveStorageItemConfig extends ReactiveStorageConfig {
@@ -110,6 +111,7 @@ export function createReactiveStorage<ValueMap extends Record<string, JSONValue>
                 } else {
                     storage.setItem(keyWithPrefix, JSON.stringify(newValue));
                 }
+                globalConfig.onSet?.(key, newValue);
                 item.update?.();
             }
         });

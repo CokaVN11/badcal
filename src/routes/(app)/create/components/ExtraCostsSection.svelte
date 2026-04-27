@@ -7,10 +7,10 @@
 	import * as m from '$lib/paraglide/messages';
 
 	const QUICK_COSTS: [string, number][] = [
-		[m.quick_cost_shuttlecock(), 30],
-		[m.quick_cost_iced_tea(), 15],
-		[m.quick_cost_drinks(), 10],
-		[m.quick_cost_parking(), 5]
+		[m.quick_cost_shuttlecock(), 30000],
+		[m.quick_cost_iced_tea(), 15000],
+		[m.quick_cost_drinks(), 10000],
+		[m.quick_cost_parking(), 5000]
 	];
 
 	function addExtraCost() {
@@ -45,16 +45,21 @@
 				class="h-8 bg-surface-container rounded-full text-sm text-on-surface-variant flex items-center gap-1 hover:bg-surface-container-high transition-colors"
 			>
 				<span>{label}</span>
-				<span class="font-semibold text-primary-container">{formatCompactNumber(Number(amt) * 1000)}</span>
+				<span class="font-semibold text-primary-container">{formatCompactNumber(Number(amt))}</span>
 			</Button>
 		{/each}
 	</div>
 
-	{#each sessionStorage.extraCosts as cost (cost.id)}
+	{#each sessionStorage.extraCosts as cost, i (cost.id)}
 		<div class="flex items-center gap-2">
 			<Input
 				type="text"
-				bind:value={cost.label}
+				value={cost.label}
+				oninput={(e) => {
+					const arr = sessionStorage.extraCosts;
+					arr[i] = { ...arr[i], label: e.currentTarget.value };
+					sessionStorage.extraCosts = arr;
+				}}
 				placeholder="Label"
 				class="flex-1 text-sm"
 			/>
@@ -62,11 +67,15 @@
 				<Input
 					type="number"
 					min="0"
-					bind:value={cost.amount}
+					value={cost.amount}
+					oninput={(e) => {
+						const arr = sessionStorage.extraCosts;
+						arr[i] = { ...arr[i], amount: Number(e.currentTarget.value) };
+						sessionStorage.extraCosts = arr;
+					}}
 					placeholder="0"
 					class="w-24 text-sm pr-8"
 				/>
-				<span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-outline font-semibold">k</span>
 			</div>
 			<Button
 				type="button"

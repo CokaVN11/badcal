@@ -5,12 +5,11 @@
 	import {
 		formatCurrency,
 		formatDate,
-		groupByKey,
 		getNamedPlayers,
 		getOthersCount
 	} from '$lib/utils';
 	import type { ExtraCost, Player, Group, CourtBlock } from '$lib/types';
-	import { computeMinuteProportionShares, computeCourtTotal, parseTime } from '$lib/utils/share-calc';
+	import { computeMinuteProportionShares } from '$lib/utils/share-calc';
 	import { IconCheck } from '@tabler/icons-svelte-runes';
 	import PaymentQR from '../PaymentQR.svelte';
 	import { calculatePlayerTimes } from '../Players/playerList.logic';
@@ -41,6 +40,7 @@
 		groups?: Group[];
 		courtBlocks?: CourtBlock[];
 		extraCosts?: ExtraCost[];
+		shareResults?: { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
 	};
 
 	let {
@@ -57,7 +57,8 @@
 		includeQR,
 		groups,
 		courtBlocks,
-		extraCosts
+		extraCosts,
+		shareResults
 	}: Props = $props();
 
 	let receiptEl: HTMLDivElement | null = $state(null);
@@ -69,12 +70,13 @@
 
 	const MAX_VISIBLE_EXTRAS = 6;
 
-	// Compute shares from groups if provided
+	// Compute shares from groups if provided, or use shareResults directly from server
 	type CompatPlayer = { id: number; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
-	const computedShares = $derived(
-		groups?.length && courtBlocks?.length
+	type ShareResult = { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number };
+	const computedShares = $derived<ShareResult[]>(
+		shareResults ?? (groups?.length && courtBlocks?.length
 			? computeMinuteProportionShares(groups, courtBlocks, extraCosts ?? [])
-			: []
+			: [])
 	);
 	const compatShares = $derived<CompatPlayer[]>(
 		computedShares.length > 0
@@ -94,7 +96,7 @@
 	const displayShares = $derived<CompatPlayer[]>(
 		computedShares.length > 0 ? compatShares : (playerShares as unknown as CompatPlayer[])
 	);
-	const compatGroupedByHours = $derived<[number, CompatPlayer[]][]>(() => {
+	const compatGroupedByHours = $derived.by<[number, CompatPlayer[]][]>(() => {
 		if (computedShares.length === 0) return [];
 		const groups: Record<number, CompatPlayer[]> = {};
 		for (const s of computedShares) {
@@ -135,7 +137,6 @@
 	let visibleExtras = $derived(paidExtras.slice(0, MAX_VISIBLE_EXTRAS));
 	let remainingExtras = $derived(paidExtras.slice(MAX_VISIBLE_EXTRAS));
 	let remainingExtrasTotal = $derived(remainingExtras.reduce((sum, c) => sum + c.amount, 0));
-	let groupedByHours = $derived(groupByKey(playerShares, (p) => p.hours));
 	let shuttlecockTotal = $derived(shuttlecockPrice * shuttlecockCount);
 </script>
 
@@ -203,7 +204,7 @@
 				</div>
 			{/each}
 		{:else}
-			{#each (typeof compatGroupedByHours === 'function' ? compatGroupedByHours() : compatGroupedByHours) as [hours, players] (hours)}
+			{#each (compatGroupedByHours) as [hours, players] (hours)}
 				{@const groupShare = players[0]?.share ?? 0}
 				{@const namedPlayers = getNamedPlayers(players)}
 				{@const othersCount = getOthersCount(namedPlayers.length, players.length)}

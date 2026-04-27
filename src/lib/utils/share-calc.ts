@@ -10,7 +10,7 @@
 
 import type { Player } from '$lib/types';
 
-const SHARE_UNIT = 500; // VND rounding unit
+export const SHARE_UNIT = 500; // VND rounding unit
 
 export interface ShareResult extends Player {
 	ratio: number;
@@ -71,7 +71,7 @@ export function computePlayerShares(
 		return { ...p, ratio, exactUnits, floorUnits, rem: exactUnits - floorUnits };
 	});
 
-	let unitsLeft = totalUnits - withExact.reduce((sum, p) => sum + p.floorUnits, 0);
+	const unitsLeft = totalUnits - withExact.reduce((sum, p) => sum + p.floorUnits, 0);
 	const sortedByRemainder = [...withExact].sort((a, b) => b.rem - a.rem || a.id - b.id);
 
 	const shares = new Map<number, number>();
@@ -159,7 +159,7 @@ export function computeMinuteProportionShares(
     return { name, idx, ratio, exactUnits, floorUnits, rem: exactUnits - floorUnits };
   });
 
-  let unitsLeft = totalUnits - withExact.reduce((s, p) => s + p.floorUnits, 0);
+  const unitsLeft = totalUnits - withExact.reduce((s, p) => s + p.floorUnits, 0);
   const sorted = [...withExact].sort((a, b) => b.rem - a.rem || a.idx - b.idx);
   const shares = new Map<number, number>();
   sorted.forEach((p, i) => {

@@ -36,11 +36,13 @@
 	<div class="flex flex-col">
 		{#if !showMultiBlock}
 			<CourtBlockRow
-					startTime={sessionStorage.courtBlocks[0].startTime}
-					endTime={sessionStorage.courtBlocks[0].endTime}
-					courtCount={sessionStorage.courtBlocks[0].courtCount}
-					feePerHour={sessionStorage.courtBlocks[0].pricePerHour}
-				/>
+				block={sessionStorage.courtBlocks[0]}
+				onUpdate={(updated) => {
+					sessionStorage.courtBlocks = sessionStorage.courtBlocks.map((b) =>
+						b.id === updated.id ? updated : b
+					);
+				}}
+			/>
 		{:else}
 			{#each sessionStorage.courtBlocks as block (block.id)}
 				<div class="rounded-xl space-y-4">
@@ -57,10 +59,12 @@
 						{/if}
 					</div>
 					<CourtBlockRow
-						startTime={block.startTime}
-						endTime={block.endTime}
-						courtCount={block.courtCount}
-						feePerHour={block.pricePerHour}
+						block={block}
+						onUpdate={(updated) => {
+							sessionStorage.courtBlocks = sessionStorage.courtBlocks.map((b) =>
+								b.id === updated.id ? updated : b
+							);
+						}}
 					/>
 				</div>
 			{/each}

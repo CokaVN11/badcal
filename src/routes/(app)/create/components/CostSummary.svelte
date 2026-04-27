@@ -1,12 +1,12 @@
 <script lang="ts">
-	import { computeCourtTotal } from '$lib/utils/share-calc';
 	import { formatCurrency } from '$lib/utils/format';
 	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { IconReceiptFilled } from '@tabler/icons-svelte-runes';
 
-	const courtTotal = $derived(computeCourtTotal(sessionStorage.courtBlocks));
-	const extraTotal = $derived(sessionStorage.extraCosts.reduce((s, c) => s + (c.amount || 0), 0));
+	// Re-trigger reactivity when cache keys change (cache invalidation signals)
+	const courtTotal = $derived((sessionStorage._courtBlocksCacheKey, sessionStorage.courtTotal ?? 0));
+	const extraTotal = $derived((sessionStorage._extraCostsCacheKey, sessionStorage.extraTotal ?? 0));
 	const grandTotal = $derived(courtTotal + extraTotal);
 </script>
 
