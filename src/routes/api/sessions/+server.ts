@@ -27,10 +27,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	// --- Validate required fields ---
 	if (!payload.title || typeof payload.title !== 'string') {
-		return json({ error: 'Missing or invalid: sessionTitle' }, { status: 400 });
+		return json({ error: 'Missing or invalid: title' }, { status: 400 });
 	}
 	if (!payload.date || typeof payload.date !== 'string') {
-		return json({ error: 'Missing or invalid: sessionDate' }, { status: 400 });
+		return json({ error: 'Missing or invalid: date' }, { status: 400 });
 	}
 	if (!Array.isArray(payload.courtBlocks)) {
 		return json({ error: 'courtBlocks must be an array' }, { status: 400 });

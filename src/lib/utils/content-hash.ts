@@ -29,7 +29,7 @@ export interface HashableExtraCost {
 	originalId?: number;
 }
 
-export interface HasableGroup {
+export interface HashableGroup {
 	id: number;
 	startTime: string;
 	endTime: string;
@@ -51,7 +51,7 @@ export interface HashablePayload {
 	date: string;
 	courtBlocks: HashableCourtBlock[];
 	extraCosts: HashableExtraCost[];
-	groups: HasableGroup[];
+	groups: HashableGroup[];
 }
 
 /** Stable tiebreaker field — prefer explicit index, fall back to array position */
@@ -68,11 +68,12 @@ function normalizeExtraCosts(costs: HashableExtraCost[]): HashableExtraCost[] {
 			if (a.amount !== b.amount) return a.amount - b.amount;
 			return a._idx - b._idx;
 		})
-		.map(({ ...rest }) => rest);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		.map(({ _idx: _idx, ...rest }) => rest);
 }
 
 /** Sort a copy of groups by (id, playerNames, startTime, endTime, originalId) */
-function normalizeGroups(groups: HasableGroup[]): HasableGroup[] {
+function normalizeGroups(groups: HashableGroup[]): HashableGroup[] {
 	return [...groups]
 		.map((p, i) => ({ ...p, _idx: stableIndex(p, i) }))
 		.sort((a, b) => {
@@ -83,7 +84,8 @@ function normalizeGroups(groups: HasableGroup[]): HasableGroup[] {
 			if (a.endTime !== b.endTime) return a.endTime.localeCompare(b.endTime);
 			return a._idx - b._idx;
 		})
-		.map(({ ...rest }) => rest);
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		.map(({ _idx: _idx, ...rest }) => rest);
 }
 
 /** Compute a deterministic SHA-256 hex digest of a payload. */

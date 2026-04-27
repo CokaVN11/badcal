@@ -4,8 +4,8 @@
 	import { sessionStorage } from '$lib/stores/storage.svelte';
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from 'svelte-sonner';
-	import { createOrReuseSession } from '$lib/api/sharing';
-	import type { CourtBlock, Group } from '$lib/types';
+	import { createOrReuseSession, type CourtBlockPayload, type GroupPayload, type ExtraCostPayload } from '$lib/api/sharing';
+	import type { Group } from '$lib/types';
 
 	import AssetOverview from './components/AssetOverview.svelte';
 	import PlayerGroupsSection from './components/PlayerGroupsSection.svelte';
@@ -74,24 +74,29 @@
 		saving = true;
 		layout.setSaving?.(true);
 		try {
-			const payload = {
+			const courtBlockPayloads: CourtBlockPayload[] = sessionStorage.courtBlocks.map((b) => ({
+				courtCount: b.courtCount,
+				startTime: b.startTime,
+				endTime: b.endTime,
+				pricePerHour: b.pricePerHour
+			}));
+			const groupPayloads: GroupPayload[] = groups.map((g) => ({
+				startTime: g.startTime,
+				endTime: g.endTime,
+				playerNames: g.playerNames
+			}));
+			const extraCostPayloads: ExtraCostPayload[] = sessionStorage.extraCosts.map((c) => ({
+				label: c.label,
+				amount: c.amount
+			}));
+
+			const result = await createOrReuseSession({
 				title: sessionStorage.title,
 				date: sessionStorage.date,
-				courtBlocks: sessionStorage.courtBlocks.map((b) => ({
-					courtCount: b.courtCount,
-					startTime: b.startTime,
-					endTime: b.endTime,
-					pricePerHour: b.pricePerHour
-				})) as CourtBlock[],
-				groups: groups.map((g) => ({
-					startTime: g.startTime,
-					endTime: g.endTime,
-					playerNames: g.playerNames
-				})) as Group[],
-				extraCosts: sessionStorage.extraCosts.map((c) => ({ label: c.label, amount: c.amount }))
-			};
-
-			const result = await createOrReuseSession(payload);
+				courtBlocks: courtBlockPayloads,
+				groups: groupPayloads,
+				extraCosts: extraCostPayloads
+			});
 
 			sessionStorage.groups = [];
 			sessionStorage.courtBlocks = [];

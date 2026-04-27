@@ -5,8 +5,31 @@
  * no $lib/server code may be imported here.
  */
 
-import type { SessionState } from "$lib/types";
+export interface CourtBlockPayload {
+	courtCount: number;
+	startTime: string;
+	endTime: string;
+	pricePerHour: number;
+}
 
+export interface GroupPayload {
+	startTime: string;
+	endTime: string;
+	playerNames: string[];
+}
+
+export interface ExtraCostPayload {
+	label: string;
+	amount: number;
+}
+
+export interface CreateSessionPayload {
+	title: string;
+	date: string;
+	courtBlocks: CourtBlockPayload[];
+	groups: GroupPayload[];
+	extraCosts: ExtraCostPayload[];
+}
 
 export interface CreateSessionResult {
 	id: string;
@@ -14,7 +37,7 @@ export interface CreateSessionResult {
 
 /** Create a sharing session or reuse an existing one for identical content. */
 export async function createOrReuseSession(
-	payload: SessionState
+	payload: CreateSessionPayload
 ): Promise<CreateSessionResult> {
 	const res = await fetch('/api/sessions', {
 		method: 'POST',

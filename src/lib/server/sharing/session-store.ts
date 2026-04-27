@@ -68,21 +68,24 @@ export async function createOrReuseSession(
 ) {
 	const prisma = getPrisma();
 	try {
-		const session = await prisma.session.create({
-			data: {
-				contentHash: hash,
-				sessionTitle: payload.sessionTitle,
-				sessionDate: payload.sessionDate
-			}
-		});
-		await prisma.courtBlock.createMany({
-			data: payload.courtBlocks.map((cb) => ({ ...cb, sessionId: session.id }))
-		});
-		await prisma.group.createMany({
-			data: payload.groups.map((g) => ({ ...g, sessionId: session.id }))
-		});
-		await prisma.extraCost.createMany({
-			data: payload.extraCosts.map((ec) => ({ ...ec, sessionId: session.id }))
+		const session = await prisma.$transaction(async (tx) => {
+			const session = await tx.session.create({
+				data: {
+					contentHash: hash,
+					sessionTitle: payload.sessionTitle,
+					sessionDate: payload.sessionDate
+				}
+			});
+			await tx.courtBlock.createMany({
+				data: payload.courtBlocks.map((cb) => ({ ...cb, sessionId: session.id }))
+			});
+			await tx.group.createMany({
+				data: payload.groups.map((g) => ({ ...g, sessionId: session.id }))
+			});
+			await tx.extraCost.createMany({
+				data: payload.extraCosts.map((ec) => ({ ...ec, sessionId: session.id }))
+			});
+			return session;
 		});
 		return session;
 	} catch (e: unknown) {
