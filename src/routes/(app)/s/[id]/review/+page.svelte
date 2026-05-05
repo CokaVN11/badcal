@@ -2,8 +2,9 @@
 	import type { PageData } from './$types';
 	import * as m from '$lib/paraglide/messages';
 	import {
-		computeMinuteProportionShares,
 		computeCourtTotal,
+		computeShares,
+		listPlayerOccurrences,
 		parseTime
 	} from '$lib/utils/share-calc';
 	import { Button } from '$lib/components/ui/button';
@@ -13,14 +14,19 @@
 	let { data }: { data: PageData } = $props();
 
 	const playerShares = $derived(
-		computeMinuteProportionShares(
-			data.session.groups,
-			data.session.courtBlocks,
-			data.session.extraCosts
-		)
+		computeShares(data.session.groups, data.session.courtBlocks, data.session.extraCosts)
 	);
 	const courtTotal = $derived(computeCourtTotal(data.session.courtBlocks));
 	const extraTotal = $derived(data.session.extraCosts.reduce((s, c) => s + (c.amount || 0), 0));
+	const playerOccurrences = $derived(listPlayerOccurrences(data.session.groups));
+	const groupByEntryId = $derived(
+		new Map(
+			playerOccurrences.map((occurrence) => [
+				occurrence.entryId,
+				data.session.groups.find((group) => group.id === occurrence.groupId)
+			])
+		)
+	);
 </script>
 
 <header
@@ -74,8 +80,8 @@
 		<div class="rounded-xl bg-white shadow-sm border border-border p-4">
 			<h3 class="text-sm font-semibold mb-3">{m.players_heading()}</h3>
 			<div class="space-y-3">
-				{#each playerShares as ps (ps.name)}
-					{@const group = data.session.groups.find(g => g.playerNames.includes(ps.name))}
+				{#each playerShares as ps (ps.entryId)}
+						{@const group = groupByEntryId.get(ps.entryId)}
 					<div class="flex items-center justify-between">
 						<div>
 							<p class="font-medium text-ink">{ps.name}</p>

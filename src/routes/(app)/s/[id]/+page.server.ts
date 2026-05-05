@@ -1,7 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { findSessionById, listPaidPlayerNames } from '$lib/server/sharing/session-store.js';
-import { computeMinuteProportionShares, computeCourtTotal, SHARE_UNIT } from '$lib/utils/share-calc.js';
+import { findSessionById, listPaidPlayerIds } from '$lib/server/sharing/session-store.js';
+import { computeShares, computeCourtTotal, listPlayerOccurrences } from '$lib/utils/share-calc.js';
 
 export const load: PageServerLoad = async ({ params }) => {
 	const { id } = params;
@@ -11,10 +11,14 @@ export const load: PageServerLoad = async ({ params }) => {
 		error(404, 'Session not found');
 	}
 
-	const paidPlayerNames = await listPaidPlayerNames(id);
+	const paidPlayerIds = await listPaidPlayerIds(id);
+	const occurrences = listPlayerOccurrences(session.groups);
+	const paidEntryIds = paidPlayerIds
+		.map((playerId) => occurrences[playerId]?.entryId)
+		.filter((entryId): entryId is string => Boolean(entryId));
 	const courtTotal = computeCourtTotal(session.courtBlocks);
 	const extraTotal = (session.extraCosts ?? []).reduce((s, c) => s + (c.amount || 0), 0);
-	const shareResults = computeMinuteProportionShares(session.groups, session.courtBlocks, session.extraCosts ?? []);
+	const shareResults = computeShares(session.groups, session.courtBlocks, session.extraCosts ?? []);
 
 	return {
 		session: {
@@ -26,7 +30,7 @@ export const load: PageServerLoad = async ({ params }) => {
 			extraCosts: session.extraCosts,
 			createdAt: session.createdAt
 		},
-		paidPlayerNames,
+		paidEntryIds,
 		courtTotal,
 		extraTotal,
 		grandTotal: courtTotal + extraTotal,

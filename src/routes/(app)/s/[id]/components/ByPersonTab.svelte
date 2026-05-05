@@ -8,15 +8,15 @@
 		playerPaidMap,
 		onTogglePaid
 	}: {
-		shareResults: { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
+		shareResults: { entryId: string; name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
 		playerPaidMap: Map<string, boolean>;
-		onTogglePaid: (name: string) => void;
+		onTogglePaid: (entryId: string) => void;
 	} = $props();
 </script>
 
 <div class="max-w-md mx-auto space-y-4">
-	{#each shareResults as r (r.name)}
-		{@const isPaid = playerPaidMap.get(r.name) ?? false}
+	{#each shareResults as r (r.entryId)}
+		{@const isPaid = playerPaidMap.get(r.entryId) ?? false}
 		<div class="rounded-xl bg-surface-container-lowest p-4 border border-border">
 			<div class="flex items-center justify-between mb-3">
 				<div class="flex items-center gap-3">
@@ -35,7 +35,7 @@
 				<Button
           variant={isPaid ? 'default' : 'outline'}
 					class="btn h-10 min-w-24"
-					onclick={() => onTogglePaid(r.name)}
+					onclick={() => onTogglePaid(r.entryId)}
 				>
 					{isPaid ? m.paid() : m.unpaid()}
 				</Button>

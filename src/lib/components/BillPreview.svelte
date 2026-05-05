@@ -207,7 +207,7 @@
 <div class="min-h-dvh flex flex-col {themeClasses.bg}">
 	<header class="backdrop-blur-md border-b px-4 py-2 sticky top-0 z-30 {themeClasses.header}">
 		<div class="max-w-lg mx-auto flex items-center gap-3">
-			<button class="btn-icon" onclick={onBack} aria-label={m.edit()}>
+			<button class="btn-icon" onclick={onBack} aria-label="Go back">
 				<IconChevronLeft class="w-5 h-5" />
 			</button>
 			<h1 class="text-lg font-semibold flex-1 {themeClasses.text}">{m.bill_preview_heading()}</h1>

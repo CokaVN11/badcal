@@ -27,7 +27,7 @@
 		groups: Group[];
 		courtBlocks: CourtBlock[];
 		extraCosts: ExtraCost[];
-		shareResults?: { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
+		shareResults?: { entryId: string; name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
 	} = $props();
 </script>
 

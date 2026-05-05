@@ -5,12 +5,12 @@
 	import {
 		formatCurrency,
 		formatDate,
-		groupByKey,
 		getNamedPlayers,
-		getOthersCount
+		getOthersCount,
+		groupByKey
 	} from '$lib/utils';
 	import type { ExtraCost, Player, Group, CourtBlock } from '$lib/types';
-	import { computeMinuteProportionShares, computeCourtTotal, parseTime } from '$lib/utils/share-calc';
+	import { computeShares } from '$lib/utils/share-calc';
 	import PaymentQR from '../PaymentQR.svelte';
 	import { calculatePlayerTimes } from '../Players/playerList.logic';
 
@@ -29,6 +29,7 @@
 		groups?: Group[];
 		courtBlocks?: CourtBlock[];
 		extraCosts?: ExtraCost[];
+		shareResults?: { entryId: string; name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
 	};
 
 	let {
@@ -45,7 +46,8 @@
 		includeQR,
 		groups,
 		courtBlocks,
-		extraCosts
+		extraCosts,
+		shareResults
 	}: Props = $props();
 
 	let receiptEl: HTMLDivElement | null = $state(null);
@@ -58,16 +60,16 @@
 	const MAX_VISIBLE_EXTRAS = 6;
 
 	// Compute shares from groups if provided
-	type CompatPlayer = { id: number; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
+	type CompatPlayer = { entryId: string; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
 	const computedShares = $derived(
-		groups?.length && courtBlocks?.length
-			? computeMinuteProportionShares(groups, courtBlocks, extraCosts ?? [])
-			: []
+		shareResults ?? (groups?.length && courtBlocks?.length
+			? computeShares(groups, courtBlocks, extraCosts ?? [])
+			: [])
 	);
 	const compatShares = $derived<CompatPlayer[]>(
 		computedShares.length > 0
-			? computedShares.map((s, i) => ({
-					id: i,
+			? computedShares.map((s) => ({
+					entryId: s.entryId,
 					name: s.name,
 					hours: Math.round(s.playerMinutes / 60 * 10) / 10,
 					arrivalOffsetMinutes: 0,
@@ -82,14 +84,14 @@
 	const displayShares = $derived<CompatPlayer[]>(
 		computedShares.length > 0 ? compatShares : (playerShares as unknown as CompatPlayer[])
 	);
-	const compatGroupedByHours = $derived<[number, CompatPlayer[]][]>(() => {
+	const compatGroupedByHours = $derived.by((): [number, CompatPlayer[]][] => {
 		if (computedShares.length === 0) return [];
 		const groups: Record<number, CompatPlayer[]> = {};
 		for (const s of computedShares) {
-			const hours = Math.round(s.playerMinutes / 60 * 10) / 10;
+			const hours = Math.round((s.playerMinutes / 60) * 10) / 10;
 			if (!groups[hours]) groups[hours] = [];
 			groups[hours].push({
-				id: 0,
+				entryId: s.entryId,
 				name: s.name,
 				hours,
 				arrivalOffsetMinutes: 0,
@@ -105,7 +107,7 @@
 			.sort((a, b) => b[0] - a[0]);
 	});
 
-	let groupedByHours = $derived(groupByKey(playerShares, (p) => p.hours));
+	let groupedByHours = $derived(groupByKey(playerShares, (p: Player) => p.hours));
 	let shuttlecockTotal = $derived(shuttlecockPrice * shuttlecockCount);
 
 	const compatTotalHours = $derived(
@@ -196,7 +198,7 @@
 			<div class="receipt-heading">{m.player_shares().toUpperCase()}</div>
 
 			{#if showNames}
-				{#each displayShares as player, i (player.id)}
+				{#each displayShares as player, i (player.entryId)}
 					<div class="receipt-item">
 						<span>{player.name?.trim() || m.player_numbered({ n: i + 1 })}</span>
 						<span class="dots"></span>
@@ -204,11 +206,11 @@
 					</div>
 				{/each}
 			{:else}
-				{#each (typeof compatGroupedByHours === 'function' ? compatGroupedByHours() : compatGroupedByHours) as [hours, players] (hours)}
+				{#each compatGroupedByHours as [hours, players] (hours)}
 					{@const groupShare = players[0]?.share ?? 0}
 					{@const namedPlayers = getNamedPlayers(players)}
 					{@const othersCount = getOthersCount(namedPlayers.length, players.length)}
-					{@const minOffset = Math.min(...players.map((p) => p.arrivalOffsetMinutes ?? 0))}
+					{@const minOffset = Math.min(...players.map((p: CompatPlayer) => p.arrivalOffsetMinutes ?? 0))}
 					{@const timeWindow = calculatePlayerTimes(startTime, minOffset, hours)}
 
 					<div class="player-group">

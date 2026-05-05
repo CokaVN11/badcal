@@ -1,8 +1,3 @@
-// ABOUTME: Formatting utilities for currency, numbers, and dates
-// ABOUTME: Vietnamese locale formatting with shorthand support (14k, 1.5tr)
-
-import { m } from '$lib/paraglide/messages';
-
 /**
  * Parse Vietnamese number shorthand to numeric value
  * Supports: k/K (nghìn/thousand), tr/m/M (triệu/million)
@@ -84,7 +79,11 @@ export function formatCompactNumber(value: number): string {
 }
 
 export function formatCurrency(amount: number): string {
-	return new Intl.NumberFormat('vi-VN').format(amount) + m.currency();
+	return new Intl.NumberFormat('vi-VN', {
+		style: 'currency',
+		currency: 'VND',
+		maximumSignificantDigits: 5
+	}).format(amount);
 }
 
 export function formatInputDisplay(value: number, rawInput?: string): string {

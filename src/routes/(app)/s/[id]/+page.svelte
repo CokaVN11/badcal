@@ -1,9 +1,12 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { page } from '$app/stores';
+	import { SvelteMap } from 'svelte/reactivity';
 	import type { PageData } from './$types';
 	import TabBar from '$lib/components/TabBar.svelte';
 	import { togglePaid } from '$lib/api/sharing';
+	import { listPlayerOccurrences, parseTime } from '$lib/utils/share-calc';
+	import { formatCurrency, formatDate } from '$lib/utils/format';
 	import * as m from '$lib/paraglide/messages';
 	import { toast } from 'svelte-sonner';
 	import { generateImageBlob, buildImageFilename, downloadBlob } from '$lib/utils/bill-share';
@@ -11,33 +14,33 @@
 	import ByPersonTab from './components/ByPersonTab.svelte';
 	import FollowingTab from './components/FollowingTab.svelte';
 	import { Button } from '$lib/components/ui/button';
+	import { IconChevronLeft } from '@tabler/icons-svelte-runes';
 
 	let { data }: { data: PageData } = $props();
 
 	let activeTab = $state(0);
 
-	// Flatten all player names in order — index maps to playerId for API calls
-	const allPlayerNames = $derived(data.session.groups.flatMap((g) => g.playerNames));
-
-	// Player name → array index map for O(1) API calls
-	const playerNameToIdx = $derived(
-		new Map(allPlayerNames.map((name, idx) => [name, idx]))
+	const playerIndexByEntryId = $derived(
+		new Map(listPlayerOccurrences(data.session.groups).map((occurrence, idx) => [occurrence.entryId, idx]))
 	);
 
-	// Per-player paid status map keyed by player name
-	const playerPaidMap = $state(new Map<string, boolean>(
-		data.paidPlayerNames.map(name => [name, true])
-	));
+	let playerPaidMap = new SvelteMap<string, boolean>();
+	$effect(() => {
+		playerPaidMap.clear();
+		for (const entryId of data.paidEntryIds) {
+			playerPaidMap.set(entryId, true);
+		}
+	});
 
-	async function togglePaidByName(name: string) {
-		const newPaid = !playerPaidMap.get(name);
-		playerPaidMap.set(name, newPaid);
+	async function togglePaidByEntryId(entryId: string) {
+		const newPaid = !playerPaidMap.get(entryId);
+		playerPaidMap.set(entryId, newPaid);
 		try {
-			const idx = playerNameToIdx.get(name);
+			const idx = playerIndexByEntryId.get(entryId);
 			if (idx === undefined) return;
 			await togglePaid(data.session.id, idx, newPaid);
 		} catch {
-			playerPaidMap.set(name, !newPaid);
+			playerPaidMap.set(entryId, !newPaid);
 		}
 	}
 
@@ -74,14 +77,78 @@
 	}
 
 	// Receipt text for clipboard
-	const shareText = $derived.by(() => [
-		data.session.sessionTitle,
-		data.session.sessionDate,
-		'',
-		...data.shareResults.map(r => `${r.name}: ${r.total.toLocaleString()} VND`),
-		'',
-		`Tong cong: ${data.grandTotal.toLocaleString()} VND`
-	].join('\n'));
+	const shareText = $derived.by(() => {
+		const courtFees: { key: string; startTime: string; endTime: string; total: number }[] = [];
+		for (const block of data.session.courtBlocks) {
+			const key = `${block.startTime}-${block.endTime}`;
+			const total =
+				((parseTime(block.endTime) - parseTime(block.startTime)) / 60) *
+				block.courtCount *
+				block.pricePerHour;
+			const existing = courtFees.find((item) => item.key === key);
+			if (existing) {
+				existing.total += total;
+			} else {
+				courtFees.push({
+					key,
+					startTime: block.startTime,
+					endTime: block.endTime,
+					total
+				});
+			}
+		}
+
+		const groupsById = Object.fromEntries(data.session.groups.map((group) => [group.id, group]));
+		const occurrencesByEntryId = Object.fromEntries(
+			listPlayerOccurrences(data.session.groups).map((occurrence) => [occurrence.entryId, occurrence])
+		);
+		const groupedPayments: {
+			key: string;
+			startTime: string;
+			endTime: string;
+			total: number;
+			playerCount: number;
+		}[] = [];
+		for (const result of data.shareResults) {
+			const occurrence = occurrencesByEntryId[result.entryId];
+			if (!occurrence) continue;
+			const group = groupsById[occurrence.groupId];
+			if (!group) continue;
+			const key = `${group.startTime}-${group.endTime}`;
+			const existing = groupedPayments.find((item) => item.key === key);
+			if (existing) {
+				existing.total += result.total;
+				existing.playerCount += 1;
+			} else {
+				groupedPayments.push({
+					key,
+					startTime: group.startTime,
+					endTime: group.endTime,
+					total: result.total,
+					playerCount: 1
+				});
+			}
+		}
+
+		const courtLines = courtFees.map((fee, index) => {
+			const label = courtFees.length === 1 ? 'Court' : `Court ${index + 1}`;
+			return `${label} (${fee.startTime}-${fee.endTime}): ${formatCurrency(fee.total)}`;
+		});
+
+		const paymentLines = groupedPayments.map((payment) => {
+			const playerLabel = payment.playerCount === 1 ? 'player' : 'players';
+			return `${payment.startTime}-${payment.endTime} (${payment.playerCount} ${playerLabel}): ${formatCurrency(payment.total)}`;
+		});
+
+		return [
+			data.session.sessionTitle,
+			formatDate(data.session.sessionDate),
+			'',
+			...courtLines,
+			'',
+			...paymentLines
+		].join('\n');
+	});
 
 	async function copyText() {
 		await navigator.clipboard.writeText(shareText);
@@ -114,8 +181,8 @@
 	<!-- Sticky header -->
 	<header class="sticky top-0 z-30 bg-surface-container-lowest border-b border-border">
 		<div class="max-w-lg mx-auto px-4 py-3 flex items-center gap-3">
-			<button onclick={() => history.back()} class="text-ink-muted hover:text-ink">
-				←
+			<button class="btn-icon" onclick={() => history.back()} aria-label={m.edit()}>
+				<IconChevronLeft class="w-5 h-5" />
 			</button>
 			<h1 class="text-lg font-semibold flex-1 text-ink">{m.bill_preview_heading()}</h1>
 			<a href={`/s/${data.session.id}/review`} class="text-sm text-primary underline">Review</a>
@@ -148,7 +215,7 @@
 			<ByPersonTab
 				shareResults={data.shareResults}
 				playerPaidMap={playerPaidMap}
-				onTogglePaid={togglePaidByName}
+				onTogglePaid={togglePaidByEntryId}
 			/>
 		{:else if activeTab === 2}
 			<FollowingTab

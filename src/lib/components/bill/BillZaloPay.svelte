@@ -9,7 +9,7 @@
 		getOthersCount
 	} from '$lib/utils';
 	import type { ExtraCost, Player, Group, CourtBlock } from '$lib/types';
-	import { computeMinuteProportionShares } from '$lib/utils/share-calc';
+	import { computeShares } from '$lib/utils/share-calc';
 	import { IconCheck } from '@tabler/icons-svelte-runes';
 	import PaymentQR from '../PaymentQR.svelte';
 	import { calculatePlayerTimes } from '../Players/playerList.logic';
@@ -40,7 +40,7 @@
 		groups?: Group[];
 		courtBlocks?: CourtBlock[];
 		extraCosts?: ExtraCost[];
-		shareResults?: { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
+		shareResults?: { entryId: string; name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number }[];
 	};
 
 	let {
@@ -71,17 +71,17 @@
 	const MAX_VISIBLE_EXTRAS = 6;
 
 	// Compute shares from groups if provided, or use shareResults directly from server
-	type CompatPlayer = { id: number; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
-	type ShareResult = { name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number };
+	type CompatPlayer = { entryId: string; name: string; hours: number; arrivalOffsetMinutes: number; share: number; playerMinutes?: number; courtShare?: number; extraShare?: number; total?: number; };
+	type ShareResult = { entryId: string; name: string; ratio: number; total: number; playerMinutes: number; courtShare: number; extraShare: number };
 	const computedShares = $derived<ShareResult[]>(
 		shareResults ?? (groups?.length && courtBlocks?.length
-			? computeMinuteProportionShares(groups, courtBlocks, extraCosts ?? [])
+			? computeShares(groups, courtBlocks, extraCosts ?? [])
 			: [])
 	);
 	const compatShares = $derived<CompatPlayer[]>(
 		computedShares.length > 0
-			? computedShares.map((s, i) => ({
-					id: i,
+			? computedShares.map((s) => ({
+					entryId: s.entryId,
 					name: s.name,
 					hours: Math.round(s.playerMinutes / 60 * 10) / 10,
 					arrivalOffsetMinutes: 0,
@@ -103,8 +103,8 @@
 			const hours = Math.round(s.playerMinutes / 60 * 10) / 10;
 			if (!groups[hours]) groups[hours] = [];
 			groups[hours].push({
-				id: 0,
-				name: s.name,
+					entryId: s.entryId,
+					name: s.name,
 				hours,
 				arrivalOffsetMinutes: 0,
 				share: s.courtShare + s.extraShare,
@@ -193,7 +193,7 @@
 	<div class="zp-section">
 		<div class="zp-section-head">{m.player_shares()}</div>
 		{#if showNames}
-			{#each displayShares as player, i (player.id)}
+			{#each displayShares as player, i (player.entryId)}
 				<div class="zp-player">
 					<span class="zp-avatar" style="background:{getPlayerColor(i)}"
 						>{(player.name?.trim() || `P${i + 1}`).charAt(0).toUpperCase()}</span
